@@ -207,6 +207,7 @@ app.get('/api/profiles', (req: Request, res: Response) => {
   const publicProfiles = list.map((u) => {
     const relationships = db.getRelationshipsForUser(u.id).filter((r) => r.status === 'confirmed');
     const receipts = db.getReceiptsForUser(u.id).filter((r) => r.status === 'completed');
+    const impressionData = db.getImpressions(u.id);
     return {
       id: u.id,
       username: u.username,
@@ -223,6 +224,10 @@ app.get('/api/profiles', (req: Request, res: Response) => {
       businessName: u.businessName,
       confirmedRelationshipsCount: relationships.length,
       completedReceiptsCount: receipts.length,
+      impressions: impressionData.impressions,
+      witnessCount: impressionData.witnessCount,
+      goodFaithRating: impressionData.averageRating,
+      ratingsCount: impressionData.ratingsCount,
     };
   });
 
@@ -235,6 +240,11 @@ app.get('/api/profiles/:username', (req: Request, res: Response) => {
   if (!user) {
     return res.status(404).json({ error: 'Profile not found' });
   }
+
+  // Record impression automatically when viewed ("if anybody see")
+  db.recordImpression(user.id, false);
+  const userImpressions = db.getImpressions(user.id);
+  const goodFaithRatings = db.getGoodFaithRatings(user.id);
 
   const allEvidence = db.getEvidenceByUserId(user.id);
   const publicEvidence = allEvidence.filter((e) => e.isPublic);
@@ -321,7 +331,119 @@ app.get('/api/profiles/:username', (req: Request, res: Response) => {
     publicCommitments,
     references,
     reputation,
+    impressions: userImpressions.impressions,
+    witnessCount: userImpressions.witnessCount,
+    goodFaithRating: userImpressions.averageRating,
+    ratingsCount: userImpressions.ratingsCount,
+    goodFaithRatings,
   });
+});
+
+/* ==========================================================================
+   GOOD FAITH COMMUNITY RATINGS, COMMENTS & IMPRESSIONS ("if anybody see")
+   ========================================================================== */
+
+app.get('/api/ratings', (req: Request, res: Response) => {
+  const target = (req.query.target as string) || 'network';
+  const ratings = db.getGoodFaithRatings(target);
+  const impressionData = db.getImpressions(target);
+
+  res.json({
+    ratings,
+    averageRating: impressionData.averageRating,
+    totalRatings: ratings.length,
+    impressions: impressionData.impressions,
+    witnessCount: impressionData.witnessCount,
+  });
+});
+
+app.post('/api/ratings', (req: Request, res: Response) => {
+  const userId = getSessionUserId(req);
+  const user = db.getUserById(userId);
+
+  const {
+    targetUserId,
+    targetUsername,
+    authorName,
+    authorTitle,
+    rating,
+    goodFaithBadge,
+    comment,
+    context,
+  } = req.body;
+
+  if (!comment || !comment.trim()) {
+    return res.status(400).json({ error: 'Comment text is required.' });
+  }
+
+  const numRating = Math.max(1, Math.min(5, Number(rating) || 5));
+
+  const newRating: GoodFaithRating = {
+    id: `gfr_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    targetUserId: targetUserId || 'network',
+    targetUsername:
+      targetUsername ||
+      (targetUserId && targetUserId !== 'network' ? db.getUserById(targetUserId)?.username : 'aegis_network'),
+    authorId: user?.id || userId,
+    authorName: authorName || user?.fullName || 'Verified Community Observer',
+    authorAvatar: user?.avatarUrl || '',
+    authorTitle: authorTitle || user?.headline || 'Good Faith Community Member',
+    rating: numRating,
+    goodFaithBadge: goodFaithBadge || 'Exemplary Integrity',
+    comment: comment.trim(),
+    context: context || 'Community Good Faith Attestation',
+    impressions: 1,
+    helpfulCount: 0,
+    createdAt: new Date().toISOString(),
+  };
+
+  db.addGoodFaithRating(newRating);
+
+  // If targeted at a user, notify them
+  if (targetUserId && targetUserId !== 'network') {
+    db.addNotification({
+      id: `notif_${Date.now()}`,
+      userId: targetUserId,
+      type: 'endorsement_received',
+      title: 'New Good Faith Attestation & Rating',
+      message: `${newRating.authorName} rated you ${newRating.rating}★ in good faith: "${newRating.comment.substring(0, 50)}..."`,
+      link: `/profile-${newRating.targetUsername}`,
+      isRead: false,
+      createdAt: new Date().toISOString(),
+    });
+  }
+
+  res.status(201).json({
+    rating: newRating,
+    message: 'Your good faith comment & rating has been published to the open ledger!',
+  });
+});
+
+app.post('/api/ratings/:id/helpful', (req: Request, res: Response) => {
+  const { id } = req.params;
+  const item = db.markGoodFaithRatingHelpful(id);
+  if (!item) return res.status(404).json({ error: 'Rating record not found' });
+  res.json({ rating: item, message: 'Attestation helpfulness confirmed in good faith.' });
+});
+
+app.post('/api/impressions', (req: Request, res: Response) => {
+  const { targetId, isWitness } = req.body || {};
+  const target = targetId || 'network';
+  const updated = db.recordImpression(target, Boolean(isWitness));
+  const full = db.getImpressions(target);
+  res.json({
+    targetId: target,
+    impressions: updated.impressions,
+    witnessCount: updated.witnessCount,
+    averageRating: full.averageRating,
+    ratingsCount: full.ratingsCount,
+  });
+});
+
+app.get('/api/impressions/:targetId', (req: Request, res: Response) => {
+  const target = req.params.targetId || 'network';
+  const full = db.getImpressions(target);
+  res.json({ targetId: target, ...full });
 });
 
 /* ==========================================================================

@@ -9,6 +9,8 @@ import {
   BusinessEntity,
   ReputationBreakdown,
   TrustCommitment,
+  GoodFaithRating,
+  ProfileImpressions,
 } from '../types/trust.js';
 
 let currentSessionUserId = localStorage.getItem('aegis_session_user_id') || 'usr_allen_001';
