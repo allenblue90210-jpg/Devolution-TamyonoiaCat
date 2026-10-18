@@ -512,7 +512,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
                         <h4 className="font-bold text-slate-900 text-sm truncate">Allen Okoro</h4>
-                        <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" title="Identity Verified" />
+                        <span title="Identity Verified"><ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" /></span>
                       </div>
                       <div className="text-xs text-slate-500 font-mono">@allenokoro</div>
                       <div className="text-[11px] text-slate-400 mt-0.5">Lagos, Nigeria</div>
@@ -572,7 +572,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
                         <h4 className="font-bold text-slate-900 text-sm truncate">Sarah Adesina</h4>
-                        <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" title="Identity Verified" />
+                        <span title="Identity Verified"><ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" /></span>
                       </div>
                       <div className="text-xs text-slate-500 font-mono">@sarah_adesina</div>
                       <div className="text-[11px] text-slate-400 mt-0.5">Abuja, Nigeria</div>
@@ -631,7 +631,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
                         <h4 className="font-bold text-slate-900 text-sm truncate">Fatima Bello</h4>
-                        <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" title="Identity Verified" />
+                        <span title="Identity Verified"><ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" /></span>
                       </div>
                       <div className="text-xs text-slate-500 font-mono">@fatimabello</div>
                       <div className="text-[11px] text-slate-400 mt-0.5">Port Harcourt, Nigeria</div>
@@ -747,7 +747,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         <div>
                           <div className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
                             <span>{item.authorName}</span>
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" title="Verified Attestation" />
+                            <span title="Verified Attestation"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /></span>
                           </div>
                           {item.authorTitle && (
                             <div className="text-[11px] text-slate-500 line-clamp-1">{item.authorTitle}</div>
