@@ -342,6 +342,7 @@ export const api = {
     lastSyncTime: string | null;
     lastSyncStatus: 'synced' | 'syncing' | 'error';
     lastSyncMessage: string | null;
+    pulledCount?: number;
   }> {
     return request('/api/git/status');
   },
@@ -357,6 +358,7 @@ export const api = {
     lastSyncTime: string | null;
     lastSyncStatus: 'synced' | 'syncing' | 'error';
     lastSyncMessage: string | null;
+    pulledCount?: number;
   }> {
     return request('/api/git/sync', {
       method: 'POST',
@@ -375,6 +377,7 @@ export const api = {
     lastSyncTime: string | null;
     lastSyncStatus: 'synced' | 'syncing' | 'error';
     lastSyncMessage: string | null;
+    pulledCount?: number;
   }> {
     return request('/api/git/pull', {
       method: 'POST',

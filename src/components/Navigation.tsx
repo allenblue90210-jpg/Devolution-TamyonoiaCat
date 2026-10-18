@@ -70,8 +70,13 @@ export const Navigation: React.FC<NavigationProps> = ({
     try {
       const res = await api.pullGitRepo();
       setGitStatus(res);
-      setSyncMessage('Pulled latest updates from GitHub!');
-      setTimeout(() => setSyncMessage(null), 3500);
+      if (res?.pulledCount && res.pulledCount > 0) {
+        setSyncMessage(`Pulled ${res.pulledCount} new commit(s) from GitHub! Reloading app...`);
+        setTimeout(() => window.location.reload(), 1500);
+      } else {
+        setSyncMessage('Repository is already up to date with GitHub main.');
+        setTimeout(() => setSyncMessage(null), 3500);
+      }
     } catch (err: any) {
       setSyncMessage(err.message || 'Pull failed');
       setTimeout(() => setSyncMessage(null), 4000);

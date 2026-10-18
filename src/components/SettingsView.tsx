@@ -55,6 +55,26 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
     }
   };
 
+  const handlePullNow = async () => {
+    setGitSyncing(true);
+    setGitMessage(null);
+    try {
+      const res = await api.pullGitRepo();
+      setGitStatus(res);
+      if (res?.pulledCount && res.pulledCount > 0) {
+        setGitMessage(`Pulled ${res.pulledCount} new commit(s) from GitHub! Reloading app...`);
+        setTimeout(() => window.location.reload(), 1500);
+      } else {
+        setGitMessage('Repository is already up to date with GitHub main.');
+        setTimeout(() => setGitMessage(null), 3500);
+      }
+    } catch (err: any) {
+      setGitMessage(err.message || 'Failed to pull updates from repository');
+    } finally {
+      setGitSyncing(false);
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -395,12 +415,20 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
             className="flex-1 w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"
           />
           <button
+            onClick={handlePullNow}
+            disabled={gitSyncing}
+            className="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg flex items-center justify-center gap-1.5 shrink-0 disabled:opacity-50 transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Pull Latest from GitHub</span>
+          </button>
+          <button
             onClick={handleSyncNow}
             disabled={gitSyncing}
             className="w-full sm:w-auto px-5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg flex items-center justify-center gap-1.5 shrink-0 shadow-xs disabled:opacity-50 transition-colors"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${gitSyncing ? 'animate-spin' : ''}`} />
-            <span>{gitSyncing ? 'Pushing to GitHub...' : 'Sync & Push Changes to Repo'}</span>
+            <span>{gitSyncing ? 'Syncing...' : 'Sync & Push Changes'}</span>
           </button>
         </div>
       </div>

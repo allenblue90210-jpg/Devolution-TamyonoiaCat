@@ -1356,6 +1356,7 @@ async function getGitRepoStatus() {
 
 async function performGitSync(customMessage?: string) {
   lastSyncStatus = 'syncing';
+  let pulledCount = 0;
   try {
     // 1. Fetch remote to see if there are any incoming updates from GitHub
     try {
@@ -1363,6 +1364,7 @@ async function performGitSync(customMessage?: string) {
       const { stdout: revCountOut } = await execAsync('git rev-list HEAD..origin/main --count');
       const remoteAhead = parseInt(revCountOut.trim(), 10) || 0;
       if (remoteAhead > 0) {
+        pulledCount = remoteAhead;
         console.log(`[Git Sync] Remote is ${remoteAhead} commit(s) ahead. Pulling latest updates from GitHub...`);
         await execAsync('git pull origin main --no-edit');
         db.reload();
@@ -1395,8 +1397,9 @@ async function performGitSync(customMessage?: string) {
 
     lastSyncTime = new Date().toISOString();
     lastSyncStatus = 'synced';
-    lastSyncMessage = 'Synchronized with GitHub';
-    return await getGitRepoStatus();
+    lastSyncMessage = pulledCount > 0 ? `Pulled ${pulledCount} update(s) from GitHub` : 'Synchronized with GitHub';
+    const status = await getGitRepoStatus();
+    return { ...status, pulledCount };
   } catch (err: any) {
     lastSyncStatus = 'error';
     lastSyncMessage = err.message || 'Sync failed';
@@ -1442,7 +1445,24 @@ app.post('/api/git/pull', async (_req: Request, res: Response) => {
    VITE DEV MIDDLEWARE & STATIC SERVING
    ========================================================================== */
 
+async function initGitConfig() {
+  try {
+    await execAsync('git config user.name "allenblue90210-jpg"');
+    await execAsync('git config user.email "allenkinetic004@gmail.com"');
+    await execAsync('git config pull.rebase false');
+    const token = process.env.GITHUB_TOKEN;
+    if (token) {
+      await execAsync(`git remote set-url origin https://${token}@github.com/allenblue90210-jpg/Devolution-TamyonoiaCat.git`);
+    }
+    console.log('[Git Sync] Remote origin credentials initialized successfully.');
+  } catch (err: any) {
+    console.warn('[Git Init Warning]:', err.message);
+  }
+}
+
 async function startServer() {
+  await initGitConfig();
+
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
