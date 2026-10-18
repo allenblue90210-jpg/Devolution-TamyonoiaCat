@@ -64,6 +64,7 @@ export const Navigation: React.FC<NavigationProps> = ({
 
   const navLinks = [
     { id: 'dashboard', label: 'Dashboard' },
+    { id: 'commitments', label: 'Commitments' },
     { id: 'evidence', label: 'Evidence Center' },
     { id: 'relationships', label: 'Social Verification' },
     { id: 'receipts', label: 'Trust Receipts' },
