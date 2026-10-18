@@ -621,6 +621,42 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                   </div>
                 </div>
 
+                {/* Public Impressions & Observer Witness Row */}
+                {c.isPublic && (
+                  <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 rounded-lg bg-indigo-50/70 border border-indigo-100 text-xs">
+                    <div className="flex flex-wrap items-center gap-2.5 text-[11px]">
+                      <span className="inline-flex items-center gap-1 font-semibold text-slate-800" title="Total public impressions on open ledger">
+                        <Eye className="w-3.5 h-3.5 text-indigo-600" />
+                        <span>{(c.impressions ?? 1420).toLocaleString()} impressions</span>
+                      </span>
+                      <span className="text-slate-300">·</span>
+                      <span className="inline-flex items-center gap-1 text-slate-600" title="Network observers witnessing this pact">
+                        <Users className="w-3.5 h-3.5 text-slate-500" />
+                        <span>{c.witnessCount ?? 24} witnesses</span>
+                      </span>
+                      <span className="text-slate-300">·</span>
+                      <span className="inline-flex items-center gap-1 text-emerald-700 font-medium">
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>{c.positiveImpressions ?? 18} credible</span>
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={(e) => handleRecordImpression(c.id, e)}
+                      disabled={c.hasWitnessed}
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
+                        c.hasWitnessed
+                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 cursor-default'
+                          : 'bg-white hover:bg-indigo-600 hover:text-white text-indigo-700 border border-indigo-200 hover:border-indigo-600 shadow-2xs'
+                      }`}
+                      title={c.hasWitnessed ? 'You have recorded an impression on this public pact' : 'Witness this public pact (+1 Impression)'}
+                    >
+                      <Eye className="w-3 h-3" />
+                      <span>{c.hasWitnessed ? 'Witnessed ✓' : 'Witness Pact'}</span>
+                    </button>
+                  </div>
+                )}
+
                 {/* Overdue Warning Callout */}
                 {countdown.isOverdue && c.status !== 'completed' && (
                   <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-900 text-xs space-y-1">
