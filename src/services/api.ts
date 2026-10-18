@@ -276,6 +276,15 @@ export const api = {
   async getCommitments(filter: 'all' | 'mine' = 'mine'): Promise<{ commitments: TrustCommitment[] }> {
     return request(`/api/commitments?filter=${filter}`);
   },
+  async getPublicCommitments(): Promise<{ commitments: TrustCommitment[] }> {
+    return request('/api/commitments?public=true');
+  },
+  async toggleCommitmentVisibility(id: string, isPublic: boolean): Promise<{ commitment: TrustCommitment; message: string }> {
+    return request(`/api/commitments/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ isPublic }),
+    });
+  },
   async getCommitment(id: string): Promise<{ commitment: TrustCommitment }> {
     return request(`/api/commitments/${id}`);
   },
