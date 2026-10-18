@@ -20,6 +20,7 @@ import { TrustReceiptsView } from './components/TrustReceiptsView.js';
 import { CommitmentsView } from './components/CommitmentsView.js';
 import { PublicProfileView } from './components/PublicProfileView.js';
 import { ReputationView } from './components/ReputationView.js';
+import { RememberView } from './components/RememberView.js';
 import { DirectoryView } from './components/DirectoryView.js';
 import { BusinessView } from './components/BusinessView.js';
 import { SettingsView } from './components/SettingsView.js';
@@ -375,6 +376,17 @@ export default function App() {
             onNavigateTab={handleSelectTab}
           />
         ) : null;
+
+      case 'remember':
+        return (
+          <RememberView
+            currentUser={currentUser}
+            availableUsers={availableUsers}
+            onBack={handleBack}
+            onNavigateTab={handleSelectTab}
+            onSelectProfile={(username) => handleSelectTab(`profile-${username}`)}
+          />
+        );
 
       case 'business':
         return currentUser ? (

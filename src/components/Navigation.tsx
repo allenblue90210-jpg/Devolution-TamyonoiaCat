@@ -25,6 +25,7 @@ import {
   Settings,
   Building2,
   X,
+  Bookmark,
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -141,12 +142,13 @@ export const Navigation: React.FC<NavigationProps> = ({
     else if (n.link?.includes('receipts') || n.type?.includes('receipt')) onSelectTab('receipts');
     else if (n.link?.includes('commitments') || n.type?.includes('commitment')) onSelectTab('commitments');
     else if (n.link?.includes('reputation') || n.type?.includes('reputation')) onSelectTab('reputation');
+    else if (n.link?.includes('remember')) onSelectTab('remember');
     else if (n.link?.includes('business') || n.type?.includes('business')) onSelectTab('business');
     else if (n.link?.includes('public-ledger')) onSelectTab('public-ledger');
     else onSelectTab('dashboard');
   };
 
-  // Complete navigation links with clean, distinct Lucide icons
+  // Complete navigation links with clean, distinct Lucide icons - Remember placed beside Reputation
   const navLinks = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'commitments', label: 'Commitments', icon: Clock },
@@ -156,6 +158,7 @@ export const Navigation: React.FC<NavigationProps> = ({
     { id: 'public-ledger', label: 'People & Ledger', icon: Globe },
     { id: 'directory', label: 'Directory', icon: Compass },
     { id: 'reputation', label: 'Reputation Engine', icon: Sparkles },
+    { id: 'remember', label: 'Remember', icon: Bookmark },
   ];
 
   return (
