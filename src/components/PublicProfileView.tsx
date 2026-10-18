@@ -201,13 +201,82 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
           </div>
         )}
 
+        {/* Public Trust Score & Reliability Banner */}
+        <div
+          className={`p-4 rounded-xl border flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+            reputation.penaltyActive
+              ? 'bg-red-50/80 border-red-300'
+              : 'bg-gradient-to-r from-indigo-50/60 via-slate-50 to-white border-indigo-100'
+          }`}
+        >
+          <div className="flex items-center gap-4">
+            <div
+              className={`w-14 h-14 rounded-xl flex flex-col items-center justify-center font-extrabold text-white shadow-xs shrink-0 ${
+                reputation.penaltyActive
+                  ? 'bg-red-600'
+                  : (reputation.trustScore || 85) >= 90
+                  ? 'bg-emerald-600'
+                  : 'bg-indigo-600'
+              }`}
+            >
+              <span className="text-xl leading-none font-mono">{reputation.trustScore ?? 85}</span>
+              <span className="text-[9px] uppercase tracking-wider text-white/80">Score</span>
+            </div>
+            <div className="space-y-0.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-bold text-slate-900 text-sm">
+                  {reputation.trustGrade || 'A Verified & Reliable'}
+                </span>
+                {reputation.penaltyActive ? (
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800 border border-red-300 flex items-center gap-1">
+                    <Flame className="w-3 h-3 text-red-600" />
+                    -{reputation.penaltyPercent}% Breach Penalty Active
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    High Standing
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-600">
+                {reputation.penaltyNotice ||
+                  'Public verifiable reliability score grounded in validated identity credentials, dual-confirmed relationships, and on-time fulfillment track record.'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="text-right hidden sm:block">
+              <div className="text-xs font-bold text-slate-900 font-mono">
+                {reputation.commitmentsSummary?.onTimeDeliveryRate ?? 100}% On-Time
+              </div>
+              <div className="text-[11px] text-slate-500">
+                {reputation.commitmentsSummary?.completedOnTime ?? 0} fulfilled pacts
+              </div>
+            </div>
+            <button
+              onClick={() => onNavigateTab('commitments')}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 shadow-xs transition-colors"
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>Make Commitment</span>
+            </button>
+          </div>
+        </div>
+
         {/* Verified Claims Summary Row */}
-        <div className="pt-4 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+        <div className="pt-4 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
           <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
             <div className="text-lg font-bold font-mono tabular-nums text-slate-900">
               {relationshipCounts?.total || 0}
             </div>
             <div className="text-[11px] text-slate-500">Confirmed Relations</div>
+          </div>
+          <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
+            <div className="text-lg font-bold font-mono tabular-nums text-indigo-700">
+              {data.publicCommitments?.length ?? 0}
+            </div>
+            <div className="text-[11px] text-slate-500">Public Commitments</div>
           </div>
           <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
             <div className="text-lg font-bold font-mono tabular-nums text-slate-900">
