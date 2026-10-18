@@ -220,6 +220,7 @@ export default function App() {
         <PublicProfileView
           username={username}
           onNavigateTab={handleSelectTab}
+          onBack={handleBack}
         />
       );
     }
@@ -230,7 +231,7 @@ export default function App() {
       return (
         <AcceptInviteView
           token={token}
-          onBack={() => handleSelectTab('relationships')}
+          onBack={handleBack}
           onCompleted={() => {
             refreshData();
             handleSelectTab('relationships');
@@ -287,6 +288,7 @@ export default function App() {
             onSelectTab={handleSelectTab}
             availableUsers={availableUsers}
             onRefreshAllData={refreshData}
+            onBack={handleBack}
           />
         );
 
@@ -300,6 +302,7 @@ export default function App() {
             onDeleteEvidence={handleDeleteEvidence}
             onOpenPhoneModal={() => setShowPhoneModal(true)}
             onOpenIdentityModal={() => setShowIdentityModal(true)}
+            onBack={handleBack}
           />
         ) : null;
 
@@ -311,6 +314,7 @@ export default function App() {
             onInviteContact={handleInviteContact}
             onDeleteRelationship={handleDeleteRelationship}
             onOpenInviteFlow={(token) => handleSelectTab(`invite-${token}`)}
+            onBack={handleBack}
           />
         ) : null;
 
@@ -323,20 +327,35 @@ export default function App() {
             onConfirmReceipt={handleConfirmReceipt}
             onCompleteReceipt={handleCompleteReceipt}
             onDisputeReceipt={handleDisputeReceipt}
+            onBack={handleBack}
           />
         ) : null;
 
       case 'directory':
-        return <DirectoryView onSelectProfile={(username) => handleSelectTab(`profile-${username}`)} />;
+        return (
+          <DirectoryView
+            onSelectProfile={(username) => handleSelectTab(`profile-${username}`)}
+            onBack={handleBack}
+          />
+        );
 
       case 'reputation':
         return currentUser ? (
-          <ReputationView user={currentUser} reputation={reputation} />
+          <ReputationView
+            user={currentUser}
+            reputation={reputation}
+            onBack={handleBack}
+            onNavigateTab={handleSelectTab}
+          />
         ) : null;
 
       case 'business':
         return currentUser ? (
-          <BusinessView user={currentUser} onNavigateTab={handleSelectTab} />
+          <BusinessView
+            user={currentUser}
+            onNavigateTab={handleSelectTab}
+            onBack={handleBack}
+          />
         ) : null;
 
       case 'settings':
@@ -347,6 +366,7 @@ export default function App() {
               setCurrentUser(updated);
               refreshData();
             }}
+            onBack={handleBack}
           />
         ) : null;
 
