@@ -55,6 +55,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
   const [category, setCategory] = useState<CommitmentCategory>('Vehicle & Transportation');
   const [otherCategoryDetails, setOtherCategoryDetails] = useState('');
   const [targetCommitterId, setTargetCommitterId] = useState('');
+  const [externalCommitterName, setExternalCommitterName] = useState('');
   const [deadlineDate, setDeadlineDate] = useState('');
   const [deadlineTime, setDeadlineTime] = useState('02:00');
   const [rewardPoints, setRewardPoints] = useState(25);
@@ -118,7 +119,8 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
         description,
         category,
         otherCategoryDetails: category === 'Other' ? otherCategoryDetails : undefined,
-        committerId: targetCommitterId,
+        committerId: targetCommitterId === 'other' ? undefined : targetCommitterId,
+        committerName: targetCommitterId === 'other' ? (externalCommitterName || 'External Counterparty') : undefined,
         deadline: combinedDeadline,
         trustRewardPoints: rewardPoints,
         isPublic: true,
@@ -128,6 +130,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
       setTitle('');
       setDescription('');
       setOtherCategoryDetails('');
+      setExternalCommitterName('');
       setActionSuccessMessage('Time-locked commitment request created and broadcasted!');
       setTimeout(() => setActionSuccessMessage(null), 4000);
       await loadCommitments();
@@ -838,9 +841,29 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                         {u.fullName} (@{u.username})
                       </option>
                     ))}
+                    <option value="other">Other (External Person / Contact)</option>
                   </select>
                 </div>
               </div>
+
+              {targetCommitterId === 'other' && (
+                <div className="p-3 bg-indigo-50/70 border border-indigo-200 rounded-lg space-y-1 animate-in fade-in duration-150">
+                  <label className="block text-indigo-950 font-semibold mb-1 text-xs">
+                    Counterparty Name & Contact *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={externalCommitterName}
+                    onChange={(e) => setExternalCommitterName(e.target.value)}
+                    placeholder="e.g. Samuel Adekunle (samuel@example.com / +234 802 000 1122)"
+                    className="w-full px-3 py-2 border border-indigo-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white text-xs"
+                  />
+                  <p className="text-[11px] text-indigo-700">
+                    Specify the external counterparty for this commitment pact.
+                  </p>
+                </div>
+              )}
 
               {category === 'Other' && (
                 <div className="p-3 bg-purple-50/70 border border-purple-200 rounded-lg space-y-1 animate-in fade-in duration-150">
