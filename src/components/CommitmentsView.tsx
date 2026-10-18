@@ -20,7 +20,8 @@ import {
   Timer,
   UserCheck,
   Flame,
-  FileText
+  FileText,
+  ArrowLeft,
 } from 'lucide-react';
 
 interface CommitmentsViewProps {
@@ -28,6 +29,7 @@ interface CommitmentsViewProps {
   onSelectTab: (tab: string) => void;
   availableUsers: Array<{ id: string; username: string; fullName: string; accountType: string; avatarUrl: string }>;
   onRefreshAllData: () => void;
+  onBack?: () => void;
 }
 
 export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
@@ -35,6 +37,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
   onSelectTab,
   availableUsers,
   onRefreshAllData,
+  onBack,
 }) => {
   const [commitments, setCommitments] = useState<TrustCommitment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -254,7 +257,20 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      {onBack && (
+        <div>
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg shadow-2xs hover:border-slate-300 transition-all cursor-pointer group"
+            title="Back to Dashboard"
+          >
+            <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:-translate-x-0.5 transition-transform" />
+            <span>Back to Dashboard</span>
+          </button>
+        </div>
+      )}
+
       {/* Toast Notice */}
       {actionSuccessMessage && (
         <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-medium flex items-center justify-between shadow-xs animate-in fade-in duration-200">
