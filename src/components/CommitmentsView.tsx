@@ -261,6 +261,9 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
   const overdueCount = commitments.filter((c) => c.status === 'overdue' || (c.status !== 'completed' && new Date(c.deadline).getTime() < currentTime)).length;
   const otherCount = commitments.filter((c) => c.category === 'Other').length;
   const onTimeRate = totalCount > 0 ? Math.round((completedCount / Math.max(1, completedCount + overdueCount)) * 100) : 100;
+  const totalPublicImpressions = commitments
+    .filter((c) => c.isPublic)
+    .reduce((acc, c) => acc + (c.impressions ?? 1420), 0);
 
   // Filtered List
   const filteredCommitments = commitments.filter((c) => {
@@ -345,7 +348,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
       </div>
 
       {/* Trust Metrics Ribbon */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-1">
           <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center justify-between">
             <span>On-Time Fulfillment</span>
@@ -377,6 +380,17 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
             {completedCount}
           </div>
           <p className="text-[11px] text-slate-500">Dual-signed receipts issued</p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-1">
+          <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center justify-between">
+            <span>Public Impressions</span>
+            <Eye className="w-4 h-4 text-purple-600" />
+          </div>
+          <div className="text-2xl font-extrabold text-purple-700 tabular-nums">
+            {totalPublicImpressions > 1000 ? `${(totalPublicImpressions / 1000).toFixed(1)}k` : totalPublicImpressions}
+          </div>
+          <p className="text-[11px] text-slate-500">Audience reach on public pacts</p>
         </div>
 
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-1">
@@ -473,6 +487,16 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                       )}
                       <span className="text-slate-300 font-mono">·</span>
                       <span className="font-mono text-slate-500 text-[11px]">{c.id}</span>
+                      {c.isPublic ? (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <Eye className="w-3 h-3 text-emerald-600" />
+                          <span>{(c.impressions ?? 1420).toLocaleString()} impressions</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                          Private
+                        </span>
+                      )}
                     </div>
 
                     {/* Status Pill with Live Timer */}
