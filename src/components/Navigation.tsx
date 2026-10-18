@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, InAppNotification } from '../types/trust.js';
 import { api } from '../services/api.js';
-import { ShieldCheck, Bell, ChevronDown, UserCheck, LogOut, Check, GitBranch, RefreshCw, ExternalLink, CheckCircle2, Download, Search } from 'lucide-react';
+import { ShieldCheck, Bell, ChevronDown, UserCheck, LogOut, Check, GitBranch, RefreshCw, ExternalLink, CheckCircle2, Download, Search, Globe } from 'lucide-react';
 
 interface NavigationProps {
   currentUser: User | null;
@@ -12,6 +12,7 @@ interface NavigationProps {
   onSwitchUser: (userId: string) => void;
   availableUsers: Array<{ id: string; username: string; fullName: string; accountType: string; avatarUrl: string }>;
   onOpenSearch?: () => void;
+  onOpenPublicLedger?: () => void;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
@@ -23,6 +24,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   onSwitchUser,
   availableUsers,
   onOpenSearch,
+  onOpenPublicLedger,
 }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -228,6 +230,20 @@ export const Navigation: React.FC<NavigationProps> = ({
               </div>
             )}
           </div>
+
+          {/* Public Commitments & Trust Receipts Ledger Icon */}
+          <button
+            onClick={onOpenPublicLedger}
+            className="relative p-2 text-slate-500 hover:text-indigo-600 rounded-lg hover:bg-indigo-50/70 transition-colors flex items-center justify-center cursor-pointer group"
+            title="Public Commitments & Trust Receipts Ledger"
+            aria-label="Public Commitments & Trust Receipts Ledger"
+          >
+            <Globe className="w-5 h-5 text-slate-600 group-hover:text-indigo-600 transition-colors" />
+            <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
+            </span>
+          </button>
 
           {/* Search People Trigger - directly beside notification icon */}
           <button
