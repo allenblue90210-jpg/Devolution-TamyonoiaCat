@@ -11,6 +11,7 @@ import {
   BusinessEntity,
   TrustCommitment,
   GoodFaithRating,
+  PactComment,
 } from '../src/types/trust.js';
 
 interface DatabaseSchema {
