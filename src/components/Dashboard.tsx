@@ -26,6 +26,7 @@ import {
   Clock,
   Timer,
   Flame,
+  Globe,
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -42,6 +43,7 @@ interface DashboardProps {
   onOpenAddEvidence: () => void;
   onOpenInviteModal: () => void;
   onOpenNewReceiptModal: () => void;
+  onOpenPublicLedger?: () => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
@@ -58,6 +60,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenAddEvidence,
   onOpenInviteModal,
   onOpenNewReceiptModal,
+  onOpenPublicLedger,
 }) => {
   const [copiedLink, setCopiedLink] = React.useState(false);
 
