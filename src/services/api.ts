@@ -297,6 +297,7 @@ export const api = {
     title: string;
     description: string;
     category: string;
+    otherCategoryDetails?: string;
     committerId?: string;
     committerUsername?: string;
     deadline: string;

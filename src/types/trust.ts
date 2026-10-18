@@ -63,6 +63,7 @@ export interface TrustCommitment {
   title: string;
   description: string;
   category: CommitmentCategory;
+  otherCategoryDetails?: string;
   requesterId: string; // User A
   requesterName: string;
   requesterAvatar?: string;
@@ -190,6 +191,7 @@ export interface TrustReceipt {
     | 'Joint Venture'
     | 'Service Contract'
     | 'Other';
+  otherCategoryDetails?: string;
   title: string;
   description: string;
   transactionValue?: string;
