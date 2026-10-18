@@ -46,7 +46,8 @@ export type CommitmentCategory =
   | 'Financial & Lending'
   | 'Equipment & Machinery'
   | 'Professional Milestone'
-  | 'Personal Promise';
+  | 'Personal Promise'
+  | 'Other';
 
 export type CommitmentStatus =
   | 'pending_acceptance'
