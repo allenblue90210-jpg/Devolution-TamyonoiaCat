@@ -965,7 +965,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 Portable Trust Infrastructure for Marketplaces, Platforms, and Lenders.
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Reputation should not be locked into any single marketplace or closed walled garden. Aegis Trust provides a standardized attestation layer that external platforms can integrate:
+                Reputation should not be locked into any single marketplace or closed walled garden. Devolution provides a standardized attestation layer that external platforms can integrate:
               </p>
               <ul className="space-y-3 text-xs text-slate-700">
                 <li className="flex items-start gap-2">
@@ -992,7 +992,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <pre className="pt-3 text-[12px] leading-relaxed text-indigo-200">
 {`{
   "subject": "allenokoro",
-  "issuer": "https://aegis-trust.network",
+  "issuer": "https://devolution-trust.network",
   "attestation_type": "PortableTrustDossier",
   "claims": {
     "identity_status": "verified",
@@ -1061,10 +1061,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-3">
               <div className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <span className="w-5 h-5 rounded bg-indigo-600 text-white flex items-center justify-center text-xs">
-                  A
+                <span className="w-5 h-5 rounded bg-indigo-600 text-white flex items-center justify-center text-xs font-bold">
+                  D
                 </span>
-                <span>Aegis Trust Network</span>
+                <span>Devolution</span>
               </div>
               <p className="text-slate-500 leading-relaxed">
                 Independent technology infrastructure for evidence-based digital credibility, verifiable credentials, and portable trust.
@@ -1103,7 +1103,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
           <div className="pt-8 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-400">
             <div>
-              © 2026 Aegis Trust Network. All rights reserved. Operating as an independent trust infrastructure provider.
+              © 2026 Devolution. All rights reserved. Operating as an independent trust infrastructure provider.
             </div>
             <div className="flex items-center gap-4">
               <span>Terms of Service</span>
