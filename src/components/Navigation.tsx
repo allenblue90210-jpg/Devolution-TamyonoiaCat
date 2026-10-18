@@ -120,7 +120,7 @@ export const Navigation: React.FC<NavigationProps> = ({
     { id: 'evidence', label: 'Evidence Center', icon: ShieldCheck },
     { id: 'relationships', label: 'Social Verification', icon: Users },
     { id: 'receipts', label: 'Trust Receipts', icon: Receipt },
-    { id: 'public-ledger', label: 'Public Ledger', icon: Globe },
+    { id: 'public-ledger', label: 'People & Ledger', icon: Globe },
     { id: 'directory', label: 'Directory', icon: Compass },
     { id: 'reputation', label: 'Reputation Engine', icon: Sparkles },
   ];
