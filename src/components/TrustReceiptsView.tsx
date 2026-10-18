@@ -577,6 +577,25 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                 </div>
               </div>
 
+              {interactionCategory === 'Other' && (
+                <div className="p-3 bg-purple-50/70 border border-purple-200 rounded-lg space-y-1 animate-in fade-in duration-150">
+                  <label className="block font-semibold text-purple-950 mb-1">
+                    Specify "Other" Category / Interaction Type *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={otherCategoryDetails}
+                    onChange={(e) => setOtherCategoryDetails(e.target.value)}
+                    placeholder="e.g. Intellectual Property License, Custody Transfer, Art Commission..."
+                    className="w-full px-3 py-2 bg-white border border-purple-300 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                  />
+                  <p className="text-[11px] text-purple-700">
+                    Defines custom classification for this bilateral trust receipt.
+                  </p>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">

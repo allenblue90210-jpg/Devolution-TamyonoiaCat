@@ -22,6 +22,7 @@ import {
   Flame,
   FileText,
   ArrowLeft,
+  Tag,
 } from 'lucide-react';
 
 interface CommitmentsViewProps {
