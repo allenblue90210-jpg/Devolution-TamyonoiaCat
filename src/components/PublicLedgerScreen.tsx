@@ -29,6 +29,8 @@ import {
   AlertCircle,
   X,
   Compass,
+  MapPin,
+  Briefcase,
 } from 'lucide-react';
 
 interface PublicLedgerScreenProps {
