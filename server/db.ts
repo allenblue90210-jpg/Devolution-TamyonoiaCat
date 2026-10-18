@@ -737,6 +737,9 @@ function getInitialData(): DatabaseSchema {
     },
   ];
 
+  const goodFaithRatings = getInitialGoodFaithRatings();
+  const impressions = getInitialImpressions();
+
   return {
     users: [allenUser, sarahUser, fatimaUser],
     evidence,
@@ -750,6 +753,88 @@ function getInitialData(): DatabaseSchema {
     phoneOtps: {
       '+234 803 491 8821': { code: '849201', expiresAt: Date.now() + 3600000 },
     },
+    goodFaithRatings,
+    impressions,
+  };
+}
+
+function getInitialGoodFaithRatings(): GoodFaithRating[] {
+  return [
+    {
+      id: 'gfr_001',
+      targetUserId: 'usr_allen_001',
+      targetUsername: 'allenokoro',
+      authorId: 'usr_sarah_002',
+      authorName: 'Sarah Adesina',
+      authorAvatar: '/src/assets/images/avatar_sarah_1792334645228.jpg',
+      authorTitle: 'Principal Cloud & Security Advisor · CloudWorks NG',
+      rating: 5,
+      goodFaithBadge: 'Exemplary Integrity',
+      comment: 'Collaborated with Allen on high-stakes distributed payment APIs. He operated in absolute good faith, delivered every milestone 24 hours ahead of schedule, and maintained transparent escrowed commitments.',
+      context: 'FinTech Payment Settlement Infrastructure',
+      impressions: 412,
+      helpfulCount: 38,
+      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 'gfr_002',
+      targetUserId: 'usr_allen_001',
+      targetUsername: 'allenokoro',
+      authorId: 'usr_fatima_003',
+      authorName: 'Fatima Bello',
+      authorAvatar: '/src/assets/images/avatar_fatima_1792334658112.jpg',
+      authorTitle: 'COO · Horizon Global Logistics',
+      rating: 5,
+      goodFaithBadge: 'Prompt Delivery',
+      comment: 'Dual-signed receipt TR-90214 was executed smoothly without a single dispute. Allen honored every delivery SLA and provided audited architectural documentation. Highly recommended in good faith.',
+      context: 'Multimodal Freight Tracking Microservice',
+      impressions: 345,
+      helpfulCount: 29,
+      createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 'gfr_003',
+      targetUserId: 'network',
+      targetUsername: 'aegis_network',
+      authorId: 'usr_emeka_005',
+      authorName: 'Emeka Okafor, Esq.',
+      authorTitle: 'Managing Partner · Altus Advisory Partners',
+      rating: 5,
+      goodFaithBadge: 'Honest Dealings',
+      comment: 'The evidence-backed structure of Aegis Trust eliminates unilateral hearsay. We completed TR-77102 with zero ambiguity. The open witness ledger and transparent commitment tracking set a new standard for business integrity.',
+      context: 'Legal Automation & Document Escrow',
+      impressions: 620,
+      helpfulCount: 44,
+      createdAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 'gfr_004',
+      targetUserId: 'usr_sarah_002',
+      targetUsername: 'sarah_adesina',
+      authorId: 'usr_allen_001',
+      authorName: 'Allen Okoro',
+      authorAvatar: '/src/assets/images/avatar_founder_1792334631930.jpg',
+      authorTitle: 'Principal Architect · Aegis Systems',
+      rating: 5,
+      goodFaithBadge: 'Trusted Collaborator',
+      comment: 'Sarah is an outstanding cloud infrastructure architect. Zero security compromise, rigorously verified cryptographic audits, and exemplary peer accountability.',
+      context: 'Cloud Security & Compliance Infrastructure',
+      impressions: 280,
+      helpfulCount: 21,
+      createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+  ];
+}
+
+function getInitialImpressions(): Record<string, { impressions: number; witnessCount: number }> {
+  return {
+    network: { impressions: 4890, witnessCount: 560 },
+    usr_allen_001: { impressions: 2420, witnessCount: 310 },
+    allenokoro: { impressions: 2420, witnessCount: 310 },
+    usr_sarah_002: { impressions: 1380, witnessCount: 195 },
+    sarah_adesina: { impressions: 1380, witnessCount: 195 },
+    usr_fatima_003: { impressions: 1890, witnessCount: 240 },
+    fatimabello: { impressions: 1890, witnessCount: 240 },
   };
 }
 
@@ -765,8 +850,20 @@ class Database {
       if (fs.existsSync(DB_FILE)) {
         const raw = fs.readFileSync(DB_FILE, 'utf-8');
         const parsed = JSON.parse(raw);
+        let updated = false;
         if (!parsed.commitments || parsed.commitments.length === 0) {
           parsed.commitments = getInitialCommitments();
+          updated = true;
+        }
+        if (!parsed.goodFaithRatings || parsed.goodFaithRatings.length === 0) {
+          parsed.goodFaithRatings = getInitialGoodFaithRatings();
+          updated = true;
+        }
+        if (!parsed.impressions) {
+          parsed.impressions = getInitialImpressions();
+          updated = true;
+        }
+        if (updated) {
           this.save(parsed);
         }
         return parsed;
@@ -1078,6 +1175,77 @@ class Database {
     if (changed) {
       this.persist();
     }
+  }
+
+  // Good Faith Community Ratings & Comments
+  public getGoodFaithRatings(targetId?: string): GoodFaithRating[] {
+    const list = this.data.goodFaithRatings || [];
+    if (!targetId || targetId === 'all') return list;
+    return list.filter(
+      (r) =>
+        r.targetUserId === targetId ||
+        r.targetUsername === targetId ||
+        (targetId === 'network' && (r.targetUserId === 'network' || !r.targetUserId))
+    );
+  }
+
+  public addGoodFaithRating(rating: GoodFaithRating): GoodFaithRating {
+    if (!this.data.goodFaithRatings) this.data.goodFaithRatings = [];
+    this.data.goodFaithRatings.unshift(rating);
+    this.persist();
+    return rating;
+  }
+
+  public markGoodFaithRatingHelpful(id: string): GoodFaithRating | null {
+    if (!this.data.goodFaithRatings) return null;
+    const item = this.data.goodFaithRatings.find((r) => r.id === id);
+    if (!item) return null;
+    item.helpfulCount = (item.helpfulCount || 0) + 1;
+    this.persist();
+    return item;
+  }
+
+  // Impressions & Witness Tracking ("if anybody see")
+  public recordImpression(
+    targetId: string = 'network',
+    isWitness: boolean = false
+  ): { impressions: number; witnessCount: number } {
+    if (!this.data.impressions) {
+      this.data.impressions = getInitialImpressions();
+    }
+    if (!this.data.impressions[targetId]) {
+      this.data.impressions[targetId] = { impressions: 1, witnessCount: isWitness ? 1 : 0 };
+    } else {
+      this.data.impressions[targetId].impressions = (this.data.impressions[targetId].impressions || 0) + 1;
+      if (isWitness) {
+        this.data.impressions[targetId].witnessCount = (this.data.impressions[targetId].witnessCount || 0) + 1;
+      }
+    }
+    this.persist();
+    return this.data.impressions[targetId];
+  }
+
+  public getImpressions(targetId: string = 'network'): {
+    impressions: number;
+    witnessCount: number;
+    averageRating: number;
+    ratingsCount: number;
+  } {
+    if (!this.data.impressions) {
+      this.data.impressions = getInitialImpressions();
+    }
+    const record = this.data.impressions[targetId] || { impressions: 120, witnessCount: 15 };
+    const ratings = this.getGoodFaithRatings(targetId);
+    const avg =
+      ratings.length > 0
+        ? Number((ratings.reduce((acc, r) => acc + r.rating, 0) / ratings.length).toFixed(2))
+        : 5.0;
+    return {
+      impressions: record.impressions,
+      witnessCount: record.witnessCount,
+      averageRating: avg,
+      ratingsCount: ratings.length,
+    };
   }
 }
 
