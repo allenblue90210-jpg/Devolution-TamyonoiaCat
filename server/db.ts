@@ -27,6 +27,85 @@ interface DatabaseSchema {
 
 const DB_FILE = path.resolve(process.cwd(), 'data', 'db.json');
 
+function getInitialCommitments(): TrustCommitment[] {
+  return [
+    {
+      id: 'TC-8012',
+      title: 'Mercedes-Benz C300 Return & Handover',
+      description: 'Vehicle loaner agreement: User A (Allen) loaning Mercedes C300 to User B (Sarah) for regional tech summit transit. Promised to be returned and parked at Lekki Phase 1 secure garage by 2:00 AM.',
+      category: 'Vehicle & Transportation',
+      requesterId: 'usr_allen_001',
+      requesterName: 'Allen Okoro',
+      requesterAvatar: '/src/assets/images/avatar_founder_1792334631930.jpg',
+      committerId: 'usr_sarah_002',
+      committerName: 'Sarah Adesina',
+      committerAvatar: '/src/assets/images/avatar_sarah_1792334645228.jpg',
+      deadline: new Date(Date.now() + 17 * 60 * 60 * 1000).toISOString(),
+      committerPledgeNote: "I'll bring it by 2am, parked safely in the designated bay with full fuel tank and keys handed to security.",
+      status: 'active',
+      trustRewardPoints: 25,
+      penaltyRateDailyPercent: 30,
+      penaltyCurrentDeductionPercent: 0,
+      isOverdue: false,
+      daysOverdue: 0,
+      checkedOutByCommitterAt: null,
+      checkedOutByRequesterAt: null,
+      linkedReceiptId: null,
+      isPublic: true,
+      createdAt: new Date(Date.now() - 7 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 'TC-7041',
+      title: 'Enterprise AWS Server Infrastructure Migration Handover',
+      description: 'Zero-downtime database replication cutover and VPC peering configuration for payment gateway.',
+      category: 'Professional Milestone',
+      requesterId: 'usr_fatima_003',
+      requesterName: 'Fatima Bello',
+      committerId: 'usr_allen_001',
+      committerName: 'Allen Okoro',
+      committerAvatar: '/src/assets/images/avatar_founder_1792334631930.jpg',
+      deadline: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+      committerPledgeNote: 'Completed 4 hours ahead of schedule. All health endpoints verified green.',
+      status: 'completed',
+      trustRewardPoints: 25,
+      penaltyRateDailyPercent: 30,
+      penaltyCurrentDeductionPercent: 0,
+      isOverdue: false,
+      daysOverdue: 0,
+      checkedOutByCommitterAt: new Date(Date.now() - 52 * 60 * 60 * 1000).toISOString(),
+      checkedOutByRequesterAt: new Date(Date.now() - 50 * 60 * 60 * 1000).toISOString(),
+      linkedReceiptId: 'TR-89241',
+      isPublic: true,
+      createdAt: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString(),
+      completedAt: new Date(Date.now() - 50 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 'TC-9023',
+      title: 'Industrial 3D Calibration Tooling Rig Return',
+      description: 'Temporary loan of high-precision CNC tool head and laser calibration jig.',
+      category: 'Equipment & Machinery',
+      requesterId: 'usr_allen_001',
+      requesterName: 'Allen Okoro',
+      requesterAvatar: '/src/assets/images/avatar_founder_1792334631930.jpg',
+      committerId: 'usr_fatima_003',
+      committerName: 'Fatima Bello',
+      committerAvatar: '/src/assets/images/avatar_sarah_1792334645228.jpg',
+      deadline: new Date(Date.now() + 42 * 60 * 60 * 1000).toISOString(),
+      status: 'pending_acceptance',
+      trustRewardPoints: 20,
+      penaltyRateDailyPercent: 30,
+      penaltyCurrentDeductionPercent: 0,
+      isOverdue: false,
+      daysOverdue: 0,
+      checkedOutByCommitterAt: null,
+      checkedOutByRequesterAt: null,
+      linkedReceiptId: null,
+      isPublic: true,
+      createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+    },
+  ];
+}
+
 function getInitialData(): DatabaseSchema {
   const allenUser: User = {
     id: 'usr_allen_001',
@@ -599,6 +678,7 @@ function getInitialData(): DatabaseSchema {
     disputes,
     notifications,
     businesses,
+    commitments: getInitialCommitments(),
     phoneOtps: {
       '+234 803 491 8821': { code: '849201', expiresAt: Date.now() + 3600000 },
     },
@@ -616,7 +696,12 @@ class Database {
     try {
       if (fs.existsSync(DB_FILE)) {
         const raw = fs.readFileSync(DB_FILE, 'utf-8');
-        return JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        if (!parsed.commitments || parsed.commitments.length === 0) {
+          parsed.commitments = getInitialCommitments();
+          this.save(parsed);
+        }
+        return parsed;
       }
     } catch (err) {
       console.warn('Failed to parse database file, reinitializing default data:', err);
