@@ -58,6 +58,18 @@ export type CommitmentStatus =
   | 'disputed'
   | 'cancelled';
 
+export interface PactComment {
+  id: string;
+  commitmentId: string;
+  authorId: string;
+  authorName: string;
+  authorAvatar?: string;
+  authorRole: 'Requester' | 'Committer' | 'Witness Observer' | 'Verified Counterparty';
+  text: string;
+  ratingPercent?: 100 | 50 | null; // e.g. 100% or 50% rating
+  createdAt: string;
+}
+
 export interface TrustCommitment {
   id: string; // e.g. TC-9014
   title: string;
@@ -86,6 +98,9 @@ export interface TrustCommitment {
   witnessCount?: number; // Total network observers who witnessed pact
   positiveImpressions?: number; // Community confidence endorsements
   hasWitnessed?: boolean; // Whether current session user witnessed pact
+  ratingPercent?: number | null; // 100% or 50% rating
+  ratingBadge?: string | null; // e.g. "100% Flawless Honor" or "50% Partial Settlement"
+  comments?: PactComment[];
   createdAt: string;
   completedAt?: string | null;
 }
