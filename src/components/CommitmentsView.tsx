@@ -42,7 +42,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
 }) => {
   const [commitments, setCommitments] = useState<TrustCommitment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'action_needed' | 'completed' | 'overdue'>('all');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'action_needed' | 'completed' | 'overdue' | 'other'>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [actionSuccessMessage, setActionSuccessMessage] = useState<string | null>(null);
 
@@ -50,6 +50,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<CommitmentCategory>('Vehicle & Transportation');
+  const [otherCategoryDetails, setOtherCategoryDetails] = useState('');
   const [targetCommitterId, setTargetCommitterId] = useState('');
   const [deadlineDate, setDeadlineDate] = useState('');
   const [deadlineTime, setDeadlineTime] = useState('02:00');
@@ -113,6 +114,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
         title,
         description,
         category,
+        otherCategoryDetails: category === 'Other' ? otherCategoryDetails : undefined,
         committerId: targetCommitterId,
         deadline: combinedDeadline,
         trustRewardPoints: rewardPoints,
@@ -122,6 +124,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
       setShowCreateModal(false);
       setTitle('');
       setDescription('');
+      setOtherCategoryDetails('');
       setActionSuccessMessage('Time-locked commitment request created and broadcasted!');
       setTimeout(() => setActionSuccessMessage(null), 4000);
       await loadCommitments();
