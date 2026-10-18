@@ -1,4 +1,4 @@
-# Aegis Trust Network — Standalone Trust & Reputation Platform
+# Devolution — Standalone Trust & Reputation Platform
 
 A modern, standalone digital trust and reputation platform that allows individuals, freelancers, creators, online sellers, and businesses to establish credibility through verifiable identity attestation, two-sided human relationship verification, voluntary peer endorsements, dual-signed Trust Receipts, and authoritative registry credentials.
 
