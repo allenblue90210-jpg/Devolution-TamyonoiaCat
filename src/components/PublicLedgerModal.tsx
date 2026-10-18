@@ -27,6 +27,11 @@ import {
   Send,
   HelpCircle,
   Sparkles,
+  Filter,
+  RefreshCw,
+  ExternalLink,
+  ChevronRight,
+  User as UserIcon,
 } from 'lucide-react';
 
 interface PublicLedgerModalProps {
@@ -47,6 +52,9 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
   onRefreshData,
 }) => {
   const [activeTab, setActiveTab] = useState<'commitments' | 'receipts' | 'mine'>('commitments');
+  const [commitmentFilter, setCommitmentFilter] = useState<'all' | 'from_people' | 'by_me' | 'public'>('all');
+  const [receiptFilter, setReceiptFilter] = useState<'all' | 'public' | 'private' | 'from_people' | 'by_me'>('all');
+
   const [commitments, setCommitments] = useState<TrustCommitment[]>([]);
   const [receipts, setReceipts] = useState<TrustReceipt[]>([]);
   const [loading, setLoading] = useState(false);
@@ -85,16 +93,28 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
     return () => clearInterval(timer);
   }, []);
 
-  // Fetch Public Data
+  // Fetch Public Data & User's Records
   const loadLedgerData = async () => {
     setLoading(true);
     try {
-      const [comRes, recRes] = await Promise.all([
+      const [comRes, myComRes, recRes, myRecRes] = await Promise.all([
         api.getPublicCommitments(),
+        currentUser ? api.getCommitments('mine') : Promise.resolve({ commitments: [] }),
         api.getPublicReceipts(),
+        currentUser ? api.getReceipts() : Promise.resolve({ receipts: [] }),
       ]);
-      setCommitments(comRes.commitments || []);
-      setReceipts(recRes.receipts || []);
+
+      // Deduplicate commitments
+      const comMap = new Map<string, TrustCommitment>();
+      (comRes.commitments || []).forEach((c) => comMap.set(c.id, c));
+      (myComRes.commitments || []).forEach((c) => comMap.set(c.id, c));
+      setCommitments(Array.from(comMap.values()));
+
+      // Deduplicate receipts (includes public network receipts + user's private receipts)
+      const recMap = new Map<string, TrustReceipt>();
+      (recRes.receipts || []).forEach((r) => recMap.set(r.id, r));
+      (myRecRes.receipts || []).forEach((r) => recMap.set(r.id, r));
+      setReceipts(Array.from(recMap.values()));
     } catch (err) {
       console.error('Failed to load public ledger:', err);
     } finally {
@@ -148,8 +168,12 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
       setShowPostCommitment(false);
       setPostTitle('');
       setPostDescription('');
-      setToastMessage('Public commitment created and broadcasted to the trust network!');
-      setTimeout(() => setToastMessage(null), 4000);
+      setToastMessage(
+        postIsPublic
+          ? 'Public commitment posted and broadcasted to the public ledger!'
+          : 'Private commitment recorded between you and the counterparty.'
+      );
+      setTimeout(() => setToastMessage(null), 4500);
       await loadLedgerData();
       if (onRefreshData) onRefreshData();
     } catch (err: any) {
@@ -187,8 +211,10 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
       setRecTitle('');
       setRecDescription('');
       setRecConditions('');
-      setToastMessage(`Trust receipt generated (${recIsPublic ? 'Public Ledger' : 'Private Bilateral Record'})!`);
-      setTimeout(() => setToastMessage(null), 4000);
+      setToastMessage(
+        `Trust receipt generated as ${recIsPublic ? 'PUBLIC (Open Ledger)' : 'PRIVATE (Confidential Bilateral)'}!`
+      );
+      setTimeout(() => setToastMessage(null), 4500);
       await loadLedgerData();
       if (onRefreshData) onRefreshData();
     } catch (err: any) {
@@ -203,8 +229,11 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
     try {
       const res = await api.toggleReceiptVisibility(id, !currentPublic);
       setReceipts((prev) => prev.map((r) => (r.id === id ? res.receipt : r)));
-      setToastMessage(`Receipt ${id} visibility updated to ${!currentPublic ? 'Public' : 'Private'}`);
-      setTimeout(() => setToastMessage(null), 3000);
+      setToastMessage(
+        `Receipt #${id} visibility set to ${!currentPublic ? 'Public Ledger (Open)' : 'Private (Confidential)'}`
+      );
+      setTimeout(() => setToastMessage(null), 3500);
+      if (onRefreshData) onRefreshData();
     } catch (err: any) {
       alert(err.message || 'Failed to update visibility');
     }
@@ -214,8 +243,11 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
     try {
       const res = await api.toggleCommitmentVisibility(id, !currentPublic);
       setCommitments((prev) => prev.map((c) => (c.id === id ? res.commitment : c)));
-      setToastMessage(`Commitment ${id} visibility updated to ${!currentPublic ? 'Public' : 'Private'}`);
-      setTimeout(() => setToastMessage(null), 3000);
+      setToastMessage(
+        `Commitment #${id} visibility updated to ${!currentPublic ? 'Public (Open Ledger)' : 'Private'}`
+      );
+      setTimeout(() => setToastMessage(null), 3500);
+      if (onRefreshData) onRefreshData();
     } catch (err: any) {
       alert(err.message || 'Failed to update visibility');
     }
@@ -243,7 +275,7 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
     };
   };
 
-  // Filtering
+  // Filtering Commitments
   const filteredCommitments = commitments.filter((c) => {
     const matchesSearch =
       !searchQuery ||
@@ -252,11 +284,22 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
       c.requesterName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.committerName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || c.category === selectedCategory;
+
+    let matchesSub = true;
+    if (commitmentFilter === 'from_people' && currentUser) {
+      matchesSub = c.requesterId === currentUser.id;
+    } else if (commitmentFilter === 'by_me' && currentUser) {
+      matchesSub = c.committerId === currentUser.id;
+    } else if (commitmentFilter === 'public') {
+      matchesSub = c.isPublic === true;
+    }
+
     const matchesMine =
       activeTab !== 'mine' || (currentUser && (c.requesterId === currentUser.id || c.committerId === currentUser.id));
-    return matchesSearch && matchesCategory && matchesMine;
+    return matchesSearch && matchesCategory && matchesSub && matchesMine;
   });
 
+  // Filtering Receipts
   const filteredReceipts = receipts.filter((r) => {
     const matchesSearch =
       !searchQuery ||
@@ -265,10 +308,28 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
       r.counterpartyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || r.interactionCategory === selectedCategory;
+
+    let matchesSub = true;
+    if (receiptFilter === 'public') {
+      matchesSub = r.isPublic === true;
+    } else if (receiptFilter === 'private') {
+      matchesSub = r.isPublic === false;
+    } else if (receiptFilter === 'from_people' && currentUser) {
+      matchesSub =
+        r.counterpartyUserId === currentUser.id ||
+        r.counterpartyName.toLowerCase().includes(currentUser.fullName.toLowerCase());
+    } else if (receiptFilter === 'by_me' && currentUser) {
+      matchesSub = r.creatorId === currentUser.id;
+    }
+
     const matchesMine =
       activeTab !== 'mine' || (currentUser && (r.creatorId === currentUser.id || r.counterpartyUserId === currentUser.id));
-    return matchesSearch && matchesCategory && matchesMine;
+    return matchesSearch && matchesCategory && matchesSub && matchesMine;
   });
+
+  const publicReceiptsCount = receipts.filter((r) => r.isPublic).length;
+  const privateReceiptsCount = receipts.filter((r) => !r.isPublic).length;
+  const publicCommitmentsCount = commitments.filter((c) => c.isPublic).length;
 
   return (
     <div
@@ -280,7 +341,7 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-4xl overflow-hidden mt-2 sm:mt-8 flex flex-col max-h-[90vh]">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-5xl overflow-hidden mt-2 sm:mt-6 flex flex-col max-h-[92vh]">
         {/* Modal Top Header */}
         <div className="p-4 sm:p-6 border-b border-slate-200 bg-slate-50/80">
           <div className="flex items-start justify-between gap-4">
@@ -292,12 +353,15 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
                 <span className="text-xs font-bold uppercase tracking-wider text-indigo-700">
                   Public Evidentiary Ledger
                 </span>
+                <span className="text-[10px] font-semibold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-200">
+                  Live Network
+                </span>
               </div>
               <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
                 Public Commitments & Trust Receipts
               </h2>
-              <p className="text-xs text-slate-600 max-w-2xl leading-relaxed">
-                Inspect public commitments posted by members across the network, or browse dual-signed trust receipts.
+              <p className="text-xs text-slate-600 max-w-3xl leading-relaxed">
+                Inspect public commitments posted across the network, post your own time-locked commitments for people to see, or inspect bilateral trust receipts. Note that trust receipts support both <strong>Public</strong> and <strong>Private</strong> attestations.
               </p>
             </div>
 
@@ -310,17 +374,36 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
             </button>
           </div>
 
-          {/* Privacy Distinction Explainer */}
-          <div className="mt-4 p-3 bg-indigo-50/70 border border-indigo-100 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-2 text-indigo-900 font-medium">
-              <Globe className="w-4 h-4 text-indigo-600 shrink-0" />
-              <span>
-                <strong>Public Ledger:</strong> Public commitments & dual-signed receipts are openly attested.
-              </span>
+          {/* Privacy Distinction Explainer Card */}
+          <div className="mt-4 p-3.5 bg-gradient-to-r from-indigo-50/90 via-slate-50 to-emerald-50/70 border border-indigo-100/90 rounded-xl space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-indigo-950 font-bold text-xs uppercase tracking-wide">
+                <ShieldCheck className="w-4 h-4 text-indigo-600 shrink-0" />
+                <span>Notice: Public vs. Private Attestations</span>
+              </div>
+              <div className="text-[11px] font-mono text-slate-500">
+                {publicCommitmentsCount} Public Commitments · {publicReceiptsCount} Public Receipts · {privateReceiptsCount} Private Receipts
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-slate-600 text-[11px] font-mono">
-              <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-              <span>Private receipts remain strictly confidential between counterparties.</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
+              <div className="p-2.5 bg-white/90 rounded-lg border border-emerald-200/80 flex items-start gap-2">
+                <Globe className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-emerald-900 block font-semibold">Public Trust Receipts & Commitments:</strong>
+                  <span className="text-slate-600 text-[11px] leading-tight block mt-0.5">
+                    Attested openly on the ledger. Anyone in the network can verify fulfilled commitments, commercial delivery milestones, and counterparty sign-offs.
+                  </span>
+                </div>
+              </div>
+              <div className="p-2.5 bg-white/90 rounded-lg border border-slate-200/80 flex items-start gap-2">
+                <Lock className="w-4 h-4 text-slate-600 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-slate-800 block font-semibold">Private Trust Receipts:</strong>
+                  <span className="text-slate-600 text-[11px] leading-tight block mt-0.5">
+                    Cryptographically dual-signed and confidential between counterparties. Not visible to the public unless you or the counterparty toggle it to Public.
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -345,7 +428,7 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
             <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
               <button
                 onClick={() => setActiveTab('commitments')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
                   activeTab === 'commitments'
                     ? 'bg-indigo-600 text-white shadow-2xs'
                     : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
@@ -354,36 +437,36 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
                 <Clock className="w-3.5 h-3.5" />
                 <span>Public Commitments</span>
                 <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-white/20 text-current">
-                  {commitments.length}
+                  {filteredCommitments.length}
                 </span>
               </button>
 
               <button
                 onClick={() => setActiveTab('receipts')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
                   activeTab === 'receipts'
                     ? 'bg-indigo-600 text-white shadow-2xs'
                     : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
                 }`}
               >
                 <Receipt className="w-3.5 h-3.5" />
-                <span>Public Trust Receipts</span>
+                <span>Trust Receipts</span>
                 <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-white/20 text-current">
-                  {receipts.length}
+                  {filteredReceipts.length}
                 </span>
               </button>
 
               {currentUser && (
                 <button
                   onClick={() => setActiveTab('mine')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
                     activeTab === 'mine'
                       ? 'bg-indigo-600 text-white shadow-2xs'
                       : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
                   }`}
                 >
                   <UserCheck className="w-3.5 h-3.5" />
-                  <span>Our Records</span>
+                  <span>Our Records & Pacts</span>
                 </button>
               )}
             </div>
@@ -392,7 +475,7 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
             <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => setShowPostCommitment(true)}
-                className="px-3 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg flex items-center gap-1 shadow-2xs transition-colors"
+                className="px-3 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Post Public Commitment</span>
@@ -400,40 +483,157 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
 
               <button
                 onClick={() => setShowPostReceipt(true)}
-                className="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg flex items-center gap-1 transition-colors"
+                className="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <Receipt className="w-3.5 h-3.5 text-slate-500" />
-                <span>New Receipt</span>
+                <span>Issue Trust Receipt</span>
               </button>
             </div>
           </div>
 
-          {/* Search Bar & Category Filter */}
-          <div className="mt-3 flex flex-col sm:flex-row items-center gap-2">
-            <div className="relative flex-1 w-full">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Filter by title, user name, or keyword..."
-                className="w-full pl-9 pr-3 py-1.5 text-xs bg-white rounded-lg border border-slate-200 focus:outline-hidden focus:ring-1 focus:ring-indigo-500"
-              />
+          {/* Sub-Filters & Search Bar */}
+          <div className="mt-3 space-y-2.5">
+            {/* Sub-Filter Pills */}
+            {activeTab === 'commitments' && (
+              <div className="flex items-center gap-1.5 overflow-x-auto text-[11px] pb-1">
+                <span className="text-slate-400 font-semibold uppercase tracking-wider shrink-0 mr-1">Filter:</span>
+                <button
+                  onClick={() => setCommitmentFilter('all')}
+                  className={`px-2.5 py-1 rounded-md transition-colors ${
+                    commitmentFilter === 'all'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  All Commitments
+                </button>
+                <button
+                  onClick={() => setCommitmentFilter('public')}
+                  className={`px-2.5 py-1 rounded-md transition-colors flex items-center gap-1 ${
+                    commitmentFilter === 'public'
+                      ? 'bg-indigo-600 text-white font-semibold'
+                      : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
+                  }`}
+                >
+                  <Globe className="w-3 h-3" />
+                  <span>Public Only</span>
+                </button>
+                {currentUser && (
+                  <>
+                    <button
+                      onClick={() => setCommitmentFilter('from_people')}
+                      className={`px-2.5 py-1 rounded-md transition-colors ${
+                        commitmentFilter === 'from_people'
+                          ? 'bg-slate-900 text-white font-semibold'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      From People to Us
+                    </button>
+                    <button
+                      onClick={() => setCommitmentFilter('by_me')}
+                      className={`px-2.5 py-1 rounded-md transition-colors ${
+                        commitmentFilter === 'by_me'
+                          ? 'bg-slate-900 text-white font-semibold'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      By Us to People
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'receipts' && (
+              <div className="flex items-center gap-1.5 overflow-x-auto text-[11px] pb-1">
+                <span className="text-slate-400 font-semibold uppercase tracking-wider shrink-0 mr-1">Receipt Type:</span>
+                <button
+                  onClick={() => setReceiptFilter('all')}
+                  className={`px-2.5 py-1 rounded-md transition-colors ${
+                    receiptFilter === 'all'
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  All Receipts
+                </button>
+                <button
+                  onClick={() => setReceiptFilter('public')}
+                  className={`px-2.5 py-1 rounded-md transition-colors flex items-center gap-1 ${
+                    receiptFilter === 'public'
+                      ? 'bg-emerald-600 text-white font-semibold'
+                      : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200'
+                  }`}
+                >
+                  <Globe className="w-3 h-3" />
+                  <span>Public Receipts ({publicReceiptsCount})</span>
+                </button>
+                <button
+                  onClick={() => setReceiptFilter('private')}
+                  className={`px-2.5 py-1 rounded-md transition-colors flex items-center gap-1 ${
+                    receiptFilter === 'private'
+                      ? 'bg-slate-700 text-white font-semibold'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                  }`}
+                >
+                  <Lock className="w-3 h-3" />
+                  <span>Private Receipts ({privateReceiptsCount})</span>
+                </button>
+                {currentUser && (
+                  <>
+                    <button
+                      onClick={() => setReceiptFilter('from_people')}
+                      className={`px-2.5 py-1 rounded-md transition-colors ${
+                        receiptFilter === 'from_people'
+                          ? 'bg-slate-900 text-white font-semibold'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      From People to Us
+                    </button>
+                    <button
+                      onClick={() => setReceiptFilter('by_me')}
+                      className={`px-2.5 py-1 rounded-md transition-colors ${
+                        receiptFilter === 'by_me'
+                          ? 'bg-slate-900 text-white font-semibold'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      Issued by Us
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Search Bar & Category Filter */}
+            <div className="flex flex-col sm:flex-row items-center gap-2">
+              <div className="relative flex-1 w-full">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Filter by title, counterparty, description, or keyword..."
+                  className="w-full pl-9 pr-3 py-1.5 text-xs bg-white rounded-lg border border-slate-200 focus:outline-hidden focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full sm:w-auto px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden"
+              >
+                <option value="all">All Categories</option>
+                <option value="Vehicle & Transportation">Vehicle & Transportation</option>
+                <option value="Delivery & Logistics">Delivery & Logistics</option>
+                <option value="Financial & Lending">Financial & Lending</option>
+                <option value="Equipment & Machinery">Equipment & Machinery</option>
+                <option value="Professional Milestone">Professional Milestone</option>
+                <option value="Freelance Project">Freelance Project</option>
+                <option value="Goods Sale & Delivery">Goods Sale & Delivery</option>
+              </select>
             </div>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full sm:w-auto px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden"
-            >
-              <option value="all">All Categories</option>
-              <option value="Vehicle & Transportation">Vehicle & Transportation</option>
-              <option value="Delivery & Logistics">Delivery & Logistics</option>
-              <option value="Financial & Lending">Financial & Lending</option>
-              <option value="Equipment & Machinery">Equipment & Machinery</option>
-              <option value="Professional Milestone">Professional Milestone</option>
-              <option value="Freelance Project">Freelance Project</option>
-              <option value="Goods Sale & Delivery">Goods Sale & Delivery</option>
-            </select>
           </div>
         </div>
 
@@ -444,12 +644,12 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
               <div className="inline-block w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mb-2" />
               <div>Fetching attested records from the public ledger...</div>
             </div>
-          ) : activeTab === 'commitments' || (activeTab === 'mine' && filteredCommitments.length > 0) ? (
+          ) : activeTab === 'commitments' ? (
             /* Public Commitments List */
             <div className="space-y-4">
               <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
                 <span>
-                  Showing {filteredCommitments.length} public commitment{filteredCommitments.length === 1 ? '' : 's'}
+                  Showing {filteredCommitments.length} commitment{filteredCommitments.length === 1 ? '' : 's'}
                 </span>
                 <span className="text-[11px] text-slate-400 font-mono">
                   All contracts time-locked with real-time default penalties
@@ -459,13 +659,13 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
               {filteredCommitments.length === 0 ? (
                 <div className="py-12 text-center space-y-3 bg-slate-50/50 rounded-xl border border-slate-100">
                   <Clock className="w-10 h-10 text-slate-300 mx-auto" />
-                  <div className="text-sm font-bold text-slate-800">No public commitments found</div>
+                  <div className="text-sm font-bold text-slate-800">No commitments found</div>
                   <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                    No active commitments match your criteria. You can post a public commitment to broadcast it to the network!
+                    No active commitments match your criteria. You can post a public commitment right now to broadcast it to the network!
                   </p>
                   <button
                     onClick={() => setShowPostCommitment(true)}
-                    className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-2xs"
+                    className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-2xs cursor-pointer"
                   >
                     Post a Public Commitment Now
                   </button>
@@ -484,10 +684,17 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
                             <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
                               {commitment.category}
                             </span>
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
-                              <Globe className="w-3 h-3 text-emerald-600" />
-                              <span>Public Commitment</span>
-                            </span>
+                            {commitment.isPublic ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <Globe className="w-3 h-3 text-emerald-600" />
+                                <span>Public Commitment</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
+                                <Lock className="w-3 h-3 text-slate-600" />
+                                <span>Private Commitment</span>
+                              </span>
+                            )}
                             <span className="text-xs font-mono text-slate-400">#{commitment.id}</span>
                           </div>
                           <h3 className="text-base font-bold text-slate-900">{commitment.title}</h3>
@@ -518,100 +725,55 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
                         </div>
                       </div>
 
-                      {/* Requester & Committer Parties */}
+                      {/* Committer & Requester Details */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-100 text-xs">
-                        <div className="flex items-center gap-2.5">
-                          {commitment.requesterAvatar ? (
-                            <img
-                              src={commitment.requesterAvatar}
-                              alt={commitment.requesterName}
-                              referrerPolicy="no-referrer"
-                              className="w-8 h-8 rounded-full object-cover border border-slate-200"
-                            />
-                          ) : (
-                            <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 font-bold flex items-center justify-center text-xs">
-                              {commitment.requesterName.charAt(0)}
-                            </div>
-                          )}
-                          <div>
-                            <div className="text-[10px] text-slate-400 uppercase font-semibold">Requester</div>
-                            <button
-                              onClick={() => {
-                                onSelectProfile(commitment.requesterName.toLowerCase().replace(/\s+/g, ''));
-                                onClose();
-                              }}
-                              className="font-semibold text-slate-800 hover:text-indigo-600 transition-colors text-left"
-                            >
-                              {commitment.requesterName}
-                            </button>
-                          </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-slate-400">Committed By:</span>
+                          <button
+                            onClick={() => {
+                              onSelectProfile(commitment.committerUsername);
+                              onClose();
+                            }}
+                            className="font-semibold text-slate-800 hover:text-indigo-600 transition-colors flex items-center gap-1"
+                          >
+                            <span>{commitment.committerName}</span>
+                            <span className="text-slate-400 font-normal">(@{commitment.committerUsername})</span>
+                          </button>
                         </div>
 
-                        <div className="flex items-center gap-2.5">
-                          {commitment.committerAvatar ? (
-                            <img
-                              src={commitment.committerAvatar}
-                              alt={commitment.committerName}
-                              referrerPolicy="no-referrer"
-                              className="w-8 h-8 rounded-full object-cover border border-slate-200"
-                            />
-                          ) : (
-                            <div className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-700 font-bold flex items-center justify-center text-xs">
-                              {commitment.committerName.charAt(0)}
-                            </div>
-                          )}
-                          <div>
-                            <div className="text-[10px] text-slate-400 uppercase font-semibold">Committed By</div>
-                            <button
-                              onClick={() => {
-                                onSelectProfile(commitment.committerName.toLowerCase().replace(/\s+/g, ''));
-                                onClose();
-                              }}
-                              className="font-semibold text-slate-800 hover:text-indigo-600 transition-colors text-left"
-                            >
-                              {commitment.committerName}
-                            </button>
-                          </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-slate-400">For / Requested By:</span>
+                          <span className="font-semibold text-slate-800">{commitment.requesterName}</span>
                         </div>
                       </div>
 
-                      {/* Committer Pledge Note if submitted */}
-                      {commitment.committerPledgeNote && (
-                        <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700 font-mono flex items-start gap-2">
-                          <UserCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                          <div>
-                            <span className="font-semibold text-slate-900">{commitment.committerName}'s Pledge:</span>{' '}
-                            <span>"{commitment.committerPledgeNote}"</span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Card Footer Actions */}
-                      <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
-                        <div className="flex items-center gap-2">
+                      {/* Status / History / Verification */}
+                      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-[11px]">
+                        <div className="flex items-center gap-2 text-slate-500">
+                          <Clock className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Status:</span>
                           <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                            className={`px-2 py-0.5 rounded font-semibold capitalize ${
                               commitment.status === 'completed'
                                 ? 'bg-emerald-50 text-emerald-700'
                                 : commitment.status === 'overdue'
                                 ? 'bg-red-50 text-red-700'
-                                : 'bg-amber-50 text-amber-700'
+                                : 'bg-blue-50 text-blue-700'
                             }`}
                           >
-                            Status: {commitment.status.replace(/_/g, ' ')}
+                            {commitment.status}
                           </span>
                         </div>
 
+                        {/* Privacy Toggle Action for owner/committer */}
                         {currentUser &&
-                          (commitment.requesterId === currentUser.id ||
-                            commitment.committerId === currentUser.id) && (
+                          (commitment.requesterId === currentUser.id || commitment.committerId === currentUser.id) && (
                             <button
                               onClick={() => handleToggleCommitmentPrivacy(commitment.id, commitment.isPublic)}
-                              className="text-slate-500 hover:text-slate-800 text-[11px] inline-flex items-center gap-1 font-medium"
-                              title="Toggle public/private visibility"
+                              className="text-slate-500 hover:text-slate-800 inline-flex items-center gap-1 font-medium transition-colors cursor-pointer"
                             >
                               {commitment.isPublic ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                              <span>{commitment.isPublic ? 'Make Private' : 'Make Public'}</span>
+                              <span>{commitment.isPublic ? 'Make Private' : 'Publish to Public Ledger'}</span>
                             </button>
                           )}
                       </div>
@@ -620,12 +782,12 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
                 })
               )}
             </div>
-          ) : (
-            /* Public Trust Receipts List */
+          ) : activeTab === 'receipts' ? (
+            /* Trust Receipts List (Public & Private) */
             <div className="space-y-4">
               <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
                 <span>
-                  Showing {filteredReceipts.length} public trust receipt{filteredReceipts.length === 1 ? '' : 's'}
+                  Showing {filteredReceipts.length} trust receipt{filteredReceipts.length === 1 ? '' : 's'}
                 </span>
                 <span className="text-[11px] text-slate-400 font-mono">
                   Dual-signed bilateral cryptographic receipts
@@ -635,13 +797,13 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
               {filteredReceipts.length === 0 ? (
                 <div className="py-12 text-center space-y-3 bg-slate-50/50 rounded-xl border border-slate-100">
                   <Receipt className="w-10 h-10 text-slate-300 mx-auto" />
-                  <div className="text-sm font-bold text-slate-800">No public trust receipts found</div>
+                  <div className="text-sm font-bold text-slate-800">No trust receipts found</div>
                   <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                    Trust receipts marked as private are kept strictly between counterparties. You can issue a public trust receipt to demonstrate completed work or payments.
+                    Trust receipts can be issued as either <strong>Public</strong> (published openly on the ledger) or <strong>Private</strong> (kept confidential between you and the counterparty).
                   </p>
                   <button
                     onClick={() => setShowPostReceipt(true)}
-                    className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-2xs"
+                    className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-2xs cursor-pointer"
                   >
                     Issue New Trust Receipt
                   </button>
@@ -658,10 +820,17 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
                           <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
                             {receipt.interactionCategory}
                           </span>
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            <Globe className="w-3 h-3 text-emerald-600" />
-                            <span>Public Receipt</span>
-                          </span>
+                          {receipt.isPublic ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200">
+                              <Globe className="w-3 h-3 text-emerald-600" />
+                              <span>Public Trust Receipt (Open Ledger)</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
+                              <Lock className="w-3 h-3 text-slate-600" />
+                              <span>Private Trust Receipt (Confidential)</span>
+                            </span>
+                          )}
                           <span className="text-xs font-mono text-slate-400 font-semibold">{receipt.id}</span>
                         </div>
                         <h3 className="text-base font-bold text-slate-900">{receipt.title}</h3>
@@ -685,7 +854,7 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
                     {/* Parties Info */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-100 text-xs">
                       <div>
-                        <span className="text-slate-400">Originator:</span>{' '}
+                        <span className="text-slate-400">Originator / Issuer:</span>{' '}
                         <button
                           onClick={() => {
                             onSelectProfile(receipt.creatorName.toLowerCase().replace(/\s+/g, ''));
@@ -746,13 +915,25 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
                     {currentUser &&
                       (receipt.creatorId === currentUser.id ||
                         receipt.counterpartyUserId === currentUser.id) && (
-                        <div className="flex justify-end pt-2 border-t border-slate-100">
+                        <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+                          <span className="text-[11px] text-slate-500">
+                            You are a confirmed party on this receipt. You can change its visibility anytime:
+                          </span>
                           <button
                             onClick={() => handleToggleReceiptPrivacy(receipt.id, receipt.isPublic)}
-                            className="text-slate-500 hover:text-slate-800 text-[11px] inline-flex items-center gap-1 font-medium"
+                            className="px-2.5 py-1 rounded-md text-xs font-semibold flex items-center gap-1.5 border transition-colors cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
                           >
-                            {receipt.isPublic ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                            <span>{receipt.isPublic ? 'Switch to Private Receipt' : 'Publish to Public Ledger'}</span>
+                            {receipt.isPublic ? (
+                              <>
+                                <Lock className="w-3.5 h-3.5 text-slate-500" />
+                                <span>Switch to Private Receipt</span>
+                              </>
+                            ) : (
+                              <>
+                                <Globe className="w-3.5 h-3.5 text-indigo-600" />
+                                <span>Publish to Public Ledger</span>
+                              </>
+                            )}
                           </button>
                         </div>
                       )}
@@ -760,20 +941,131 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
                 ))
               )}
             </div>
+          ) : (
+            /* Our Records / Activity Combined View */
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 mb-2 flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-indigo-600" />
+                  <span>Our Time-Locked Commitments</span>
+                </h3>
+                <div className="space-y-3">
+                  {filteredCommitments.filter(
+                    (c) => currentUser && (c.requesterId === currentUser.id || c.committerId === currentUser.id)
+                  ).length === 0 ? (
+                    <div className="p-4 bg-slate-50 rounded-xl text-xs text-slate-500 text-center">
+                      No commitments recorded for your account yet.
+                    </div>
+                  ) : (
+                    filteredCommitments
+                      .filter((c) => currentUser && (c.requesterId === currentUser.id || c.committerId === currentUser.id))
+                      .map((c) => (
+                        <div
+                          key={c.id}
+                          className="p-3.5 rounded-xl border border-slate-200 bg-white flex items-center justify-between gap-3 text-xs"
+                        >
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-slate-900">{c.title}</span>
+                              {c.isPublic ? (
+                                <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
+                                  Public
+                                </span>
+                              ) : (
+                                <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-semibold border border-slate-200">
+                                  Private
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-slate-500 text-[11px] mt-0.5">
+                              {c.committerId === currentUser?.id ? 'You committed to: ' : 'Committed to you by: '}
+                              <strong>{c.committerId === currentUser?.id ? c.requesterName : c.committerName}</strong>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleToggleCommitmentPrivacy(c.id, c.isPublic)}
+                            className="text-xs text-indigo-600 hover:text-indigo-800 font-medium shrink-0 cursor-pointer"
+                          >
+                            {c.isPublic ? 'Make Private' : 'Make Public'}
+                          </button>
+                        </div>
+                      ))
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 mb-2 flex items-center gap-2">
+                  <Receipt className="w-4 h-4 text-indigo-600" />
+                  <span>Our Bilateral Trust Receipts (Public & Private)</span>
+                </h3>
+                <div className="space-y-3">
+                  {filteredReceipts.filter(
+                    (r) =>
+                      currentUser &&
+                      (r.creatorId === currentUser.id || r.counterpartyUserId === currentUser.id)
+                  ).length === 0 ? (
+                    <div className="p-4 bg-slate-50 rounded-xl text-xs text-slate-500 text-center">
+                      No trust receipts recorded for your account yet.
+                    </div>
+                  ) : (
+                    filteredReceipts
+                      .filter(
+                        (r) =>
+                          currentUser &&
+                          (r.creatorId === currentUser.id || r.counterpartyUserId === currentUser.id)
+                      )
+                      .map((r) => (
+                        <div
+                          key={r.id}
+                          className="p-3.5 rounded-xl border border-slate-200 bg-white flex items-center justify-between gap-3 text-xs"
+                        >
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-slate-900">{r.title}</span>
+                              {r.isPublic ? (
+                                <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200 flex items-center gap-1">
+                                  <Globe className="w-3 h-3 text-emerald-600" />
+                                  Public Receipt
+                                </span>
+                              ) : (
+                                <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-semibold border border-slate-200 flex items-center gap-1">
+                                  <Lock className="w-3 h-3 text-slate-600" />
+                                  Private Receipt
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-slate-500 text-[11px] mt-0.5">
+                              Counterparty: <strong>{r.counterpartyName}</strong>
+                              {r.transactionValue && ` · Value: ${r.transactionValue}`}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleToggleReceiptPrivacy(r.id, r.isPublic)}
+                            className="text-xs text-indigo-600 hover:text-indigo-800 font-medium shrink-0 cursor-pointer"
+                          >
+                            {r.isPublic ? 'Make Private' : 'Make Public'}
+                          </button>
+                        </div>
+                      ))
+                  )}
+                </div>
+              </div>
+            </div>
           )}
         </div>
 
-        {/* Modal Bottom Bar */}
-        <div className="p-3 sm:p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
-          <div className="flex items-center gap-1.5">
-            <Sparkles className="w-4 h-4 text-indigo-600" />
+        {/* Modal Footer Info */}
+        <div className="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-indigo-600" />
             <span>Public entries carry cryptographic integrity and are linked to identity verification.</span>
           </div>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-100"
+            className="px-3 py-1 text-slate-600 hover:text-slate-900 text-xs font-semibold rounded hover:bg-slate-200 cursor-pointer"
           >
-            Close
+            Close Ledger
           </button>
         </div>
       </div>
@@ -785,84 +1077,85 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
           aria-modal="true"
           className="fixed inset-0 z-60 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
         >
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-lg p-6 space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="space-y-0.5">
-                <div className="text-xs font-bold uppercase tracking-wider text-indigo-700">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-2xl max-w-lg w-full p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700">
                   New Public Time-Locked Pact
-                </div>
+                </span>
                 <h3 className="text-lg font-bold text-slate-900">Post Public Commitment</h3>
               </div>
               <button
                 onClick={() => setShowPostCommitment(false)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateCommitment} className="space-y-4">
+            <form onSubmit={handleCreateCommitment} className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Commitment Title *</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Pact / Commitment Title *</label>
                 <input
                   type="text"
                   required
                   value={postTitle}
                   onChange={(e) => setPostTitle(e.target.value)}
-                  placeholder="e.g. Loaner Audi RS5 Vehicle Return, AWS Cloud Migration Handover"
-                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:ring-1 focus:ring-indigo-500"
+                  placeholder="e.g. Complete Phase 2 smart contract deployment on staging"
+                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Description & Terms *</label>
-                <textarea
-                  required
-                  rows={2}
-                  value={postDescription}
-                  onChange={(e) => setPostDescription(e.target.value)}
-                  placeholder="Specific conditions of handover, location, and terms..."
-                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:ring-1 focus:ring-indigo-500"
-                />
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Category *</label>
+                <select
+                  value={postCategory}
+                  onChange={(e) => setPostCategory(e.target.value as CommitmentCategory)}
+                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-hidden"
+                >
+                  <option value="Vehicle & Transportation">Vehicle & Transportation</option>
+                  <option value="Delivery & Logistics">Delivery & Logistics</option>
+                  <option value="Financial & Lending">Financial & Lending</option>
+                  <option value="Equipment & Machinery">Equipment & Machinery</option>
+                  <option value="Professional Milestone">Professional Milestone</option>
+                </select>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Category</label>
-                  <select
-                    value={postCategory}
-                    onChange={(e) => setPostCategory(e.target.value as CommitmentCategory)}
-                    className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg"
-                  >
-                    <option value="Vehicle & Transportation">Vehicle & Transportation</option>
-                    <option value="Delivery & Logistics">Delivery & Logistics</option>
-                    <option value="Financial & Lending">Financial & Lending</option>
-                    <option value="Equipment & Machinery">Equipment & Machinery</option>
-                    <option value="Professional Milestone">Professional Milestone</option>
-                    <option value="Personal Promise">Personal Promise</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Committer Person</label>
-                  <select
-                    value={postCommitterId}
-                    onChange={(e) => setPostCommitterId(e.target.value)}
-                    className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg"
-                  >
-                    <option value="">Select counterparty...</option>
-                    {availableUsers.map((u) => (
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Assigned Committer / Beneficiary
+                </label>
+                <select
+                  value={postCommitterId}
+                  onChange={(e) => setPostCommitterId(e.target.value)}
+                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-hidden"
+                >
+                  <option value="">Select counterparty persona</option>
+                  {availableUsers
+                    .filter((u) => u.id !== currentUser?.id)
+                    .map((u) => (
                       <option key={u.id} value={u.id}>
                         {u.fullName} (@{u.username})
                       </option>
                     ))}
-                  </select>
-                </div>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Commitment Description & Terms *</label>
+                <textarea
+                  required
+                  rows={3}
+                  value={postDescription}
+                  onChange={(e) => setPostDescription(e.target.value)}
+                  placeholder="State the clear, non-negotiable delivery criteria and handover protocol..."
+                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-indigo-500"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Target Date *</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Deadline Date *</label>
                   <input
                     type="date"
                     required
@@ -872,7 +1165,7 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Target Time *</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Deadline Time *</label>
                   <input
                     type="time"
                     required
@@ -883,16 +1176,23 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
                 </div>
               </div>
 
-              {/* Public Visibility Toggle */}
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between">
+              {/* Public Visibility Toggle Card */}
+              <div
+                onClick={() => setPostIsPublic(!postIsPublic)}
+                className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
+                  postIsPublic
+                    ? 'bg-indigo-50/70 border-indigo-200 text-indigo-950'
+                    : 'bg-slate-50 border-slate-200 text-slate-800'
+                }`}
+              >
                 <div className="space-y-0.5">
-                  <div className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
-                    {postIsPublic ? <Globe className="w-3.5 h-3.5 text-indigo-600" /> : <Lock className="w-3.5 h-3.5 text-slate-500" />}
-                    <span>{postIsPublic ? 'Publish on Public Ledger' : 'Keep as Private Commitment'}</span>
+                  <div className="text-xs font-bold flex items-center gap-1.5">
+                    {postIsPublic ? <Globe className="w-4 h-4 text-indigo-600" /> : <Lock className="w-4 h-4 text-slate-600" />}
+                    <span>{postIsPublic ? 'Public Commitment (Open Ledger)' : 'Private Commitment (Bilateral)'}</span>
                   </div>
-                  <div className="text-[11px] text-slate-500">
+                  <div className="text-[11px] text-slate-600 leading-tight">
                     {postIsPublic
-                      ? 'Visible to everyone on the public commitments feed.'
+                      ? 'Visible to everyone on the public commitments feed. Demonstrates transparency.'
                       : 'Only visible between you and the assigned committer.'}
                   </div>
                 </div>
@@ -908,14 +1208,14 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowPostCommitment(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-lg"
+                  className="px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-lg cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submittingPost}
-                  className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-2xs disabled:opacity-50"
+                  className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-2xs disabled:opacity-50 cursor-pointer"
                 >
                   {submittingPost ? 'Publishing...' : 'Publish Commitment'}
                 </button>
@@ -932,48 +1232,23 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
           aria-modal="true"
           className="fixed inset-0 z-60 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
         >
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-lg p-6 space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="space-y-0.5">
-                <div className="text-xs font-bold uppercase tracking-wider text-indigo-700">
-                  Dual-Signed Transaction Proof
-                </div>
+          <div className="bg-white rounded-xl border border-slate-200 shadow-2xl max-w-lg w-full p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700">
+                  Bilateral Attestation
+                </span>
                 <h3 className="text-lg font-bold text-slate-900">Issue New Trust Receipt</h3>
               </div>
               <button
                 onClick={() => setShowPostReceipt(false)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateReceipt} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Counterparty Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={recCounterpartyName}
-                    onChange={(e) => setRecCounterpartyName(e.target.value)}
-                    placeholder="e.g. Sarah Adesina"
-                    className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Counterparty Contact *</label>
-                  <input
-                    type="text"
-                    required
-                    value={recCounterpartyContact}
-                    onChange={(e) => setRecCounterpartyContact(e.target.value)}
-                    placeholder="Email or phone"
-                    className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg"
-                  />
-                </div>
-              </div>
-
+            <form onSubmit={handleCreateReceipt} className="space-y-3">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Receipt Title *</label>
                 <input
@@ -981,42 +1256,78 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
                   required
                   value={recTitle}
                   onChange={(e) => setRecTitle(e.target.value)}
-                  placeholder="e.g. Freelance Web Development Milestone Handover"
+                  placeholder="e.g. Delivery of Industrial Generator & Complete Sign-off"
                   className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Category</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Counterparty Full Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={recCounterpartyName}
+                    onChange={(e) => setRecCounterpartyName(e.target.value)}
+                    placeholder="e.g. Fatima Bello"
+                    className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Counterparty Email / Phone *</label>
+                  <input
+                    type="text"
+                    required
+                    value={recCounterpartyContact}
+                    onChange={(e) => setRecCounterpartyContact(e.target.value)}
+                    placeholder="e.g. fatima@example.com"
+                    className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Category *</label>
                   <select
                     value={recCategory}
-                    onChange={(e) => setRecCategory(e.target.value as TrustReceipt['interactionCategory'])}
+                    onChange={(e) => setRecCategory(e.target.value as any)}
                     className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg"
                   >
                     <option value="Freelance Project">Freelance Project</option>
                     <option value="Goods Sale & Delivery">Goods Sale & Delivery</option>
-                    <option value="Consulting Agreement">Consulting Agreement</option>
-                    <option value="Loan / Micro-credit Repayment">Loan Repayment</option>
-                    <option value="Property Lease">Property Lease</option>
-                    <option value="Joint Venture">Joint Venture</option>
-                    <option value="Service Contract">Service Contract</option>
+                    <option value="Contract Services">Contract Services</option>
+                    <option value="Vehicle Purchase/Lease">Vehicle Purchase/Lease</option>
+                    <option value="Financial Loan/Settlement">Financial Loan/Settlement</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Value (Optional)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Transaction Value (Optional)</label>
                   <input
                     type="text"
                     value={recValue}
                     onChange={(e) => setRecValue(e.target.value)}
-                    placeholder="e.g. $2,500 USD or ₦1,200,000"
+                    placeholder="e.g. ₦ 4,500,000 NGN"
                     className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Completion Conditions *</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Description</label>
+                <textarea
+                  rows={2}
+                  value={recDescription}
+                  onChange={(e) => setRecDescription(e.target.value)}
+                  placeholder="Summary of services, deliverables, or goods transferred..."
+                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Conditions of Satisfaction *
+                </label>
                 <textarea
                   required
                   rows={2}
@@ -1027,24 +1338,31 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
                 />
               </div>
 
-              {/* Public vs Private Receipt Toggle */}
-              <div className="p-3 rounded-lg bg-indigo-50/50 border border-indigo-100 flex items-center justify-between">
+              {/* Public vs Private Receipt Toggle Card */}
+              <div
+                onClick={() => setRecIsPublic(!recIsPublic)}
+                className={`p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
+                  recIsPublic
+                    ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950'
+                    : 'bg-slate-50 border-slate-200 text-slate-800'
+                }`}
+              >
                 <div className="space-y-0.5">
-                  <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                    {recIsPublic ? <Globe className="w-3.5 h-3.5 text-indigo-600" /> : <Lock className="w-3.5 h-3.5 text-slate-600" />}
+                  <div className="text-xs font-bold flex items-center gap-1.5">
+                    {recIsPublic ? <Globe className="w-4 h-4 text-emerald-600" /> : <Lock className="w-4 h-4 text-slate-600" />}
                     <span>{recIsPublic ? 'Public Trust Receipt (Open Ledger)' : 'Private Trust Receipt (Bilateral Only)'}</span>
                   </div>
                   <div className="text-[11px] text-slate-600 leading-tight">
                     {recIsPublic
-                      ? 'Note: Public receipts appear on the public evidentiary ledger for anyone to inspect.'
-                      : 'Note: Private receipts remain completely confidential between you and the counterparty.'}
+                      ? 'Note: Public receipts appear on the public evidentiary ledger for prospective clients and partners to inspect.'
+                      : 'Note: Private receipts remain completely confidential between you and the counterparty with zero public exposure.'}
                   </div>
                 </div>
                 <input
                   type="checkbox"
                   checked={recIsPublic}
                   onChange={(e) => setRecIsPublic(e.target.checked)}
-                  className="w-4 h-4 text-indigo-600 rounded border-slate-300"
+                  className="w-4 h-4 text-emerald-600 rounded border-slate-300"
                 />
               </div>
 
@@ -1052,14 +1370,14 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowPostReceipt(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-lg"
+                  className="px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-lg cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submittingReceipt}
-                  className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-2xs disabled:opacity-50"
+                  className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-2xs disabled:opacity-50 cursor-pointer"
                 >
                   {submittingReceipt ? 'Issuing...' : 'Issue Receipt'}
                 </button>
