@@ -683,7 +683,10 @@
       "isOverdue": false,
       "daysOverdue": 0,
       "isPublic": true,
-      "createdAt": "2026-10-18T10:00:00.000Z"
+      "createdAt": "2026-10-18T10:00:00.000Z",
+      "impressions": 1420,
+      "witnessCount": 71,
+      "positiveImpressions": 56
     },
     {
       "id": "TC-3107",
@@ -705,7 +708,10 @@
       "daysOverdue": 0,
       "isPublic": true,
       "createdAt": "2026-10-18T16:15:51.620Z",
-      "committerPledgeNote": "Ill bring it by 2am parked safely in the front driveway with full tank."
+      "committerPledgeNote": "Ill bring it by 2am parked safely in the front driveway with full tank.",
+      "impressions": 980,
+      "witnessCount": 49,
+      "positiveImpressions": 39
     },
     {
       "id": "TC-8012",
@@ -730,7 +736,10 @@
       "checkedOutByRequesterAt": null,
       "linkedReceiptId": null,
       "isPublic": true,
-      "createdAt": "2026-10-18T09:15:43.602Z"
+      "createdAt": "2026-10-18T09:15:43.602Z",
+      "impressions": 2150,
+      "witnessCount": 107,
+      "positiveImpressions": 86
     },
     {
       "id": "TC-7041",
@@ -755,7 +764,10 @@
       "linkedReceiptId": "TR-89241",
       "isPublic": true,
       "createdAt": "2026-10-15T16:15:43.602Z",
-      "completedAt": "2026-10-16T14:15:43.602Z"
+      "completedAt": "2026-10-16T14:15:43.602Z",
+      "impressions": 1680,
+      "witnessCount": 84,
+      "positiveImpressions": 67
     },
     {
       "id": "TC-9023",
@@ -779,7 +791,10 @@
       "checkedOutByRequesterAt": null,
       "linkedReceiptId": null,
       "isPublic": true,
-      "createdAt": "2026-10-18T13:15:43.602Z"
+      "createdAt": "2026-10-18T13:15:43.602Z",
+      "impressions": 890,
+      "witnessCount": 44,
+      "positiveImpressions": 35
     }
   ]
 }
