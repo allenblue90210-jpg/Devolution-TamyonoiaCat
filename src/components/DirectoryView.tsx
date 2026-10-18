@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api.js';
-import { Search, ShieldCheck, Building2, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Search, ShieldCheck, Building2, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
 
 interface DirectoryViewProps {
   onSelectProfile: (username: string) => void;
+  onBack?: () => void;
 }
 
-export const DirectoryView: React.FC<DirectoryViewProps> = ({ onSelectProfile }) => {
+export const DirectoryView: React.FC<DirectoryViewProps> = ({ onSelectProfile, onBack }) => {
   const [query, setQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [onlyVerified, setOnlyVerified] = useState(false);
