@@ -1145,9 +1145,9 @@ export const PublicLedgerScreen: React.FC<PublicLedgerScreenProps> = ({
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-60 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
+          className="fixed inset-0 z-60 overflow-y-auto p-3 sm:p-6 bg-slate-900/70 backdrop-blur-xs flex min-h-full items-center justify-center animate-in fade-in duration-150"
         >
-          <div className="bg-white rounded-xl border border-slate-200 shadow-2xl max-w-lg w-full p-6 space-y-4">
+          <div className="relative bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full p-5 sm:p-6 space-y-4 my-auto max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3.5rem)] overflow-y-auto overscroll-contain">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700">
@@ -1300,9 +1300,9 @@ export const PublicLedgerScreen: React.FC<PublicLedgerScreenProps> = ({
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-60 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
+          className="fixed inset-0 z-60 overflow-y-auto p-3 sm:p-6 bg-slate-900/70 backdrop-blur-xs flex min-h-full items-center justify-center animate-in fade-in duration-150"
         >
-          <div className="bg-white rounded-xl border border-slate-200 shadow-2xl max-w-lg w-full p-6 space-y-4">
+          <div className="relative bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full p-5 sm:p-6 space-y-4 my-auto max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3.5rem)] overflow-y-auto overscroll-contain">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700">
