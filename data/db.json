@@ -542,7 +542,7 @@
       "type": "receipt_action",
       "title": "Commitment Accepted & Timer Active",
       "message": "Sarah Adesina accepted the commitment: \"Ill bring it by 2am parked safely in the front driveway with full tank.\". Live countdown timer is now running.",
-      "isRead": false,
+      "isRead": true,
       "createdAt": "2026-10-18T16:15:55.710Z"
     },
     {
@@ -571,7 +571,7 @@
       "title": "New Endorsement from Sarah Adesina",
       "message": "Sarah Adesina has confirmed your colleague relationship and provided a personal endorsement.",
       "link": "/relationships",
-      "isRead": false,
+      "isRead": true,
       "createdAt": "2025-09-02T16:20:00.000Z"
     },
     {
@@ -581,7 +581,7 @@
       "title": "Trust Receipt Milestone Fulfilled",
       "message": "Fatima Bello acknowledged final fulfillment of Trust Receipt TR-90214.",
       "link": "/receipts",
-      "isRead": false,
+      "isRead": true,
       "createdAt": "2025-08-30T17:00:00.000Z"
     }
   ],
