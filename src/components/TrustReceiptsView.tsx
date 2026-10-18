@@ -77,11 +77,42 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
   const [disputeReason, setDisputeReason] = useState('Unfulfilled Deliverables');
   const [disputeDesc, setDisputeDesc] = useState('');
 
-  const filteredReceipts = receipts.filter((r) => {
+  const filteredReceipts = localReceipts.filter((r) => {
     if (filterStatus === 'all') return true;
     if (filterStatus === 'other') return r.interactionCategory === 'Other';
     return r.status === filterStatus;
   });
+
+  const handleOpenRateModal = (rc: TrustReceipt, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setRatingReceipt(rc);
+    setRateScore(5);
+    setRateBadge('Full Fulfillment Verified');
+    setRateComment('');
+    setShowRateModal(true);
+  };
+
+  const handleSubmitRating = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!ratingReceipt) return;
+    try {
+      setSubmittingRating(true);
+      const res = await api.rateReceipt(ratingReceipt.id, rateScore, rateBadge, rateComment);
+      setLocalReceipts((prev) =>
+        prev.map((r) => (r.id === ratingReceipt.id ? res.receipt : r))
+      );
+      if (selectedReceipt?.id === ratingReceipt.id) {
+        setSelectedReceipt(res.receipt);
+      }
+      setShowRateModal(false);
+      setToastMessage(`Receipt #${ratingReceipt.id} rated at ${rateScore} ★ (${rateBadge})!`);
+      setTimeout(() => setToastMessage(null), 4000);
+    } catch (err: any) {
+      alert(err.message || 'Failed to submit rating.');
+    } finally {
+      setSubmittingRating(false);
+    }
+  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
