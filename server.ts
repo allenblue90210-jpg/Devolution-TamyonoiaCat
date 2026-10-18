@@ -763,6 +763,7 @@ app.post('/api/receipts', (req: Request, res: Response) => {
     counterpartyName,
     counterpartyContact,
     interactionCategory,
+    otherCategoryDetails,
     title,
     description,
     transactionValue,
@@ -784,6 +785,7 @@ app.post('/api/receipts', (req: Request, res: Response) => {
     counterpartyName,
     counterpartyContact,
     interactionCategory,
+    otherCategoryDetails: interactionCategory === 'Other' ? (otherCategoryDetails || 'Custom Agreement') : undefined,
     title,
     description: description || '',
     transactionValue: transactionValue || undefined,
@@ -1059,7 +1061,7 @@ app.post('/api/commitments', (req: Request, res: Response) => {
   const requester = db.getUserById(requesterId);
   if (!requester) return res.status(401).json({ error: 'Unauthorized user' });
 
-  const { title, description, category, committerId, committerUsername, deadline, trustRewardPoints, isPublic } = req.body;
+  const { title, description, category, otherCategoryDetails, committerId, committerUsername, deadline, trustRewardPoints, isPublic } = req.body;
   if (!title || !description || !deadline) {
     return res.status(400).json({ error: 'Title, description, and target deadline are required.' });
   }
@@ -1080,6 +1082,7 @@ app.post('/api/commitments', (req: Request, res: Response) => {
     title,
     description,
     category: category || 'Vehicle & Transportation',
+    otherCategoryDetails: category === 'Other' ? (otherCategoryDetails || 'Custom Pact') : undefined,
     requesterId,
     requesterName: requester.fullName,
     requesterAvatar: requester.avatarUrl,
@@ -1178,7 +1181,8 @@ app.put('/api/commitments/:id/checkout', (req: Request, res: Response) => {
     counterpartyName: commitment.committerName,
     counterpartyContact: 'Attested Trust Identity',
     counterpartyUserId: commitment.committerId,
-    interactionCategory: 'Service Contract',
+    interactionCategory: commitment.category === 'Other' ? 'Other' : 'Service Contract',
+    otherCategoryDetails: commitment.category === 'Other' ? (commitment.otherCategoryDetails || 'Custom Handover Pact') : undefined,
     title: `Fulfilled Commitment: ${commitment.title}`,
     description: `Dual-attested fulfillment of time-locked trust pact. ${commitment.description}. Committer pledged: "${commitment.committerPledgeNote || 'As agreed'}".`,
     status: 'completed',
