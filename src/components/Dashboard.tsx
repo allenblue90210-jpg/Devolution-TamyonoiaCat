@@ -23,6 +23,9 @@ import {
   FileText,
   Copy,
   Check,
+  Clock,
+  Timer,
+  Flame,
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -178,6 +181,62 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Trust Score & Time-Locked Commitment Alert Banner */}
+      <div
+        className={`p-5 rounded-xl border flex flex-col md:flex-row md:items-center justify-between gap-5 shadow-xs ${
+          reputation?.penaltyActive
+            ? 'bg-red-50/80 border-red-300'
+            : 'bg-gradient-to-r from-indigo-50/70 via-slate-50 to-white border-indigo-100'
+        }`}
+      >
+        <div className="flex items-center gap-4">
+          <div
+            className={`w-14 h-14 rounded-xl flex flex-col items-center justify-center font-extrabold text-white shadow-xs shrink-0 ${
+              reputation?.penaltyActive
+                ? 'bg-red-600'
+                : (reputation?.trustScore ?? 85) >= 90
+                ? 'bg-emerald-600'
+                : 'bg-indigo-600'
+            }`}
+          >
+            <span className="text-xl leading-none font-mono">{reputation?.trustScore ?? 85}</span>
+            <span className="text-[9px] uppercase tracking-wider text-white/80">Score</span>
+          </div>
+
+          <div className="space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-bold text-slate-900 text-sm">
+                {reputation?.trustGrade || 'A Verified & Reliable'}
+              </span>
+              {reputation?.penaltyActive ? (
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800 border border-red-300 flex items-center gap-1">
+                  <Flame className="w-3 h-3 text-red-600" />
+                  -{reputation.penaltyPercent}% Penalty Active for Overdue Pact
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                  {reputation?.commitmentsSummary?.onTimeDeliveryRate ?? 100}% On-Time Delivery
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-slate-600 max-w-2xl leading-normal">
+              {reputation?.penaltyNotice ||
+                'Public trust reputation calculated from verified identity claims, counterparty endorsements, and on-time commitment fulfillments. Missed deadlines trigger an automatic -30% daily reputation deduction.'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 shrink-0">
+          <button
+            onClick={() => onNavigateTab('commitments')}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 shadow-xs transition-colors"
+          >
+            <Clock className="w-3.5 h-3.5" />
+            <span>Manage Commitments</span>
+          </button>
         </div>
       </div>
 
