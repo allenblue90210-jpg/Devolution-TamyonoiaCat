@@ -140,16 +140,6 @@ function getInitialCommitments(): TrustCommitment[] {
       witnessCount: 44,
       positiveImpressions: 38,
       createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-      trustRewardPoints: 20,
-      penaltyRateDailyPercent: 30,
-      penaltyCurrentDeductionPercent: 0,
-      isOverdue: false,
-      daysOverdue: 0,
-      checkedOutByCommitterAt: null,
-      checkedOutByRequesterAt: null,
-      linkedReceiptId: null,
-      isPublic: true,
-      createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
     },
   ];
 }

@@ -32,6 +32,7 @@ import {
   ExternalLink,
   ChevronRight,
   User as UserIcon,
+  Users,
 } from 'lucide-react';
 
 interface PublicLedgerModalProps {
