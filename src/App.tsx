@@ -50,7 +50,6 @@ export default function App() {
   const [showPhoneModal, setShowPhoneModal] = useState<boolean>(false);
   const [showIdentityModal, setShowIdentityModal] = useState<boolean>(false);
   const [showSearchModal, setShowSearchModal] = useState<boolean>(false);
-  const [showPublicLedgerModal, setShowPublicLedgerModal] = useState<boolean>(false);
 
   const [tabHistory, setTabHistory] = useState<string[]>([]);
 
@@ -58,10 +57,6 @@ export default function App() {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
-      if (hash === 'public-ledger') {
-        setShowPublicLedgerModal(true);
-        return;
-      }
       if (hash) {
         setCurrentTab((prev) => {
           if (prev !== hash) {
@@ -89,10 +84,6 @@ export default function App() {
   }, []);
 
   const handleSelectTab = (tab: string) => {
-    if (tab === 'public-ledger') {
-      setShowPublicLedgerModal(true);
-      return;
-    }
     if (tab !== currentTab) {
       setTabHistory((prev) => (prev[prev.length - 1] === currentTab ? prev : [...prev, currentTab]));
     }
@@ -293,7 +284,7 @@ export default function App() {
             onOpenAddEvidence={() => handleSelectTab('evidence')}
             onOpenInviteModal={() => handleSelectTab('relationships')}
             onOpenNewReceiptModal={() => handleSelectTab('receipts')}
-            onOpenPublicLedger={() => setShowPublicLedgerModal(true)}
+            onOpenPublicLedger={() => handleSelectTab('public-ledger')}
           />
         ) : (
           <div className="py-20 text-center">
@@ -360,6 +351,17 @@ export default function App() {
         return (
           <DirectoryView
             onSelectProfile={(username) => handleSelectTab(`profile-${username}`)}
+            onBack={handleBack}
+          />
+        );
+
+      case 'public-ledger':
+        return (
+          <PublicLedgerScreen
+            currentUser={currentUser}
+            onSelectProfile={(username) => handleSelectTab(`profile-${username}`)}
+            availableUsers={availableUsers}
+            onRefreshData={refreshData}
             onBack={handleBack}
           />
         );
