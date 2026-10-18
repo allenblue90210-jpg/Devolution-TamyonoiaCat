@@ -23,16 +23,19 @@ import {
   Timer,
   Flame,
   TrendingUp,
+  ArrowLeft,
 } from 'lucide-react';
 
 interface PublicProfileViewProps {
   username: string;
   onNavigateTab: (tab: string) => void;
+  onBack?: () => void;
 }
 
 export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
   username,
   onNavigateTab,
+  onBack,
 }) => {
   const [data, setData] = useState<{
     user: User;
