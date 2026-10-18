@@ -720,6 +720,10 @@ app.delete('/api/relationships/:id', (req: Request, res: Response) => {
 
 app.get('/api/receipts', (req: Request, res: Response) => {
   const userId = getSessionUserId(req);
+  if (req.query.public === 'true') {
+    const publicReceipts = db.getState().receipts.filter((r) => r.isPublic);
+    return res.json({ receipts: publicReceipts });
+  }
   const receipts = db.getReceiptsForUser(userId);
   res.json({ receipts });
 });
@@ -729,6 +733,24 @@ app.get('/api/receipts/:id', (req: Request, res: Response) => {
   const receipt = db.getReceiptById(id);
   if (!receipt) return res.status(404).json({ error: 'Trust receipt not found' });
   res.json({ receipt });
+});
+
+app.patch('/api/receipts/:id', (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { isPublic } = req.body;
+  const receipt = db.getReceiptById(id);
+  if (!receipt) return res.status(404).json({ error: 'Trust receipt not found' });
+
+  if (isPublic !== undefined) {
+    receipt.isPublic = Boolean(isPublic);
+    receipt.history.push({
+      timestamp: new Date().toISOString(),
+      actor: receipt.creatorName,
+      event: `Receipt visibility changed to ${receipt.isPublic ? 'Public Ledger' : 'Private Counterparty Only'}`,
+    });
+    db.updateReceipt(id, receipt);
+  }
+  res.json({ receipt, message: `Receipt set to ${receipt.isPublic ? 'Public' : 'Private'}` });
 });
 
 app.post('/api/receipts', (req: Request, res: Response) => {
@@ -745,6 +767,7 @@ app.post('/api/receipts', (req: Request, res: Response) => {
     transactionValue,
     completionConditions,
     evidenceAttachments,
+    isPublic,
   } = req.body;
 
   if (!counterpartyName || !counterpartyContact || !interactionCategory || !title || !completionConditions) {
@@ -774,7 +797,7 @@ app.post('/api/receipts', (req: Request, res: Response) => {
         event: 'Trust Receipt Created & Awaiting Counterparty Confirmation',
       },
     ],
-    isPublic: true,
+    isPublic: isPublic !== undefined ? Boolean(isPublic) : true,
     createdAt: new Date().toISOString(),
   };
 
