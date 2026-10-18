@@ -250,7 +250,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <button
                     onClick={() => {
                       setSelectedReviewTarget({
-                        name: 'Aegis Trust Network & Verified People',
+                        name: 'Devolution Network & Verified People',
                         userId: 'network',
                         username: 'aegis_network',
                       });
@@ -471,7 +471,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <button
                 onClick={() => {
                   setSelectedReviewTarget({
-                    name: 'Aegis Trust Network & Verified People',
+                    name: 'Devolution Network & Verified People',
                     userId: 'network',
                     username: 'aegis_network',
                   });
@@ -836,7 +836,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 Relationship confirmation is not an endorsement. We keep them separate.
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                In most networks, a connection or reference conflates knowledge of a person with character endorsement. Aegis Trust explicitly divides these into two voluntary, independent steps:
+                In most networks, a connection or reference conflates knowledge of a person with character endorsement. Devolution explicitly divides these into two voluntary, independent steps:
               </p>
               <div className="space-y-4 text-xs">
                 <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
