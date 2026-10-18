@@ -26,6 +26,10 @@ import {
   Eye,
   Users,
   Globe,
+  MessageSquare,
+  Star,
+  ThumbsUp,
+  MessageCircle,
 } from 'lucide-react';
 
 interface CommitmentsViewProps {
@@ -65,6 +69,15 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
   const [pledgeNote, setPledgeNote] = useState('');
   const [acceptLoading, setAcceptLoading] = useState(false);
+
+  // State for Comments per commitment
+  const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
+  const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
+  const [commentRatingTags, setCommentRatingTags] = useState<Record<string, 100 | 50 | null>>({});
+  const [commentSubmitting, setCommentSubmitting] = useState<Record<string, boolean>>({});
+
+  // State for Dual Checkout Rating Selection (100% or 50%)
+  const [checkoutRatings, setCheckoutRatings] = useState<Record<string, 100 | 50>>({});
 
   // Live Clock Tick for Real-Time Countdown
   const [currentTime, setCurrentTime] = useState(Date.now());
@@ -176,17 +189,66 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
     }
   };
 
-  const handleCheckoutCommitment = async (id: string) => {
+  const handleCheckoutCommitment = async (id: string, ratingPercent: 100 | 50 = 100) => {
     try {
-      const res = await api.checkoutCommitment(id);
+      const badge = ratingPercent === 100 ? '100% Exemplary Good Faith Handover' : '50% Partial / Settled with Caveats';
+      const res = await api.checkoutCommitment(id, ratingPercent, badge);
       setActionSuccessMessage(
-        `Dual checkout confirmed! Dual-signed Trust Receipt ${res.receipt.id} generated and reputation boosted by +${res.pointsAwarded} pts!`
+        `Dual checkout confirmed at ${ratingPercent}% Rating! Dual-signed Trust Receipt ${res.receipt.id} generated and reputation boosted by +${res.pointsAwarded} pts!`
       );
       setTimeout(() => setActionSuccessMessage(null), 5000);
       await loadCommitments();
       onRefreshAllData();
     } catch (err: any) {
       alert(err.message || 'Failed to checkout commitment');
+    }
+  };
+
+  const handleRateCommitment = async (id: string, ratingPercent: 100 | 50) => {
+    try {
+      const badge = ratingPercent === 100 ? '100% Flawless Honor' : '50% Partial / Settled with Caveats';
+      const res = await api.rateCommitment(id, ratingPercent, badge);
+      setCommitments((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, ...res.commitment, ratingPercent, ratingBadge: badge } : c))
+      );
+      setActionSuccessMessage(`Pact rated at ${ratingPercent}% (${badge})!`);
+      setTimeout(() => setActionSuccessMessage(null), 4000);
+      onRefreshAllData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to rate pact');
+    }
+  };
+
+  const toggleComments = (id: string) => {
+    setExpandedComments((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const handleAddComment = async (commitmentId: string) => {
+    const text = (commentInputs[commitmentId] || '').trim();
+    if (!text) {
+      alert('Please enter a comment or progress update for this pact.');
+      return;
+    }
+    const ratingTag = commentRatingTags[commitmentId] ?? null;
+
+    try {
+      setCommentSubmitting((prev) => ({ ...prev, [commitmentId]: true }));
+      const res = await api.addCommitmentComment(commitmentId, text, ratingTag);
+      setCommitments((prev) =>
+        prev.map((c) => (c.id === commitmentId ? { ...c, comments: res.commitment.comments } : c))
+      );
+      setCommentInputs((prev) => ({ ...prev, [commitmentId]: '' }));
+      setExpandedComments((prev) => ({ ...prev, [commitmentId]: true }));
+      setActionSuccessMessage('Comment added to pact & synchronized to ledger!');
+      setTimeout(() => setActionSuccessMessage(null), 3500);
+      onRefreshAllData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to post comment');
+    } finally {
+      setCommentSubmitting((prev) => ({ ...prev, [commitmentId]: false }));
     }
   };
 
