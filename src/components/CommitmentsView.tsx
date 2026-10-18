@@ -679,8 +679,8 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
 
       {/* Modal: Create Commitment Request */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 overflow-y-auto p-3 sm:p-6 bg-slate-900/60 backdrop-blur-xs flex min-h-full items-center justify-center">
+          <div className="relative bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-xl my-auto max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
@@ -699,7 +699,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
               </button>
             </div>
 
-            <form onSubmit={handleCreateCommitment} className="p-6 space-y-4 text-xs">
+            <form onSubmit={handleCreateCommitment} className="p-4 sm:p-6 space-y-4 text-xs overflow-y-auto flex-1 overscroll-contain">
               <div>
                 <label className="block text-slate-700 font-semibold mb-1">
                   Commitment Request Title *
