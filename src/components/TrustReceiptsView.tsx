@@ -46,6 +46,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
   const [counterpartyName, setCounterpartyName] = useState('');
   const [counterpartyContact, setCounterpartyContact] = useState('');
   const [interactionCategory, setInteractionCategory] = useState<TrustReceipt['interactionCategory']>('Freelance Project');
+  const [otherCategoryDetails, setOtherCategoryDetails] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [transactionValue, setTransactionValue] = useState('');
@@ -58,10 +59,11 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
   const [disputeReason, setDisputeReason] = useState('Unfulfilled Deliverables');
   const [disputeDesc, setDisputeDesc] = useState('');
 
-  const filteredReceipts =
-    filterStatus === 'all'
-      ? receipts
-      : receipts.filter((r) => r.status === filterStatus);
+  const filteredReceipts = receipts.filter((r) => {
+    if (filterStatus === 'all') return true;
+    if (filterStatus === 'other') return r.interactionCategory === 'Other';
+    return r.status === filterStatus;
+  });
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,6 +74,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
         counterpartyName,
         counterpartyContact,
         interactionCategory,
+        otherCategoryDetails: interactionCategory === 'Other' ? otherCategoryDetails : undefined,
         title,
         description,
         transactionValue,
@@ -89,6 +92,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
       setTitle('');
       setCounterpartyName('');
       setCounterpartyContact('');
+      setOtherCategoryDetails('');
       setDescription('');
       setTransactionValue('');
       setCompletionConditions('');
