@@ -145,6 +145,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
               {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{copiedLink ? 'Link Copied' : 'Share Public Link'}</span>
             </button>
+            {onOpenPublicLedger && (
+              <button
+                onClick={onOpenPublicLedger}
+                className="px-3.5 py-2 text-xs font-semibold text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-all flex items-center gap-1.5 shadow-2xs"
+              >
+                <Globe className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Open Public Ledger</span>
+              </button>
+            )}
             <button
               onClick={() => onNavigateTab(`profile-${user.username}`)}
               className="px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex items-center gap-1.5 shadow-xs"
@@ -303,14 +312,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* Action Shortcut Banners */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-5 rounded-xl bg-white border border-slate-200 flex flex-col justify-between space-y-3">
           <div>
             <div className="text-xs font-semibold uppercase tracking-wider text-indigo-700">
               Trust Evidence Center
             </div>
             <div className="text-sm font-bold text-slate-900 mt-1">
-              Add Credentials & Verify Documents
+              Add Credentials & Documents
             </div>
             <p className="text-xs text-slate-500 mt-1">
               Attach business registrations, university degrees, or residential address proof.
@@ -352,10 +361,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
               Commitment Tracking
             </div>
             <div className="text-sm font-bold text-slate-900 mt-1">
-              Create a Trust Receipt
+              Issue a Trust Receipt
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              Document freelance projects, goods sales, or contracts with dual-signed completion conditions.
+              Document freelance projects, goods sales, or contracts with dual-signed public/private terms.
             </p>
           </div>
           <button
@@ -364,6 +373,32 @@ export const Dashboard: React.FC<DashboardProps> = ({
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Create Trust Receipt</span>
+          </button>
+        </div>
+
+        <div className="p-5 rounded-xl bg-gradient-to-br from-indigo-50/90 to-blue-50/70 border border-indigo-200 flex flex-col justify-between space-y-3">
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-indigo-700">
+                Public Evidentiary Ledger
+              </span>
+              <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
+                Live
+              </span>
+            </div>
+            <div className="text-sm font-bold text-slate-900 mt-1">
+              Public Commitments & Receipts
+            </div>
+            <p className="text-xs text-slate-600 mt-1">
+              Post public commitments for people to inspect, or browse public & private trust receipts across the network.
+            </p>
+          </div>
+          <button
+            onClick={onOpenPublicLedger}
+            className="w-full py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+          >
+            <Globe className="w-3.5 h-3.5" />
+            <span>Open Public Ledger</span>
           </button>
         </div>
       </div>
