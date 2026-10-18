@@ -48,12 +48,19 @@ export default function App() {
   const [showPhoneModal, setShowPhoneModal] = useState<boolean>(false);
   const [showIdentityModal, setShowIdentityModal] = useState<boolean>(false);
 
+  const [tabHistory, setTabHistory] = useState<string[]>([]);
+
   // Hash Navigation listener
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
       if (hash) {
-        setCurrentTab(hash);
+        setCurrentTab((prev) => {
+          if (prev !== hash) {
+            setTabHistory((hist) => (hist[hist.length - 1] === prev ? hist : [...hist, prev]));
+          }
+          return hash;
+        });
       }
     };
     handleHashChange();
@@ -62,9 +69,27 @@ export default function App() {
   }, []);
 
   const handleSelectTab = (tab: string) => {
+    if (tab !== currentTab) {
+      setTabHistory((prev) => (prev[prev.length - 1] === currentTab ? prev : [...prev, currentTab]));
+    }
     setCurrentTab(tab);
     window.location.hash = tab;
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBack = () => {
+    if (tabHistory.length > 0) {
+      const prevTab = tabHistory[tabHistory.length - 1];
+      setTabHistory((prev) => prev.slice(0, -1));
+      setCurrentTab(prevTab);
+      window.location.hash = prevTab;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      const fallback = currentUser ? 'dashboard' : 'landing';
+      setCurrentTab(fallback);
+      window.location.hash = fallback;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   // Initial Data Load
