@@ -1,5 +1,5 @@
 {
-  "name": "Aegis Trust Network",
+  "name": "Devolution",
   "description": "Evidence-based digital trust and reputation platform featuring identity verification, confirmed real-world relationships, trust receipts, and portable reputation infrastructure.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

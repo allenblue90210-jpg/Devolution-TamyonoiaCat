@@ -105,7 +105,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div>
             <div className="text-xs font-semibold uppercase tracking-wider text-indigo-700">
-              Aegis Trust Access
+              Devolution Trust Access
             </div>
             <h3 className="text-base font-bold text-slate-900 mt-0.5">
               {mode === 'signin' && 'Sign In to Your Trust Ledger'}
