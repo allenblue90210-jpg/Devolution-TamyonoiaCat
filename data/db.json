@@ -790,7 +790,21 @@
       "positiveImpressions": 56,
       "checkedOutByRequesterAt": "2026-10-18T21:33:18.047Z",
       "completedAt": "2026-10-18T21:33:18.047Z",
-      "linkedReceiptId": "TR-61491"
+      "linkedReceiptId": "TR-61491",
+      "ratingPercent": 100,
+      "ratingBadge": "100% Exemplary Good Faith",
+      "comments": [
+        {
+          "id": "pcmt_TC-9482_1",
+          "commitmentId": "TC-9482",
+          "authorId": "usr_sarah_002",
+          "authorName": "Dr. Sarah Adebayo",
+          "authorRole": "Committer",
+          "text": "Handover progress logged for High-Precision Spectral Sensor Kit Custody & Return. Pledged delivery on schedule.",
+          "ratingPercent": 100,
+          "createdAt": "2026-10-18T21:59:43.238Z"
+        }
+      ]
     },
     {
       "id": "TC-3107",
@@ -818,7 +832,21 @@
       "positiveImpressions": 39,
       "checkedOutByRequesterAt": "2026-10-18T21:33:23.539Z",
       "completedAt": "2026-10-18T21:33:23.539Z",
-      "linkedReceiptId": "TR-66576"
+      "linkedReceiptId": "TR-66576",
+      "ratingPercent": 100,
+      "ratingBadge": "100% Exemplary Good Faith",
+      "comments": [
+        {
+          "id": "pcmt_TC-3107_1",
+          "commitmentId": "TC-3107",
+          "authorId": "usr_sarah_002",
+          "authorName": "Sarah Adesina",
+          "authorRole": "Committer",
+          "text": "Handover progress logged for Loaner Audi RS5 Vehicle Return. Pledged delivery on schedule.",
+          "ratingPercent": 100,
+          "createdAt": "2026-10-18T21:59:43.238Z"
+        }
+      ]
     },
     {
       "id": "TC-8012",
@@ -846,7 +874,21 @@
       "createdAt": "2026-10-18T09:15:43.602Z",
       "impressions": 2150,
       "witnessCount": 107,
-      "positiveImpressions": 86
+      "positiveImpressions": 86,
+      "ratingPercent": 100,
+      "ratingBadge": "100% Exemplary Good Faith",
+      "comments": [
+        {
+          "id": "pcmt_TC-8012_1",
+          "commitmentId": "TC-8012",
+          "authorId": "usr_sarah_002",
+          "authorName": "Sarah Adesina",
+          "authorRole": "Committer",
+          "text": "Handover progress logged for Mercedes-Benz C300 Return & Handover. Pledged delivery on schedule.",
+          "ratingPercent": 100,
+          "createdAt": "2026-10-18T21:59:43.238Z"
+        }
+      ]
     },
     {
       "id": "TC-7041",
@@ -874,7 +916,21 @@
       "completedAt": "2026-10-16T14:15:43.602Z",
       "impressions": 1680,
       "witnessCount": 84,
-      "positiveImpressions": 67
+      "positiveImpressions": 67,
+      "ratingPercent": 100,
+      "ratingBadge": "100% Exemplary Good Faith",
+      "comments": [
+        {
+          "id": "pcmt_TC-7041_1",
+          "commitmentId": "TC-7041",
+          "authorId": "usr_allen_001",
+          "authorName": "Allen Okoro",
+          "authorRole": "Committer",
+          "text": "Handover progress logged for Enterprise AWS Server Infrastructure Migration Handover. Pledged delivery on schedule.",
+          "ratingPercent": 100,
+          "createdAt": "2026-10-18T21:59:43.238Z"
+        }
+      ]
     },
     {
       "id": "TC-9023",
@@ -901,7 +957,21 @@
       "createdAt": "2026-10-18T13:15:43.602Z",
       "impressions": 890,
       "witnessCount": 44,
-      "positiveImpressions": 35
+      "positiveImpressions": 35,
+      "ratingPercent": 100,
+      "ratingBadge": "100% Exemplary Good Faith",
+      "comments": [
+        {
+          "id": "pcmt_TC-9023_1",
+          "commitmentId": "TC-9023",
+          "authorId": "usr_fatima_003",
+          "authorName": "Fatima Bello",
+          "authorRole": "Committer",
+          "text": "Handover progress logged for Industrial 3D Calibration Tooling Rig Return. Pledged delivery on schedule.",
+          "ratingPercent": 100,
+          "createdAt": "2026-10-18T21:59:43.238Z"
+        }
+      ]
     }
   ],
   "goodFaithRatings": [
