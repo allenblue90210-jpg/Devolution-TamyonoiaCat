@@ -575,46 +575,38 @@ export const Navigation: React.FC<NavigationProps> = ({
       {/* Mobile Fixed Bottom Navigation Bar */}
       <nav
         aria-label="Mobile Bottom Navigation"
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 py-1.5 px-3 flex items-center justify-around shadow-lg"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 py-1.5 px-3 flex items-center justify-around shadow-lg select-none [-webkit-tap-highlight-color:transparent]"
       >
         <button
           onClick={() => onSelectTab('dashboard')}
-          className={`flex flex-col items-center gap-0.5 text-[10px] font-semibold py-1 px-2 rounded-lg transition-colors cursor-pointer ${
-            currentTab === 'dashboard' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-800'
-          }`}
+          className="flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
         >
-          <LayoutDashboard className="w-4 h-4" />
-          <span>Home</span>
+          <LayoutDashboard className={`w-4 h-4 ${currentTab === 'dashboard' ? 'text-indigo-600' : 'text-slate-400'}`} />
+          <span className="text-[10px] text-slate-500 font-normal">Home</span>
         </button>
 
         <button
           onClick={() => onSelectTab('commitments')}
-          className={`flex flex-col items-center gap-0.5 text-[10px] font-semibold py-1 px-2 rounded-lg transition-colors cursor-pointer ${
-            currentTab === 'commitments' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-800'
-          }`}
+          className="flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
         >
-          <Clock className="w-4 h-4" />
-          <span>Pacts</span>
+          <Clock className={`w-4 h-4 ${currentTab === 'commitments' ? 'text-indigo-600' : 'text-slate-400'}`} />
+          <span className="text-[10px] text-slate-500 font-normal">Pacts</span>
         </button>
 
         <button
           onClick={() => onSelectTab('receipts')}
-          className={`flex flex-col items-center gap-0.5 text-[10px] font-semibold py-1 px-2 rounded-lg transition-colors cursor-pointer ${
-            currentTab === 'receipts' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-800'
-          }`}
+          className="flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
         >
-          <Receipt className="w-4 h-4" />
-          <span>Receipts</span>
+          <Receipt className={`w-4 h-4 ${currentTab === 'receipts' ? 'text-indigo-600' : 'text-slate-400'}`} />
+          <span className="text-[10px] text-slate-500 font-normal">Receipts</span>
         </button>
 
         <button
           onClick={() => onSelectTab('reputation')}
-          className={`flex flex-col items-center gap-0.5 text-[10px] font-semibold py-1 px-2 rounded-lg transition-colors cursor-pointer ${
-            currentTab === 'reputation' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-800'
-          }`}
+          className="flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
         >
-          <ShieldCheck className="w-4 h-4" />
-          <span>Reputation</span>
+          <ShieldCheck className={`w-4 h-4 ${currentTab === 'reputation' ? 'text-indigo-600' : 'text-slate-400'}`} />
+          <span className="text-[10px] text-slate-500 font-normal">Reputation</span>
         </button>
       </nav>
     </>
