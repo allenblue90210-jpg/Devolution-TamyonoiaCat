@@ -380,6 +380,87 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
             </div>
           )}
 
+          {/* Public Commitments & Escrowed Pacts */}
+          <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-indigo-600" />
+                <h2 className="text-sm font-bold text-slate-900">Public Commitments & Escrowed Pacts</h2>
+              </div>
+              <span className="text-xs text-slate-500 font-mono tabular-nums">
+                {data.publicCommitments?.length || 0} pacts
+              </span>
+            </div>
+
+            <div className="space-y-3">
+              {!data.publicCommitments || data.publicCommitments.length === 0 ? (
+                <div className="text-xs text-slate-500 py-4 text-center">
+                  No public commitments published on this profile yet.
+                </div>
+              ) : (
+                data.publicCommitments.map((cmt) => (
+                  <div
+                    key={cmt.id}
+                    className={`p-3.5 rounded-lg border text-xs space-y-2 ${
+                      cmt.status === 'completed'
+                        ? 'bg-emerald-50/40 border-emerald-200'
+                        : cmt.status === 'overdue' || cmt.isOverdue
+                        ? 'bg-red-50/60 border-red-300'
+                        : 'bg-slate-50 border-slate-200'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="font-mono font-bold text-indigo-700 shrink-0">{cmt.id}</span>
+                        <span className="font-bold text-slate-900 truncate">{cmt.title}</span>
+                      </div>
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] font-bold shrink-0 ${
+                          cmt.status === 'completed'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : cmt.status === 'overdue' || cmt.isOverdue
+                            ? 'bg-red-100 text-red-800 animate-pulse'
+                            : 'bg-indigo-100 text-indigo-800'
+                        }`}
+                      >
+                        {cmt.status === 'completed'
+                          ? 'Completed on time'
+                          : cmt.status === 'overdue' || cmt.isOverdue
+                          ? 'OVERDUE (-30% daily decay)'
+                          : 'Active Timer'}
+                      </span>
+                    </div>
+
+                    <p className="text-slate-600 text-[11px] leading-relaxed">
+                      {cmt.description}
+                    </p>
+
+                    {cmt.committerPledgeNote && (
+                      <div className="text-[11px] text-slate-700 bg-white/80 p-2 rounded border border-slate-200/60 font-mono">
+                        Pledged: "{cmt.committerPledgeNote}"
+                      </div>
+                    )}
+
+                    <div className="flex flex-wrap items-center justify-between text-[10px] text-slate-500 pt-1">
+                      <span>Target: {new Date(cmt.deadline).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
+                      <span className="text-slate-600">
+                        Requester: {cmt.requesterName} · Committer: {cmt.committerName}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <button
+              onClick={() => onNavigateTab('commitments')}
+              className="w-full py-2 bg-slate-50 hover:bg-slate-100 text-indigo-700 border border-slate-200 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <span>View Full Commitments Board</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
           {/* Completed Trust Receipts */}
           <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
             <div className="flex items-center justify-between">
