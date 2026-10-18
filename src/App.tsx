@@ -58,6 +58,10 @@ export default function App() {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
+      if (hash === 'public-ledger') {
+        setShowPublicLedgerModal(true);
+        return;
+      }
       if (hash) {
         setCurrentTab((prev) => {
           if (prev !== hash) {
@@ -85,6 +89,10 @@ export default function App() {
   }, []);
 
   const handleSelectTab = (tab: string) => {
+    if (tab === 'public-ledger') {
+      setShowPublicLedgerModal(true);
+      return;
+    }
     if (tab !== currentTab) {
       setTabHistory((prev) => (prev[prev.length - 1] === currentTab ? prev : [...prev, currentTab]));
     }
@@ -285,6 +293,7 @@ export default function App() {
             onOpenAddEvidence={() => handleSelectTab('evidence')}
             onOpenInviteModal={() => handleSelectTab('relationships')}
             onOpenNewReceiptModal={() => handleSelectTab('receipts')}
+            onOpenPublicLedger={() => setShowPublicLedgerModal(true)}
           />
         ) : (
           <div className="py-20 text-center">
