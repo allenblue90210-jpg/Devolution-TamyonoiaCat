@@ -1,5 +1,31 @@
-import React, { useState } from 'react';
-import { ShieldCheck, CheckCircle2, Users, Receipt, Award, Lock, ArrowRight, ExternalLink, HelpCircle, ChevronRight, FileText, Check, Clock, Timer, Flame } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import {
+  ShieldCheck,
+  CheckCircle2,
+  Users,
+  Receipt,
+  Award,
+  Lock,
+  ArrowRight,
+  ExternalLink,
+  HelpCircle,
+  ChevronRight,
+  FileText,
+  Check,
+  Clock,
+  Timer,
+  Flame,
+  Eye,
+  Star,
+  MessageSquarePlus,
+  ThumbsUp,
+  HeartHandshake,
+  Sparkles,
+  UserCheck,
+} from 'lucide-react';
+import { api } from '../services/api.js';
+import { GoodFaithRating } from '../types/trust.js';
+import { GoodFaithReviewModal } from './GoodFaithReviewModal.js';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -13,6 +39,73 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onNavigateTab,
 }) => {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+
+  // Live Impressions & Good Faith Ratings State
+  const [impressions, setImpressions] = useState(4890);
+  const [witnessCount, setWitnessCount] = useState(560);
+  const [averageRating, setAverageRating] = useState(4.95);
+  const [ratings, setRatings] = useState<GoodFaithRating[]>([]);
+  const [hasWitnessedNetwork, setHasWitnessedNetwork] = useState(false);
+  const [showRateModal, setShowRateModal] = useState(false);
+  const [selectedReviewTarget, setSelectedReviewTarget] = useState<{
+    userId?: string;
+    username?: string;
+    name?: string;
+  }>({ name: 'Aegis Trust Network & Verified People' });
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [filterPerson, setFilterPerson] = useState<string>('all');
+
+  useEffect(() => {
+    // Record page impression automatically ("if anybody see")
+    api
+      .recordImpression('network', false)
+      .then((res) => {
+        setImpressions(res.impressions);
+        setWitnessCount(res.witnessCount);
+      })
+      .catch(() => {});
+
+    api
+      .getRatings('all')
+      .then((res) => {
+        setRatings(res.ratings);
+        if (res.averageRating) setAverageRating(res.averageRating);
+        if (res.impressions) setImpressions(res.impressions);
+        if (res.witnessCount) setWitnessCount(res.witnessCount);
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleWitnessNetwork = async () => {
+    if (hasWitnessedNetwork) return;
+    try {
+      const res = await api.recordImpression('network', true);
+      setImpressions(res.impressions);
+      setWitnessCount(res.witnessCount);
+      setHasWitnessedNetwork(true);
+      setToastMessage('Thank you! You have officially witnessed the Aegis verified network in good faith.');
+      setTimeout(() => setToastMessage(null), 4500);
+    } catch {
+      setHasWitnessedNetwork(true);
+      setWitnessCount((prev) => prev + 1);
+    }
+  };
+
+  const handleHelpfulClick = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await api.markRatingHelpful(id);
+      setRatings((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, helpfulCount: (r.helpfulCount || 0) + 1, hasMarkedHelpful: true } : r))
+      );
+    } catch {}
+  };
+
+  const handleReviewSubmitted = (newRating: GoodFaithRating) => {
+    setRatings((prev) => [newRating, ...prev]);
+    setToastMessage('Your good faith comment & rating has been recorded and anchored to the open ledger!');
+    setTimeout(() => setToastMessage(null), 4500);
+  };
 
   const faqs = [
     {
@@ -84,6 +177,91 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 >
                   View Verified Profile
                 </button>
+              </div>
+
+              {/* Toast Notification */}
+              {toastMessage && (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 flex items-center justify-between shadow-2xs animate-in fade-in duration-200">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>{toastMessage}</span>
+                  </div>
+                  <button
+                    onClick={() => setToastMessage(null)}
+                    className="text-emerald-700 hover:text-emerald-900 text-[11px] font-semibold cursor-pointer"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              )}
+
+              {/* Live Network Impressions, Good Faith Witnesses & Ratings Banner */}
+              <div className="p-4 rounded-xl bg-indigo-50/90 border border-indigo-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
+                <div className="space-y-1">
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <div
+                      className="inline-flex items-center gap-1.5 text-indigo-950 font-bold"
+                      title="Total public impressions registered when verified observers view network profiles"
+                    >
+                      <Eye className="w-4 h-4 text-indigo-600" />
+                      <span className="font-mono tabular-nums">{impressions.toLocaleString()}</span>
+                      <span className="text-indigo-800 font-semibold">Impressions</span>
+                    </div>
+                    <span className="text-indigo-200">·</span>
+                    <div
+                      className="inline-flex items-center gap-1.5 text-slate-700 font-medium"
+                      title="Network observers witnessing verified people in good faith"
+                    >
+                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                      <span className="font-mono tabular-nums font-bold text-slate-900">
+                        {witnessCount.toLocaleString()}
+                      </span>
+                      <span>Witnesses in Good Faith</span>
+                    </div>
+                    <span className="text-indigo-200">·</span>
+                    <div
+                      className="inline-flex items-center gap-1 text-amber-700 font-bold"
+                      title="Average community good-faith rating"
+                    >
+                      <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
+                      <span>{averageRating.toFixed(1)} / 5.0</span>
+                      <span className="text-slate-500 font-normal">({ratings.length} reviews)</span>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-500">
+                    Live observer impressions recorded across verified people & ledger profiles.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={handleWitnessNetwork}
+                    disabled={hasWitnessedNetwork}
+                    className={`px-3 py-1.5 rounded-lg font-semibold text-xs transition-all flex items-center gap-1.5 cursor-pointer ${
+                      hasWitnessedNetwork
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 cursor-default'
+                        : 'bg-white hover:bg-indigo-600 hover:text-white text-indigo-700 border border-indigo-200 hover:border-indigo-600 shadow-2xs'
+                    }`}
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-current" />
+                    <span>{hasWitnessedNetwork ? 'Witnessed in Good Faith' : 'Witness Network'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setSelectedReviewTarget({
+                        name: 'Aegis Trust Network & Verified People',
+                        userId: 'network',
+                        username: 'aegis_network',
+                      });
+                      setShowRateModal(true);
+                    }}
+                    className="px-3 py-1.5 rounded-lg font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white transition-colors flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  >
+                    <MessageSquarePlus className="w-3.5 h-3.5" />
+                    <span>Rate in Good Faith</span>
+                  </button>
+                </div>
               </div>
 
               {/* Four Core Evidentiary Questions */}
