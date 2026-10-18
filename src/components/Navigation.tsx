@@ -269,9 +269,13 @@ export const Navigation: React.FC<NavigationProps> = ({
 
             {/* 2. Public Commitments & Trust Receipts Ledger Icon */}
             <button
-              onClick={onOpenPublicLedger}
-              className="relative p-2 text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80 rounded-lg transition-colors flex items-center justify-center cursor-pointer group shadow-2xs"
-              title="Open Public Ledger: Commitments & Trust Receipts"
+              onClick={() => onSelectTab('public-ledger')}
+              className={`relative p-2 rounded-lg transition-colors flex items-center justify-center cursor-pointer group shadow-2xs ${
+                currentTab === 'public-ledger'
+                  ? 'text-indigo-700 bg-indigo-100 border border-indigo-300'
+                  : 'text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80'
+              }`}
+              title="Public Ledger: Verified People, Commitments & Trust Receipts"
               aria-label="Public Commitments & Trust Receipts Ledger"
             >
               <Globe className="w-4 h-4 text-indigo-600 group-hover:scale-110 transition-transform" />
