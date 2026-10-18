@@ -984,6 +984,15 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                       >
                         50%
                       </button>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenRatePactModal(c)}
+                        className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 transition-all cursor-pointer flex items-center gap-1"
+                        title="Submit Full Peer Rating with Review Commentary"
+                      >
+                        <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+                        <span>Review & Rate</span>
+                      </button>
                     </div>
 
                     {/* Public Profile Link */}
