@@ -731,13 +731,13 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
                           <span className="text-slate-400">Committed By:</span>
                           <button
                             onClick={() => {
-                              onSelectProfile(commitment.committerUsername);
+                              const found = availableUsers.find((u) => u.id === commitment.committerId);
+                              onSelectProfile(found ? found.username : commitment.committerName.toLowerCase().replace(/\s+/g, ''));
                               onClose();
                             }}
-                            className="font-semibold text-slate-800 hover:text-indigo-600 transition-colors flex items-center gap-1"
+                            className="font-semibold text-slate-800 hover:text-indigo-600 transition-colors flex items-center gap-1 cursor-pointer"
                           >
                             <span>{commitment.committerName}</span>
-                            <span className="text-slate-400 font-normal">(@{commitment.committerUsername})</span>
                           </button>
                         </div>
 
