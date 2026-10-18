@@ -1060,8 +1060,8 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, () => {
-    console.log(`Trust Platform running on http://localhost:${PORT}`);
+  app.listen(Number(PORT), '0.0.0.0', () => {
+    console.log(`Trust Platform running on http://0.0.0.0:${PORT}`);
   });
 }
 
