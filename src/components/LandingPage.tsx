@@ -449,6 +449,372 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
+      {/* Section: Verified People, Live Impressions & Good Faith Community Ratings */}
+      <section className="py-20 bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          {/* Section Header */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="max-w-2xl space-y-2">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
+                <HeartHandshake className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Good Faith Community Attestations</span>
+              </div>
+              <h3 className="text-3xl font-bold text-slate-900 tracking-tight text-balance">
+                Verified people, live observer impressions, and community ratings in good faith.
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                When anyone inspects a verified person or commitment, public impressions are tallied for transparent accountability. Observers and commercial counterparties voluntarily submit reviews and ratings in sworn good faith.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+              <button
+                onClick={() => {
+                  setSelectedReviewTarget({
+                    name: 'Aegis Trust Network & Verified People',
+                    userId: 'network',
+                    username: 'aegis_network',
+                  });
+                  setShowRateModal(true);
+                }}
+                className="px-4 py-2.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg flex items-center gap-2 shadow-2xs transition-colors cursor-pointer"
+              >
+                <MessageSquarePlus className="w-4 h-4" />
+                <span>Rate & Comment in Good Faith</span>
+              </button>
+              <button
+                onClick={() => onNavigateTab('public-ledger')}
+                className="px-4 py-2.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <span>Browse All People</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* 1. Verified People Cards with Impressions & Good Faith Ratings */}
+          <div>
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center justify-between">
+              <span>Attested People Across Network</span>
+              <span className="font-mono text-[11px] text-slate-500">Live Impressions & Witness Metrics</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Person 1: Allen Okoro */}
+              <div className="bg-slate-50 rounded-xl border border-slate-200 p-5 space-y-4 hover:border-indigo-300 hover:shadow-xs transition-all flex flex-col justify-between">
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3.5">
+                    <img
+                      src="/src/assets/images/avatar_founder_1792334631930.jpg"
+                      alt="Allen Okoro"
+                      className="w-12 h-12 rounded-xl object-cover border border-slate-200 shadow-2xs"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="font-bold text-slate-900 text-sm truncate">Allen Okoro</h4>
+                        <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" title="Identity Verified" />
+                      </div>
+                      <div className="text-xs text-slate-500 font-mono">@allenokoro</div>
+                      <div className="text-[11px] text-slate-400 mt-0.5">Lagos, Nigeria</div>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-600 line-clamp-2">
+                    Founder & Principal Systems Architect at Aegis Systems. Distributed consensus & smart escrow.
+                  </p>
+
+                  {/* Impression & Good Faith Ratings Pills */}
+                  <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-200/80 text-[11px]">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-100/80 text-indigo-900 font-semibold" title="Total public profile impressions">
+                      <Eye className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>2,420 impressions</span>
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-100/80 text-emerald-900 font-semibold" title="Good-faith witnesses">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>310 witnesses</span>
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 font-bold border border-amber-200" title="Good faith community rating">
+                      <Star className="w-3 h-3 text-amber-500 fill-amber-400" />
+                      <span>5.0 (2 reviews)</span>
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-slate-200/80 flex items-center gap-2">
+                  <button
+                    onClick={() => onExploreProfile('allenokoro')}
+                    className="flex-1 py-1.5 px-3 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg text-center transition-colors cursor-pointer"
+                  >
+                    View Profile
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedReviewTarget({ name: 'Allen Okoro', userId: 'usr_allen_001', username: 'allenokoro' });
+                      setShowRateModal(true);
+                    }}
+                    className="py-1.5 px-2.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors cursor-pointer"
+                    title="Rate Allen in good faith"
+                  >
+                    Rate
+                  </button>
+                </div>
+              </div>
+
+              {/* Person 2: Sarah Adesina */}
+              <div className="bg-slate-50 rounded-xl border border-slate-200 p-5 space-y-4 hover:border-indigo-300 hover:shadow-xs transition-all flex flex-col justify-between">
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3.5">
+                    <img
+                      src="/src/assets/images/avatar_sarah_1792334645228.jpg"
+                      alt="Sarah Adesina"
+                      className="w-12 h-12 rounded-xl object-cover border border-slate-200 shadow-2xs"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="font-bold text-slate-900 text-sm truncate">Sarah Adesina</h4>
+                        <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" title="Identity Verified" />
+                      </div>
+                      <div className="text-xs text-slate-500 font-mono">@sarah_adesina</div>
+                      <div className="text-[11px] text-slate-400 mt-0.5">Abuja, Nigeria</div>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-600 line-clamp-2">
+                    Senior Cloud Security Architect at CloudWorks NG. Zero-trust infrastructure auditor.
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-200/80 text-[11px]">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-100/80 text-indigo-900 font-semibold">
+                      <Eye className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>1,380 impressions</span>
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-100/80 text-emerald-900 font-semibold">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>195 witnesses</span>
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 font-bold border border-amber-200">
+                      <Star className="w-3 h-3 text-amber-500 fill-amber-400" />
+                      <span>5.0 (1 review)</span>
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-slate-200/80 flex items-center gap-2">
+                  <button
+                    onClick={() => onExploreProfile('sarah_adesina')}
+                    className="flex-1 py-1.5 px-3 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg text-center transition-colors cursor-pointer"
+                  >
+                    View Profile
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedReviewTarget({ name: 'Sarah Adesina', userId: 'usr_sarah_002', username: 'sarah_adesina' });
+                      setShowRateModal(true);
+                    }}
+                    className="py-1.5 px-2.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors cursor-pointer"
+                    title="Rate Sarah in good faith"
+                  >
+                    Rate
+                  </button>
+                </div>
+              </div>
+
+              {/* Person 3: Fatima Bello */}
+              <div className="bg-slate-50 rounded-xl border border-slate-200 p-5 space-y-4 hover:border-indigo-300 hover:shadow-xs transition-all flex flex-col justify-between">
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3.5">
+                    <img
+                      src="/src/assets/images/avatar_fatima_1792334658112.jpg"
+                      alt="Fatima Bello"
+                      className="w-12 h-12 rounded-xl object-cover border border-slate-200 shadow-2xs"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="font-bold text-slate-900 text-sm truncate">Fatima Bello</h4>
+                        <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" title="Identity Verified" />
+                      </div>
+                      <div className="text-xs text-slate-500 font-mono">@fatimabello</div>
+                      <div className="text-[11px] text-slate-400 mt-0.5">Port Harcourt, Nigeria</div>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-600 line-clamp-2">
+                    Chief Operating Officer at Horizon Global Freight. Cross-border logistics settlement.
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-200/80 text-[11px]">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-100/80 text-indigo-900 font-semibold">
+                      <Eye className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>1,890 impressions</span>
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-100/80 text-emerald-900 font-semibold">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>240 witnesses</span>
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 font-bold border border-amber-200">
+                      <Star className="w-3 h-3 text-amber-500 fill-amber-400" />
+                      <span>5.0 (1 review)</span>
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-slate-200/80 flex items-center gap-2">
+                  <button
+                    onClick={() => onExploreProfile('fatimabello')}
+                    className="flex-1 py-1.5 px-3 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg text-center transition-colors cursor-pointer"
+                  >
+                    View Profile
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedReviewTarget({ name: 'Fatima Bello', userId: 'usr_fatima_003', username: 'fatimabello' });
+                      setShowRateModal(true);
+                    }}
+                    className="py-1.5 px-2.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors cursor-pointer"
+                    title="Rate Fatima in good faith"
+                  >
+                    Rate
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 2. Good Faith Comments & Ratings Feed */}
+          <div className="bg-slate-50/70 rounded-2xl border border-slate-200 p-6 sm:p-8 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Star className="w-5 h-5 text-amber-500 fill-amber-400" />
+                  <h4 className="text-base font-bold text-slate-900">
+                    Good Faith Community Reviews & Ratings ({ratings.length})
+                  </h4>
+                </div>
+                <p className="text-xs text-slate-500">
+                  Voluntary, audited evaluations left by confirmed colleagues, clients, and network witnesses.
+                </p>
+              </div>
+
+              {/* Filter Pills */}
+              <div className="flex items-center gap-1.5 overflow-x-auto text-xs pb-1 sm:pb-0">
+                {[
+                  { id: 'all', label: `All Reviews (${ratings.length})` },
+                  { id: 'allenokoro', label: 'Allen Okoro' },
+                  { id: 'sarah_adesina', label: 'Sarah Adesina' },
+                  { id: 'network', label: 'Network Overall' },
+                ].map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => setFilterPerson(f.id)}
+                    className={`px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition-colors cursor-pointer ${
+                      filterPerson === f.id
+                        ? 'bg-slate-900 text-white font-semibold'
+                        : 'bg-white text-slate-600 hover:bg-slate-200 border border-slate-200'
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Ratings Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {ratings
+                .filter((r) => {
+                  if (filterPerson === 'all') return true;
+                  if (filterPerson === 'network') return r.targetUserId === 'network' || !r.targetUserId;
+                  return r.targetUsername === filterPerson || r.targetUserId === filterPerson;
+                })
+                .map((item) => (
+                  <div
+                    key={item.id}
+                    className="bg-white rounded-xl border border-slate-200 p-5 space-y-3 shadow-2xs hover:border-indigo-200 transition-all"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-3">
+                        {item.authorAvatar ? (
+                          <img
+                            src={item.authorAvatar}
+                            alt={item.authorName}
+                            className="w-10 h-10 rounded-full object-cover border border-slate-100"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">
+                            {item.authorName.charAt(0)}
+                          </div>
+                        )}
+                        <div>
+                          <div className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                            <span>{item.authorName}</span>
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" title="Verified Attestation" />
+                          </div>
+                          {item.authorTitle && (
+                            <div className="text-[11px] text-slate-500 line-clamp-1">{item.authorTitle}</div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Star Rating */}
+                      <div className="flex items-center gap-0.5 shrink-0 bg-amber-50 px-2 py-1 rounded-md border border-amber-200/80">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-3.5 h-3.5 ${
+                              i < item.rating
+                                ? 'text-amber-500 fill-amber-400'
+                                : 'text-slate-200'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Badge & Target Person */}
+                    <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
+                      <span className="px-2 py-0.5 rounded-full font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                        {item.goodFaithBadge || 'Exemplary Integrity'}
+                      </span>
+                      <span className="text-slate-300">·</span>
+                      <span className="text-slate-500 font-mono">
+                        Attesting for: {item.targetUsername === 'aegis_network' || item.targetUserId === 'network' ? 'Network' : `@${item.targetUsername || 'user'}`}
+                      </span>
+                      {item.context && (
+                        <>
+                          <span className="text-slate-300">·</span>
+                          <span className="text-slate-600 italic">{item.context}</span>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Comment text */}
+                    <p className="text-xs text-slate-700 leading-relaxed italic bg-slate-50/70 p-3 rounded-lg border border-slate-100">
+                      "{item.comment}"
+                    </p>
+
+                    {/* Footer: Date & Helpful button */}
+                    <div className="flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-slate-100">
+                      <span>{new Date(item.createdAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}</span>
+                      <button
+                        onClick={(e) => handleHelpfulClick(item.id, e)}
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md transition-colors cursor-pointer ${
+                          item.hasMarkedHelpful
+                            ? 'bg-emerald-100 text-emerald-800 font-semibold cursor-default'
+                            : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'
+                        }`}
+                        title="Mark this review helpful"
+                      >
+                        <ThumbsUp className="w-3 h-3" />
+                        <span>Helpful ({item.helpfulCount || 0})</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Deep-dive: Social Verification vs Endorsements */}
       <section className="py-20 bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
