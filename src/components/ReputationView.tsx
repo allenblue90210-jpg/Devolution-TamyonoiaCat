@@ -12,14 +12,17 @@ import {
   HelpCircle,
   Clock,
   Lock,
+  ArrowLeft,
 } from 'lucide-react';
 
 interface ReputationViewProps {
   user: User;
   reputation: ReputationBreakdown | null;
+  onBack?: () => void;
+  onNavigateTab?: (tab: string) => void;
 }
 
-export const ReputationView: React.FC<ReputationViewProps> = ({ user, reputation }) => {
+export const ReputationView: React.FC<ReputationViewProps> = ({ user, reputation, onBack, onNavigateTab }) => {
   if (!reputation) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center text-xs text-slate-500">
@@ -31,7 +34,22 @@ export const ReputationView: React.FC<ReputationViewProps> = ({ user, reputation
   const { dimensions, summaryLevel, methodologyVersion, lastCalculatedAt, transparentFormulaNotice, disclaimer } = reputation;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      {/* Top Navigation Back Bar */}
+      <div>
+        <button
+          onClick={() => {
+            if (onBack) onBack();
+            else if (onNavigateTab) onNavigateTab('dashboard');
+          }}
+          className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg shadow-2xs hover:border-slate-300 transition-all cursor-pointer group"
+          title="Back to Dashboard"
+        >
+          <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:-translate-x-0.5 transition-transform" />
+          <span>Back to Dashboard</span>
+        </button>
+      </div>
+
       {/* Header Banner */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xs">
         <div className="space-y-1">

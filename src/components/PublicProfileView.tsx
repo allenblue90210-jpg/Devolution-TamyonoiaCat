@@ -127,7 +127,28 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
   const { user, relationshipCounts, publicEndorsers, publicEvidence, publicReceipts, references, reputation } = data;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      {/* Top Back Navigation Bar */}
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => {
+            if (onBack) onBack();
+            else onNavigateTab('directory');
+          }}
+          className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg shadow-2xs hover:border-slate-300 transition-all cursor-pointer group"
+          title="Back to previous page"
+        >
+          <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:-translate-x-0.5 transition-transform" />
+          <span>Back</span>
+        </button>
+        <button
+          onClick={() => onNavigateTab('directory')}
+          className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+        >
+          Browse Directory →
+        </button>
+      </div>
+
       {/* Top Banner & Header Card */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
