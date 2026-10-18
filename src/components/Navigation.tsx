@@ -267,18 +267,19 @@ export const Navigation: React.FC<NavigationProps> = ({
               )}
             </div>
 
-            {/* 2. Public Commitments & Trust Receipts Ledger Icon */}
+            {/* 2. World / People & Public Ledger Screen Icon */}
             <button
               onClick={() => onSelectTab('public-ledger')}
-              className={`relative p-2 rounded-lg transition-colors flex items-center justify-center cursor-pointer group shadow-2xs ${
+              className={`relative px-2.5 py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer group shadow-2xs ${
                 currentTab === 'public-ledger'
                   ? 'text-indigo-700 bg-indigo-100 border border-indigo-300'
                   : 'text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80'
               }`}
-              title="Public Ledger: Verified People, Commitments & Trust Receipts"
-              aria-label="Public Commitments & Trust Receipts Ledger"
+              title="World Screen: Browse Verified People, Public Commitments & Trust Receipts"
+              aria-label="World Screen - Verified People & Public Ledger"
             >
               <Globe className="w-4 h-4 text-indigo-600 group-hover:scale-110 transition-transform" />
+              <span className="hidden sm:inline text-xs font-bold text-indigo-900">People & Ledger</span>
               <span className="absolute -top-1 -right-1 flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
@@ -549,13 +550,18 @@ export const Navigation: React.FC<NavigationProps> = ({
 
         <button
           onClick={onOpenPublicLedger}
-          className="flex flex-col items-center gap-0.5 text-[10px] font-bold py-1 px-2.5 rounded-lg text-indigo-700 bg-indigo-50 border border-indigo-200/80 transition-colors cursor-pointer relative"
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold py-1 px-2.5 rounded-lg transition-colors cursor-pointer relative ${
+            currentTab === 'public-ledger'
+              ? 'text-indigo-700 bg-indigo-100 border border-indigo-300'
+              : 'text-indigo-700 bg-indigo-50 border border-indigo-200/80 hover:bg-indigo-100'
+          }`}
+          title="World Screen: Browse People & Public Ledger"
         >
           <span className="relative">
             <Globe className="w-4 h-4 text-indigo-600" />
             <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-indigo-600 rounded-full" />
           </span>
-          <span>Ledger</span>
+          <span>People</span>
         </button>
 
         <button
