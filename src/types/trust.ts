@@ -70,6 +70,87 @@ export interface PactComment {
   createdAt: string;
 }
 
+export interface PactRating {
+  id: string;
+  commitmentId: string;
+  authorId: string;
+  authorName: string;
+  authorAvatar?: string;
+  rating: number; // 1 to 5 stars
+  ratingPercent?: number; // 100 or 50 or custom %
+  badge?: string; // e.g. "100% Flawless Honor"
+  comment?: string;
+  createdAt: string;
+}
+
+export interface ReceiptRating {
+  id: string;
+  receiptId: string;
+  authorId: string;
+  authorName: string;
+  authorAvatar?: string;
+  rating: number; // 1 to 5 stars
+  badge?: string; // e.g. "Full Fulfillment Verified", "Reliability Confirmed"
+  comment: string;
+  createdAt: string;
+}
+
+export type RememberWordTag = 'Business' | 'Crime' | 'Fraud' | 'Contract' | 'Reliability' | string;
+
+export interface RememberEvidenceAttachment {
+  name: string;
+  type: string;
+  size?: string;
+  date?: string;
+  notes?: string;
+}
+
+export interface RememberReviewer {
+  userId: string;
+  name: string;
+  avatarUrl?: string;
+  headline?: string;
+  qualificationNote: string; // why they are in a good position to review
+  status: 'pending' | 'verified_corroborated' | 'contested' | 'under_review';
+  verdictComment?: string;
+  reviewedAt?: string;
+  ratingScore?: number; // 1 to 5 stars
+}
+
+export interface RememberCorroboration {
+  id: string;
+  authorId: string;
+  authorName: string;
+  authorAvatar?: string;
+  verdict: 'corroborated' | 'neutral' | 'refuted';
+  note: string;
+  evidenceName?: string;
+  createdAt: string;
+}
+
+export interface RememberRecord {
+  id: string; // e.g. REM-1042
+  authorId: string;
+  authorName: string;
+  authorAvatar?: string;
+  targetId?: string; // target user ID if in network
+  targetName: string; // person or organization being remembered
+  targetAvatar?: string;
+  title: string;
+  description: string;
+  tags: RememberWordTag[]; // e.g. ['Business', 'Contract', 'Reliability'] or ['Crime', 'Fraud']
+  incidentDate: string;
+  evidenceItems: RememberEvidenceAttachment[];
+  attachedReviewer: RememberReviewer;
+  corroborations: RememberCorroboration[];
+  severityOrImpact: 'High Critical' | 'Medium Substantive' | 'Exemplary Positive';
+  veracityScore: number; // e.g. 96 (%)
+  status: 'pending_review' | 'verified' | 'disputed';
+  isPublic: boolean;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface TrustCommitment {
   id: string; // e.g. TC-9014
   title: string;
@@ -101,6 +182,9 @@ export interface TrustCommitment {
   ratingPercent?: number | null; // 100% or 50% rating
   ratingBadge?: string | null; // e.g. "100% Flawless Honor" or "50% Partial Settlement"
   comments?: PactComment[];
+  ratingsList?: PactRating[];
+  averageRating?: number;
+  ratingsCount?: number;
   createdAt: string;
   completedAt?: string | null;
 }
@@ -231,6 +315,9 @@ export interface TrustReceipt {
     actor: string;
     event: string;
   }>;
+  ratings?: ReceiptRating[];
+  averageRating?: number;
+  ratingsCount?: number;
   isPublic: boolean;
   createdAt: string;
   completedAt?: string | null;
