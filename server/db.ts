@@ -10,6 +10,7 @@ import {
   InAppNotification,
   BusinessEntity,
   TrustCommitment,
+  GoodFaithRating,
 } from '../src/types/trust.js';
 
 interface DatabaseSchema {
@@ -23,6 +24,8 @@ interface DatabaseSchema {
   businesses: BusinessEntity[];
   commitments: TrustCommitment[];
   phoneOtps: Record<string, { code: string; expiresAt: number }>;
+  goodFaithRatings?: GoodFaithRating[];
+  impressions?: Record<string, { impressions: number; witnessCount: number }>;
 }
 
 const DB_FILE = path.resolve(process.cwd(), 'data', 'db.json');
