@@ -181,9 +181,17 @@ export const api = {
     });
   },
 
-  // Trust Receipts
   async getReceipts(): Promise<{ receipts: TrustReceipt[] }> {
     return request('/api/receipts');
+  },
+  async getPublicReceipts(): Promise<{ receipts: TrustReceipt[] }> {
+    return request('/api/receipts?public=true');
+  },
+  async toggleReceiptVisibility(id: string, isPublic: boolean): Promise<{ receipt: TrustReceipt; message: string }> {
+    return request(`/api/receipts/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ isPublic }),
+    });
   },
   async getReceiptById(id: string): Promise<{ receipt: TrustReceipt }> {
     return request(`/api/receipts/${id}`);

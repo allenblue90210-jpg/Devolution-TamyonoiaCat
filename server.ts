@@ -1018,8 +1018,12 @@ app.post('/api/business/team', (req: Request, res: Response) => {
 app.get('/api/commitments', (req: Request, res: Response) => {
   const userId = getSessionUserId(req);
   const filter = req.query.filter as string;
-  if (filter === 'all') {
-    return res.json({ commitments: db.getCommitments() });
+  if (filter === 'all' || req.query.public === 'true') {
+    const list = db.getCommitments();
+    if (req.query.public === 'true') {
+      return res.json({ commitments: list.filter((c) => c.isPublic) });
+    }
+    return res.json({ commitments: list });
   }
   res.json({ commitments: db.getCommitmentsForUser(userId) });
 });
@@ -1027,6 +1031,19 @@ app.get('/api/commitments', (req: Request, res: Response) => {
 app.get('/api/commitments/:id', (req: Request, res: Response) => {
   const commitment = db.getCommitmentById(req.params.id);
   if (!commitment) return res.status(404).json({ error: 'Commitment not found' });
+  res.json({ commitment });
+});
+
+app.patch('/api/commitments/:id', (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { isPublic } = req.body;
+  const commitment = db.getCommitmentById(id);
+  if (!commitment) return res.status(404).json({ error: 'Commitment not found' });
+
+  if (isPublic !== undefined) {
+    const updated = db.updateCommitment(id, { isPublic: Boolean(isPublic) });
+    return res.json({ commitment: updated, message: `Commitment set to ${updated.isPublic ? 'Public' : 'Private'}` });
+  }
   res.json({ commitment });
 });
 
