@@ -51,7 +51,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     userId?: string;
     username?: string;
     name?: string;
-  }>({ name: 'Aegis Trust Network & Verified People' });
+  }>({ name: 'Devolution Network & Verified People' });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [filterPerson, setFilterPerson] = useState<string>('all');
 
@@ -83,7 +83,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       setImpressions(res.impressions);
       setWitnessCount(res.witnessCount);
       setHasWitnessedNetwork(true);
-      setToastMessage('Thank you! You have officially witnessed the Aegis verified network in good faith.');
+      setToastMessage('Thank you! You have officially witnessed the Devolution verified network in good faith.');
       setTimeout(() => setToastMessage(null), 4500);
     } catch {
       setHasWitnessedNetwork(true);

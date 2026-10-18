@@ -167,10 +167,10 @@ export const Navigation: React.FC<NavigationProps> = ({
             onClick={() => onSelectTab('landing')}
             className="text-lg font-bold tracking-tight text-slate-900 hover:text-indigo-600 transition-colors whitespace-nowrap shrink-0 flex items-center gap-2 cursor-pointer"
           >
-            <span className="w-7 h-7 rounded-md bg-indigo-600 flex items-center justify-center text-white text-sm font-semibold shadow-xs">
-              A
+            <span className="w-7 h-7 rounded-md bg-indigo-600 flex items-center justify-center text-white text-sm font-bold shadow-xs">
+              D
             </span>
-            <span className="hidden sm:inline">Aegis Trust</span>
+            <span className="font-extrabold tracking-tight">Devolution</span>
           </button>
 
           {/* Zone 2: Desktop Horizontal Navigation with Icons on every tab */}
