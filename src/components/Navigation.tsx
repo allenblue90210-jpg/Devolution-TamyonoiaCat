@@ -526,13 +526,13 @@ export const Navigation: React.FC<NavigationProps> = ({
         </button>
 
         <button
-          onClick={() => setShowMobileMenu(!showMobileMenu)}
+          onClick={() => onSelectTab('reputation')}
           className={`flex flex-col items-center gap-0.5 text-[10px] font-semibold py-1 px-2 rounded-lg transition-colors cursor-pointer ${
-            showMobileMenu ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-800'
+            currentTab === 'reputation' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-800'
           }`}
         >
-          <Menu className="w-4 h-4" />
-          <span>More</span>
+          <ShieldCheck className="w-4 h-4" />
+          <span>Reputation</span>
         </button>
       </nav>
     </>
