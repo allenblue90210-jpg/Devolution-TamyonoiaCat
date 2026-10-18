@@ -8,6 +8,7 @@ import {
   InAppNotification,
   BusinessEntity,
   ReputationBreakdown,
+  TrustCommitment,
 } from '../types/trust.js';
 
 let currentSessionUserId = localStorage.getItem('aegis_session_user_id') || 'usr_allen_001';
@@ -260,6 +261,55 @@ export const api = {
     return request('/api/disputes', {
       method: 'POST',
       body: JSON.stringify(data),
+    });
+  },
+
+  // Time-Locked Commitments & Trust Pacts
+  async getCommitments(filter: 'all' | 'mine' = 'mine'): Promise<{ commitments: TrustCommitment[] }> {
+    return request(`/api/commitments?filter=${filter}`);
+  },
+  async getCommitment(id: string): Promise<{ commitment: TrustCommitment }> {
+    return request(`/api/commitments/${id}`);
+  },
+  async createCommitment(data: {
+    title: string;
+    description: string;
+    category: string;
+    committerId?: string;
+    committerUsername?: string;
+    deadline: string;
+    trustRewardPoints?: number;
+    isPublic?: boolean;
+  }): Promise<{ commitment: TrustCommitment; message: string }> {
+    return request('/api/commitments', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  async acceptCommitment(
+    id: string,
+    pledgeNote: string,
+    confirmedDeadline?: string
+  ): Promise<{ commitment: TrustCommitment; message: string }> {
+    return request(`/api/commitments/${id}/accept`, {
+      method: 'PUT',
+      body: JSON.stringify({ pledgeNote, confirmedDeadline }),
+    });
+  },
+  async fulfillCommitment(id: string): Promise<{ commitment: TrustCommitment; message: string }> {
+    return request(`/api/commitments/${id}/fulfill`, {
+      method: 'PUT',
+    });
+  },
+  async checkoutCommitment(id: string): Promise<{
+    commitment: TrustCommitment;
+    receipt: TrustReceipt;
+    pointsAwarded: number;
+    onTime: boolean;
+    message: string;
+  }> {
+    return request(`/api/commitments/${id}/checkout`, {
+      method: 'PUT',
     });
   },
 

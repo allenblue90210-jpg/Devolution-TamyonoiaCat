@@ -989,6 +989,212 @@ app.post('/api/business/team', (req: Request, res: Response) => {
 });
 
 /* ==========================================================================
+   TIME-LOCKED COMMITMENTS & TRUST PACTS
+   ========================================================================== */
+
+app.get('/api/commitments', (req: Request, res: Response) => {
+  const userId = getSessionUserId(req);
+  const filter = req.query.filter as string;
+  if (filter === 'all') {
+    return res.json({ commitments: db.getCommitments() });
+  }
+  res.json({ commitments: db.getCommitmentsForUser(userId) });
+});
+
+app.get('/api/commitments/:id', (req: Request, res: Response) => {
+  const commitment = db.getCommitmentById(req.params.id);
+  if (!commitment) return res.status(404).json({ error: 'Commitment not found' });
+  res.json({ commitment });
+});
+
+app.post('/api/commitments', (req: Request, res: Response) => {
+  const requesterId = getSessionUserId(req);
+  const requester = db.getUserById(requesterId);
+  if (!requester) return res.status(401).json({ error: 'Unauthorized user' });
+
+  const { title, description, category, committerId, committerUsername, deadline, trustRewardPoints, isPublic } = req.body;
+  if (!title || !description || !deadline) {
+    return res.status(400).json({ error: 'Title, description, and target deadline are required.' });
+  }
+
+  let targetCommitter = committerId ? db.getUserById(committerId) : null;
+  if (!targetCommitter && committerUsername) {
+    targetCommitter = db.getUserByUsername(committerUsername);
+  }
+  if (!targetCommitter) {
+    targetCommitter = db.getUserById('usr_sarah_002') || db.getUsers()[1];
+  }
+
+  const newCommitment: TrustCommitment = {
+    id: `TC-${Math.floor(1000 + Math.random() * 9000)}`,
+    title,
+    description,
+    category: category || 'Vehicle & Transportation',
+    requesterId,
+    requesterName: requester.fullName,
+    requesterAvatar: requester.avatarUrl,
+    committerId: targetCommitter.id,
+    committerName: targetCommitter.fullName,
+    committerAvatar: targetCommitter.avatarUrl,
+    deadline,
+    status: 'pending_acceptance',
+    trustRewardPoints: Number(trustRewardPoints) || 25,
+    penaltyRateDailyPercent: 30, // 30% daily deduction on breach
+    penaltyCurrentDeductionPercent: 0,
+    isOverdue: false,
+    daysOverdue: 0,
+    isPublic: isPublic !== false,
+    createdAt: new Date().toISOString(),
+  };
+
+  db.createCommitment(newCommitment);
+
+  db.addNotification({
+    id: `notif_${Date.now()}`,
+    userId: targetCommitter.id,
+    type: 'receipt_action',
+    title: 'New Commitment Request Received',
+    message: `${requester.fullName} created a commitment pact: '${title}'. Sign your pledge and confirmed delivery time.`,
+    isRead: false,
+    createdAt: new Date().toISOString(),
+  });
+
+  res.status(201).json({ commitment: newCommitment, message: 'Commitment request created and posted.' });
+});
+
+app.put('/api/commitments/:id/accept', (req: Request, res: Response) => {
+  const commitment = db.getCommitmentById(req.params.id);
+  if (!commitment) return res.status(404).json({ error: 'Commitment not found' });
+
+  const { pledgeNote, confirmedDeadline } = req.body;
+  if (!pledgeNote) {
+    return res.status(400).json({ error: 'Committer pledge note is required (e.g. "I will bring it by 2:00 AM").' });
+  }
+
+  const updated = db.updateCommitment(commitment.id, {
+    status: 'active',
+    committerPledgeNote: pledgeNote,
+    deadline: confirmedDeadline || commitment.deadline,
+  });
+
+  db.addNotification({
+    id: `notif_${Date.now()}`,
+    userId: commitment.requesterId,
+    type: 'receipt_action',
+    title: 'Commitment Accepted & Timer Active',
+    message: `${commitment.committerName} accepted the commitment: "${pledgeNote}". Live countdown timer is now running.`,
+    isRead: false,
+    createdAt: new Date().toISOString(),
+  });
+
+  res.json({ commitment: updated, message: 'Commitment signed. Timer is now running.' });
+});
+
+app.put('/api/commitments/:id/fulfill', (req: Request, res: Response) => {
+  const commitment = db.getCommitmentById(req.params.id);
+  if (!commitment) return res.status(404).json({ error: 'Commitment not found' });
+
+  const updated = db.updateCommitment(commitment.id, {
+    status: 'fulfilled_pending_checkout',
+    checkedOutByCommitterAt: new Date().toISOString(),
+  });
+
+  db.addNotification({
+    id: `notif_${Date.now()}`,
+    userId: commitment.requesterId,
+    type: 'receipt_action',
+    title: 'Commitment Ready for Dual Checkout',
+    message: `${commitment.committerName} has marked '${commitment.title}' as fulfilled/delivered. Please confirm checkout to finalize trust score boost.`,
+    isRead: false,
+    createdAt: new Date().toISOString(),
+  });
+
+  res.json({ commitment: updated, message: 'Fulfillment registered. Awaiting requester checkout.' });
+});
+
+app.put('/api/commitments/:id/checkout', (req: Request, res: Response) => {
+  const commitment = db.getCommitmentById(req.params.id);
+  if (!commitment) return res.status(404).json({ error: 'Commitment not found' });
+
+  const now = new Date();
+  const deadlineDate = new Date(commitment.deadline);
+  const isFulfilledOnTime = now.getTime() <= deadlineDate.getTime();
+
+  const receiptId = `TR-${Math.floor(10000 + Math.random() * 90000)}`;
+  const trustReceipt: TrustReceipt = {
+    id: receiptId,
+    creatorId: commitment.requesterId,
+    creatorName: commitment.requesterName,
+    counterpartyName: commitment.committerName,
+    counterpartyContact: 'Attested Trust Identity',
+    counterpartyUserId: commitment.committerId,
+    interactionCategory: 'Service Contract',
+    title: `Fulfilled Commitment: ${commitment.title}`,
+    description: `Dual-attested fulfillment of time-locked trust pact. ${commitment.description}. Committer pledged: "${commitment.committerPledgeNote || 'As agreed'}".`,
+    status: 'completed',
+    completionConditions: `Delivered by deadline (${new Date(commitment.deadline).toLocaleString()}) and dual-verified.`,
+    isFulfillmentConfirmed: true,
+    evidenceAttachments: [
+      {
+        name: `Dual-Signoff_Attestation_${receiptId}.pdf`,
+        date: now.toISOString().split('T')[0],
+        size: '142 KB',
+      },
+    ],
+    history: [
+      {
+        timestamp: commitment.createdAt,
+        actor: commitment.requesterName,
+        event: 'Pact Request Created',
+      },
+      {
+        timestamp: commitment.checkedOutByCommitterAt || now.toISOString(),
+        actor: commitment.committerName,
+        event: 'Pledge Fulfilled & Handover Submitted',
+      },
+      {
+        timestamp: now.toISOString(),
+        actor: commitment.requesterName,
+        event: 'Dual Checkout Confirmed & Trust Points Awarded',
+      },
+    ],
+    isPublic: commitment.isPublic,
+    createdAt: commitment.createdAt,
+    completedAt: now.toISOString(),
+  };
+
+  db.createReceipt(trustReceipt);
+
+  const updated = db.updateCommitment(commitment.id, {
+    status: 'completed',
+    isOverdue: false,
+    daysOverdue: 0,
+    penaltyCurrentDeductionPercent: 0,
+    checkedOutByRequesterAt: now.toISOString(),
+    completedAt: now.toISOString(),
+    linkedReceiptId: receiptId,
+  });
+
+  db.addNotification({
+    id: `notif_${Date.now()}`,
+    userId: commitment.committerId,
+    type: 'receipt_action',
+    title: 'Commitment Successfully Checked Out!',
+    message: `Checkout confirmed for '${commitment.title}'. Dual-signed Trust Receipt ${receiptId} generated and trust rating boosted by +${commitment.trustRewardPoints} pts!`,
+    isRead: false,
+    createdAt: now.toISOString(),
+  });
+
+  res.json({
+    commitment: updated,
+    receipt: trustReceipt,
+    pointsAwarded: commitment.trustRewardPoints,
+    onTime: isFulfilledOnTime,
+    message: 'Checkout confirmed! Trust Receipt generated and rating boosted.',
+  });
+});
+
+/* ==========================================================================
    DISPUTES & AUDIT
    ========================================================================== */
 
