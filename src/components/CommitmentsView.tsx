@@ -23,6 +23,9 @@ import {
   FileText,
   ArrowLeft,
   Tag,
+  Eye,
+  Users,
+  Globe,
 } from 'lucide-react';
 
 interface CommitmentsViewProps {
@@ -181,6 +184,20 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
       onRefreshAllData();
     } catch (err: any) {
       alert(err.message || 'Failed to checkout commitment');
+    }
+  };
+
+  const handleRecordImpression = async (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    try {
+      const res = await api.recordCommitmentImpression(id, 'witness');
+      setCommitments((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, ...res.commitment, hasWitnessed: true } : c))
+      );
+      setActionSuccessMessage(res.message);
+      setTimeout(() => setActionSuccessMessage(null), 3500);
+    } catch (err: any) {
+      console.error('Failed to record impression:', err);
     }
   };
 
