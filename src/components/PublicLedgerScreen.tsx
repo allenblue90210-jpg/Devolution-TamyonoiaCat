@@ -147,6 +147,7 @@ export const PublicLedgerScreen: React.FC<PublicLedgerScreenProps> = ({
         title: postTitle,
         description: postDescription,
         category: postCategory,
+        otherCategoryDetails: postCategory === 'Other' ? postOtherCategoryDetails : undefined,
         committerId: postCommitterId || (availableUsers.find((u) => u.id !== currentUser.id)?.id || 'usr_sarah_002'),
         deadline: combinedDeadline,
         trustRewardPoints: postRewardPoints,
@@ -156,6 +157,7 @@ export const PublicLedgerScreen: React.FC<PublicLedgerScreenProps> = ({
       setShowPostCommitment(false);
       setPostTitle('');
       setPostDescription('');
+      setPostOtherCategoryDetails('');
       setToastMessage(
         postIsPublic
           ? 'Public commitment posted and broadcasted to the public ledger!'
@@ -186,6 +188,7 @@ export const PublicLedgerScreen: React.FC<PublicLedgerScreenProps> = ({
         counterpartyName: recCounterpartyName,
         counterpartyContact: recCounterpartyContact,
         interactionCategory: recCategory,
+        otherCategoryDetails: recCategory === 'Other' ? recOtherCategoryDetails : undefined,
         title: recTitle,
         description: recDescription,
         transactionValue: recValue || undefined,
@@ -196,6 +199,7 @@ export const PublicLedgerScreen: React.FC<PublicLedgerScreenProps> = ({
       setShowPostReceipt(false);
       setRecCounterpartyName('');
       setRecCounterpartyContact('');
+      setRecOtherCategoryDetails('');
       setRecTitle('');
       setRecDescription('');
       setRecConditions('');
@@ -496,16 +500,33 @@ export const PublicLedgerScreen: React.FC<PublicLedgerScreenProps> = ({
           </button>
         </div>
 
-        {/* Global Search within this screen */}
-        <div className="relative w-full md:w-72">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search people, pacts, or receipts..."
-            className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-indigo-500"
-          />
+        {/* Global Search and Category Filter within this screen */}
+        <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
+          <div className="relative w-full sm:w-64">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search people, pacts, or receipts..."
+              className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="w-full sm:w-auto px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden"
+          >
+            <option value="all">All Categories</option>
+            <option value="Vehicle & Transportation">Vehicle & Transportation</option>
+            <option value="Delivery & Logistics">Delivery & Logistics</option>
+            <option value="Financial & Lending">Financial & Lending</option>
+            <option value="Equipment & Machinery">Equipment & Machinery</option>
+            <option value="Professional Milestone">Professional Milestone</option>
+            <option value="Freelance Project">Freelance Project</option>
+            <option value="Goods Sale & Delivery">Goods Sale & Delivery</option>
+            <option value="Other">Other (Custom Pacts & Receipts)</option>
+          </select>
         </div>
       </div>
 
