@@ -17,6 +17,7 @@ import {
   BusinessEntity,
   TrustCommitment,
   GoodFaithRating,
+  PactComment,
 } from './src/types/trust.js';
 
 const app = express();
