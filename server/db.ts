@@ -933,6 +933,65 @@ class Database {
     }
     return false;
   }
+
+  // Commitment & Time-Locked Pacts Methods
+  public getCommitments(): TrustCommitment[] {
+    this.checkAndUpdateOverdueCommitments();
+    return this.data.commitments;
+  }
+
+  public getCommitmentsForUser(userId: string): TrustCommitment[] {
+    this.checkAndUpdateOverdueCommitments();
+    return this.data.commitments.filter(
+      (c) => c.requesterId === userId || c.committerId === userId
+    );
+  }
+
+  public getCommitmentById(id: string): TrustCommitment | undefined {
+    this.checkAndUpdateOverdueCommitments();
+    return this.data.commitments.find((c) => c.id === id);
+  }
+
+  public createCommitment(commitment: TrustCommitment): TrustCommitment {
+    this.data.commitments.unshift(commitment);
+    this.persist();
+    return commitment;
+  }
+
+  public updateCommitment(id: string, updates: Partial<TrustCommitment>): TrustCommitment | null {
+    const idx = this.data.commitments.findIndex((c) => c.id === id);
+    if (idx === -1) return null;
+    this.data.commitments[idx] = { ...this.data.commitments[idx], ...updates };
+    this.persist();
+    return this.data.commitments[idx];
+  }
+
+  public checkAndUpdateOverdueCommitments(): void {
+    const now = Date.now();
+    let changed = false;
+
+    for (const c of this.data.commitments) {
+      if (c.status === 'completed' || c.status === 'cancelled' || c.status === 'disputed') {
+        continue;
+      }
+      const deadlineMs = new Date(c.deadline).getTime();
+      if (now > deadlineMs) {
+        const days = Math.max(1, Math.ceil((now - deadlineMs) / (1000 * 60 * 60 * 24)));
+        const penalty = Math.min(90, days * 30);
+        if (c.status !== 'overdue' || c.daysOverdue !== days || c.penaltyCurrentDeductionPercent !== penalty) {
+          c.status = 'overdue';
+          c.isOverdue = true;
+          c.daysOverdue = days;
+          c.penaltyCurrentDeductionPercent = penalty;
+          changed = true;
+        }
+      }
+    }
+
+    if (changed) {
+      this.persist();
+    }
+  }
 }
 
 export const db = new Database();
