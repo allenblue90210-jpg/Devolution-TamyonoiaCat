@@ -21,8 +21,6 @@ import {
   CheckCircle2,
   Download,
   Search,
-  Menu,
-  X,
   User as UserIcon,
   Settings,
   Building2,
@@ -54,7 +52,6 @@ export const Navigation: React.FC<NavigationProps> = ({
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showGitMenu, setShowGitMenu] = useState(false);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [gitStatus, setGitStatus] = useState<any>(null);
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
@@ -473,54 +470,8 @@ export const Navigation: React.FC<NavigationProps> = ({
                 Sign In
               </button>
             )}
-
-            {/* 6. Mobile Hamburger / Menu Toggle Icon */}
-            <button
-              onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="lg:hidden p-2 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors flex items-center justify-center cursor-pointer"
-              title="Toggle Menu"
-              aria-label="Navigation Menu"
-            >
-              {showMobileMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
           </div>
         </div>
-
-        {/* Mobile Slide-down Navigation Drawer */}
-        {showMobileMenu && (
-          <div className="lg:hidden border-t border-slate-200 bg-white px-4 py-3 space-y-1 shadow-lg animate-in slide-in-from-top-2 duration-150">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2 py-1">
-              Platform Navigation
-            </div>
-            <div className="grid grid-cols-2 gap-1.5">
-              {navLinks.map((link) => {
-                const Icon = link.icon;
-                const isActive = currentTab === link.id;
-                return (
-                  <button
-                    key={link.id}
-                    onClick={() => {
-                      setShowMobileMenu(false);
-                      if (link.id === 'public-ledger') {
-                        onOpenPublicLedger?.();
-                      } else {
-                        onSelectTab(link.id);
-                      }
-                    }}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-colors text-left cursor-pointer ${
-                      isActive
-                        ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                        : 'text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    <Icon className={`w-4 h-4 ${isActive ? 'text-indigo-600' : 'text-slate-500'}`} />
-                    <span className="truncate">{link.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
       </header>
 
       {/* Mobile Fixed Bottom Navigation Bar */}
