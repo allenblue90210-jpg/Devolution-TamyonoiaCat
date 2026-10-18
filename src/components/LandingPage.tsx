@@ -755,18 +755,27 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         </div>
                       </div>
 
-                      {/* Star Rating */}
-                      <div className="flex items-center gap-0.5 shrink-0 bg-amber-50 px-2 py-1 rounded-md border border-amber-200/80">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-3.5 h-3.5 ${
-                              i < item.rating
-                                ? 'text-amber-500 fill-amber-400'
-                                : 'text-slate-200'
-                            }`}
-                          />
-                        ))}
+                      {/* Star Rating & Percentage Badge */}
+                      <div className="flex items-center gap-1.5 shrink-0 bg-amber-50 px-2 py-1 rounded-md border border-amber-200/80">
+                        <div className="flex items-center gap-0.5">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-3.5 h-3.5 ${
+                                i < item.rating
+                                  ? 'text-amber-500 fill-amber-400'
+                                  : 'text-slate-200'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className={`text-[10px] font-extrabold px-1 rounded ${
+                          item.rating === 5
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-amber-100 text-amber-800'
+                        }`}>
+                          {item.rating === 5 ? '100% Rating' : item.rating === 3 ? '50% Rating' : `${item.rating * 20}% Rating`}
+                        </span>
                       </div>
                     </div>
 
