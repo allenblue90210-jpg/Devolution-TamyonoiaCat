@@ -24,6 +24,7 @@ import {
   User as UserIcon,
   Settings,
   Building2,
+  X,
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -108,7 +109,42 @@ export const Navigation: React.FC<NavigationProps> = ({
     }
   };
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const [localNotifications, setLocalNotifications] = useState<InAppNotification[]>(notifications);
+
+  useEffect(() => {
+    setLocalNotifications(notifications);
+  }, [notifications]);
+
+  const unreadCount = localNotifications.filter((n) => !n.isRead).length;
+
+  const handleMarkAllRead = async () => {
+    setLocalNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    try {
+      await api.markAllNotificationsRead();
+    } catch (err) {
+      console.warn('Failed to mark all notifications read:', err);
+    }
+  };
+
+  const handleNotificationClick = async (n: InAppNotification) => {
+    setShowNotifications(false);
+    if (!n.isRead) {
+      setLocalNotifications((prev) => prev.map((item) => (item.id === n.id ? { ...item, isRead: true } : item)));
+      try {
+        await api.markNotificationRead(n.id);
+      } catch (err) {
+        console.warn('Failed to mark notification read:', err);
+      }
+    }
+    if (n.link?.includes('evidence') || n.type?.includes('evidence')) onSelectTab('evidence');
+    else if (n.link?.includes('relationships') || n.type?.includes('relationship')) onSelectTab('relationships');
+    else if (n.link?.includes('receipts') || n.type?.includes('receipt')) onSelectTab('receipts');
+    else if (n.link?.includes('commitments') || n.type?.includes('commitment')) onSelectTab('commitments');
+    else if (n.link?.includes('reputation') || n.type?.includes('reputation')) onSelectTab('reputation');
+    else if (n.link?.includes('business') || n.type?.includes('business')) onSelectTab('business');
+    else if (n.link?.includes('public-ledger')) onSelectTab('public-ledger');
+    else onSelectTab('dashboard');
+  };
 
   // Complete navigation links with clean, distinct Lucide icons
   const navLinks = [
@@ -309,42 +345,104 @@ export const Navigation: React.FC<NavigationProps> = ({
                 </button>
 
                 {showNotifications && (
-                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg border border-slate-200 shadow-lg py-2 z-50">
-                    <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
-                      <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Notifications
-                      </span>
-                      <span className="text-xs text-slate-400 font-mono tabular-nums">{unreadCount} unread</span>
-                    </div>
-                    <div className="max-h-72 overflow-y-auto divide-y divide-slate-100">
-                      {notifications.length === 0 ? (
-                        <div className="px-4 py-6 text-center text-xs text-slate-500">
-                          No notifications yet.
+                  <>
+                    {/* Backdrop for easy dismissal */}
+                    <div
+                      className="fixed inset-0 z-40 bg-slate-900/15 backdrop-blur-[1px] sm:bg-transparent"
+                      onClick={() => setShowNotifications(false)}
+                    />
+
+                    {/* Notification Dialog / Popover: responsive, guaranteed never cut off */}
+                    <div className="fixed sm:absolute inset-x-3 sm:inset-x-auto top-16 sm:top-full sm:right-0 sm:mt-2 sm:w-96 max-w-lg bg-white rounded-xl border border-slate-200/90 shadow-2xl z-50 overflow-hidden flex flex-col max-h-[80vh] sm:max-h-[32rem]">
+                      {/* Header */}
+                      <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/70 shrink-0">
+                        <div className="flex items-center gap-2">
+                          <Bell className="w-4 h-4 text-indigo-600" />
+                          <span className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                            Notifications
+                          </span>
+                          {unreadCount > 0 && (
+                            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700">
+                              {unreadCount} new
+                            </span>
+                          )}
                         </div>
-                      ) : (
-                        notifications.slice(0, 5).map((n) => (
-                          <div
-                            key={n.id}
-                            className={`px-4 py-3 hover:bg-slate-50 text-xs cursor-pointer ${
-                              !n.isRead ? 'bg-indigo-50/50' : ''
-                            }`}
-                            onClick={() => {
-                              setShowNotifications(false);
-                              if (n.link?.includes('evidence')) onSelectTab('evidence');
-                              else if (n.link?.includes('relationships')) onSelectTab('relationships');
-                              else if (n.link?.includes('receipts')) onSelectTab('receipts');
-                            }}
+                        <div className="flex items-center gap-2">
+                          {unreadCount > 0 && (
+                            <button
+                              onClick={handleMarkAllRead}
+                              className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
+                            >
+                              Mark all read
+                            </button>
+                          )}
+                          <button
+                            onClick={() => setShowNotifications(false)}
+                            className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
+                            title="Close notifications"
+                            aria-label="Close notifications"
                           >
-                            <div className="font-semibold text-slate-800">{n.title}</div>
-                            <div className="text-slate-500 text-[11px] mt-0.5">{n.message}</div>
-                            <div className="text-slate-400 text-[10px] mt-1">
-                              {new Date(n.createdAt).toLocaleDateString()}
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Notification list with full scrolling */}
+                      <div className="overflow-y-auto divide-y divide-slate-100 flex-1 overscroll-contain">
+                        {localNotifications.length === 0 ? (
+                          <div className="px-4 py-10 text-center text-slate-500 space-y-2">
+                            <div className="w-10 h-10 mx-auto rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+                              <Bell className="w-5 h-5" />
+                            </div>
+                            <div className="text-xs font-semibold text-slate-700">No notifications yet</div>
+                            <div className="text-[11px] text-slate-400 max-w-[200px] mx-auto">
+                              Updates on relationships, commitments, and trust receipts will appear here.
                             </div>
                           </div>
-                        ))
-                      )}
+                        ) : (
+                          localNotifications.map((n) => (
+                            <div
+                              key={n.id}
+                              onClick={() => handleNotificationClick(n)}
+                              className={`px-4 py-3 hover:bg-indigo-50/40 text-xs cursor-pointer transition-colors flex items-start gap-3 ${
+                                !n.isRead ? 'bg-indigo-50/60' : 'bg-white'
+                              }`}
+                            >
+                              <div className="mt-0.5 shrink-0">
+                                {!n.isRead ? (
+                                  <span className="block w-2 h-2 rounded-full bg-indigo-600 ring-2 ring-indigo-200" />
+                                ) : (
+                                  <span className="block w-2 h-2 rounded-full bg-slate-300" />
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0 space-y-1">
+                                <div className="font-semibold text-slate-900 leading-snug break-words">
+                                  {n.title}
+                                </div>
+                                <div className="text-slate-600 text-[11px] leading-relaxed break-words whitespace-pre-wrap">
+                                  {n.message}
+                                </div>
+                                <div className="text-slate-400 text-[10px] pt-0.5 font-mono">
+                                  {new Date(n.createdAt).toLocaleDateString(undefined, {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })}
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+
+                      {/* Footer */}
+                      <div className="px-4 py-2 bg-slate-50/80 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between shrink-0">
+                        <span>{localNotifications.length} total notification{localNotifications.length === 1 ? '' : 's'}</span>
+                        <span className="text-[10px] text-slate-400">Click any notification to open</span>
+                      </div>
                     </div>
-                  </div>
+                  </>
                 )}
               </div>
             )}
