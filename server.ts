@@ -1042,7 +1042,7 @@ app.patch('/api/commitments/:id', (req: Request, res: Response) => {
 
   if (isPublic !== undefined) {
     const updated = db.updateCommitment(id, { isPublic: Boolean(isPublic) });
-    return res.json({ commitment: updated, message: `Commitment set to ${updated.isPublic ? 'Public' : 'Private'}` });
+    return res.json({ commitment: updated, message: `Commitment set to ${updated?.isPublic ? 'Public' : 'Private'}` });
   }
   res.json({ commitment });
 });
