@@ -419,20 +419,12 @@ export default function App() {
         onSwitchUser={handleSwitchUser}
         availableUsers={availableUsers}
         onOpenSearch={() => setShowSearchModal(true)}
-        onOpenPublicLedger={() => setShowPublicLedgerModal(true)}
+        onOpenPublicLedger={() => handleSelectTab('public-ledger')}
       />
 
       <main className="flex-1 pb-16">{renderContent()}</main>
 
       {/* Modals */}
-      <PublicLedgerModal
-        isOpen={showPublicLedgerModal}
-        onClose={() => setShowPublicLedgerModal(false)}
-        currentUser={currentUser}
-        onSelectProfile={(username) => handleSelectTab(`profile-${username}`)}
-        availableUsers={availableUsers}
-        onRefreshData={refreshData}
-      />
 
       <PeopleSearchModal
         isOpen={showSearchModal}
