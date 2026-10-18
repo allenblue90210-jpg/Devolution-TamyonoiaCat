@@ -1623,6 +1623,120 @@ app.get('/api/export-data', (req: Request, res: Response) => {
 });
 
 /* ==========================================================================
+   REMEMBER LEDGER & PEER-REVIEWED EVIDENCE VAULT
+   ========================================================================== */
+
+app.get('/api/remember', (req: Request, res: Response) => {
+  const { tag, filter, q } = req.query as { tag?: string; filter?: string; q?: string };
+  const records = db.getRememberRecords(tag, filter, q);
+  res.json({ records, count: records.length });
+});
+
+app.get('/api/remember/:id', (req: Request, res: Response) => {
+  const record = db.getRememberRecordById(req.params.id);
+  if (!record) return res.status(404).json({ error: 'Remember record not found.' });
+  res.json({ record });
+});
+
+app.post('/api/remember', (req: Request, res: Response) => {
+  const userId = getSessionUserId(req);
+  const user = db.getUserById(userId);
+  const {
+    targetId,
+    targetName,
+    title,
+    description,
+    tags,
+    incidentDate,
+    evidenceItems,
+    attachedReviewer,
+    severityOrImpact,
+    isPublic,
+  } = req.body || {};
+
+  if (!title || !description || !targetName) {
+    return res.status(400).json({ error: 'Title, description, and target name are required.' });
+  }
+
+  let finalTags: string[] = Array.isArray(tags) && tags.length > 0 ? tags : ['Business'];
+
+  const reviewerUser = attachedReviewer?.userId ? db.getUserById(attachedReviewer.userId) : null;
+
+  const newRecord: RememberRecord = {
+    id: `REM-${Math.floor(1000 + Math.random() * 9000)}`,
+    authorId: userId,
+    authorName: user?.fullName || 'Verified Member',
+    authorAvatar: user?.avatarUrl,
+    targetId: targetId || undefined,
+    targetName: targetName.trim(),
+    targetAvatar: targetId ? db.getUserById(targetId)?.avatarUrl : undefined,
+    title: title.trim(),
+    description: description.trim(),
+    tags: finalTags,
+    incidentDate: incidentDate || new Date().toISOString().split('T')[0],
+    evidenceItems: Array.isArray(evidenceItems) ? evidenceItems : [],
+    attachedReviewer: {
+      userId: reviewerUser?.id || attachedReviewer?.userId || 'usr_sarah_002',
+      name: reviewerUser?.fullName || attachedReviewer?.name || 'Designated Reviewer',
+      avatarUrl: reviewerUser?.avatarUrl || attachedReviewer?.avatarUrl,
+      headline: reviewerUser?.headline || attachedReviewer?.headline || 'Independent Technical & Compliance Auditor',
+      qualificationNote: attachedReviewer?.qualificationNote || 'Attached as peer / domain authority in position to review evidence.',
+      status: 'pending',
+    },
+    corroborations: [],
+    severityOrImpact: severityOrImpact || 'Medium Substantive',
+    veracityScore: 90,
+    status: 'pending_review',
+    isPublic: isPublic !== false,
+    createdAt: new Date().toISOString(),
+  };
+
+  const created = db.createRememberRecord(newRecord);
+  res.status(201).json({ record: created, message: 'Remember record logged and broadcast to reviewer.' });
+});
+
+app.put('/api/remember/:id/review', (req: Request, res: Response) => {
+  const userId = getSessionUserId(req);
+  const { verdict, verdictComment, ratingScore } = req.body || {};
+  if (!verdict || !verdictComment) {
+    return res.status(400).json({ error: 'Verdict and review comment are required.' });
+  }
+  const updated = db.reviewRememberRecord(
+    req.params.id,
+    userId,
+    verdict,
+    verdictComment,
+    ratingScore ? Number(ratingScore) : 5
+  );
+  if (!updated) return res.status(404).json({ error: 'Remember record not found.' });
+  res.json({ record: updated, message: 'Review verdict and corroboration recorded.' });
+});
+
+app.post('/api/remember/:id/corroborate', (req: Request, res: Response) => {
+  const userId = getSessionUserId(req);
+  const user = db.getUserById(userId);
+  const { verdict, note, evidenceName } = req.body || {};
+  if (!note || !note.trim()) {
+    return res.status(400).json({ error: 'Corroboration note is required.' });
+  }
+
+  const corroboration: RememberCorroboration = {
+    id: `cor_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    authorId: userId,
+    authorName: user?.fullName || 'Verified Observer',
+    authorAvatar: user?.avatarUrl,
+    verdict: verdict || 'corroborated',
+    note: note.trim(),
+    evidenceName: evidenceName || undefined,
+    createdAt: new Date().toISOString(),
+  };
+
+  const updated = db.corroborateRememberRecord(req.params.id, corroboration);
+  if (!updated) return res.status(404).json({ error: 'Remember record not found.' });
+  res.status(201).json({ record: updated, corroboration, message: 'Corroboration logged.' });
+});
+
+/* ==========================================================================
    GITHUB CONTINUOUS REPO SYNC
    ========================================================================== */
 
