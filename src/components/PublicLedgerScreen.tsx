@@ -607,7 +607,7 @@ export const PublicLedgerScreen: React.FC<PublicLedgerScreenProps> = ({
                   </div>
 
                   <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                    {person.headline || 'Independent verified professional on the Aegis Trust Network.'}
+                    {person.headline || 'Independent verified professional on the Devolution Network.'}
                   </p>
 
                   {/* Verification & Metrics Pills */}

@@ -26,7 +26,7 @@ export const GoodFaithReviewModal: React.FC<GoodFaithReviewModalProps> = ({
   onClose,
   targetUserId,
   targetUsername,
-  targetName = 'Aegis Trust Network & Verified People',
+  targetName = 'Devolution Network & Verified People',
   onReviewSubmitted,
 }) => {
   const [rating, setRating] = useState(5);

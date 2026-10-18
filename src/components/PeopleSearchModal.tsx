@@ -307,7 +307,7 @@ export const PeopleSearchModal: React.FC<PeopleSearchModalProps> = ({
         <div className="p-3 sm:p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
           <div className="flex items-center gap-2">
             <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-            <span>Search connects to independently attested records on the Aegis Trust ledger</span>
+            <span>Search connects to independently attested records on the Devolution ledger</span>
           </div>
           <div className="text-[11px] text-slate-400 font-mono">
             {filteredResults.length} profile{filteredResults.length === 1 ? '' : 's'} available

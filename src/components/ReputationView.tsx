@@ -64,7 +64,7 @@ export const ReputationView: React.FC<ReputationViewProps> = ({ user, reputation
             Transparent Evidentiary Engine
           </h1>
           <p className="text-xs text-slate-600 max-w-2xl leading-relaxed">
-            Unlike opaque algorithms or arbitrary 3-digit credit scores, Aegis Trust breaks reputation down into independently verifiable evidence dimensions.
+            Unlike opaque algorithms or arbitrary 3-digit credit scores, Devolution breaks reputation down into independently verifiable evidence dimensions.
           </p>
         </div>
 
