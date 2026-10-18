@@ -731,6 +731,11 @@ class Database {
     this.save(this.data);
   }
 
+  public reload(): DatabaseSchema {
+    this.data = this.load();
+    return this.data;
+  }
+
   // User queries
   public getUserById(id: string): User | undefined {
     return this.data.users.find((u) => u.id === id);

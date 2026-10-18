@@ -1314,41 +1314,65 @@ async function getGitRepoStatus() {
   }
 }
 
-async function performGitPush(customMessage?: string) {
+async function performGitSync(customMessage?: string) {
   lastSyncStatus = 'syncing';
   try {
+    // 1. Fetch remote to see if there are any incoming updates from GitHub
+    try {
+      await execAsync('git fetch origin main');
+      const { stdout: revCountOut } = await execAsync('git rev-list HEAD..origin/main --count');
+      const remoteAhead = parseInt(revCountOut.trim(), 10) || 0;
+      if (remoteAhead > 0) {
+        console.log(`[Git Sync] Remote is ${remoteAhead} commit(s) ahead. Pulling latest updates from GitHub...`);
+        await execAsync('git pull origin main --no-edit');
+        db.reload();
+        console.log('[Git Sync] Successfully pulled updates from GitHub and reloaded database state.');
+      }
+    } catch (fetchErr: any) {
+      console.warn('[Git Sync Fetch Warning]:', fetchErr.message);
+    }
+
+    // 2. Check for local modifications and commit
     const { stdout: statusOut } = await execAsync('git status --porcelain');
     if (statusOut.trim().length > 0) {
       const msg = customMessage || `chore(sync): automated continuous sync [${new Date().toISOString()}]`;
       await execAsync('git add -A');
       await execAsync(`git commit -m "${msg.replace(/"/g, '\\"')}"`);
     }
-    await execAsync('git push origin main');
+
+    // 3. Check if local is ahead of remote and needs pushing
+    try {
+      const { stdout: unpushedCountOut } = await execAsync('git rev-list origin/main..HEAD --count');
+      const localAhead = parseInt(unpushedCountOut.trim(), 10) || 0;
+      if (localAhead > 0) {
+        console.log(`[Git Sync] Pushing ${localAhead} commit(s) to remote GitHub repository...`);
+        await execAsync('git push origin main');
+        console.log('[Git Sync] Successfully pushed to origin/main');
+      }
+    } catch (pushErr: any) {
+      console.warn('[Git Sync Push Warning]:', pushErr.message);
+    }
+
     lastSyncTime = new Date().toISOString();
     lastSyncStatus = 'synced';
-    lastSyncMessage = 'Successfully pushed latest changes to GitHub';
+    lastSyncMessage = 'Synchronized with GitHub';
     return await getGitRepoStatus();
   } catch (err: any) {
     lastSyncStatus = 'error';
-    lastSyncMessage = err.message || 'Push failed';
+    lastSyncMessage = err.message || 'Sync failed';
     throw err;
   }
 }
 
-// Continuous background sync every 45 seconds:
-// If file or state changes are detected, automatically commit & push to GitHub repository
+// Continuous background sync every 30 seconds:
+// Automatically polls GitHub remote for updates and pushes any local changes
 setInterval(async () => {
   try {
-    const { stdout: statusOut } = await execAsync('git status --porcelain');
-    if (statusOut.trim().length > 0) {
-      console.log('[Continuous Git Sync] Detected working changes, pushing to remote repository...');
-      await performGitPush('chore(sync): continuous auto-sync updates');
-      console.log('[Continuous Git Sync] Successfully pushed to origin/main');
-    }
+    await performGitSync('chore(sync): continuous auto-sync updates');
   } catch (err: any) {
-    console.warn('[Continuous Git Sync Notice]:', err.message);
+    // Continuous quiet background polling notice
   }
-}, 45000);
+}, 30000);
 
 app.get('/api/git/status', async (_req: Request, res: Response) => {
   const status = await getGitRepoStatus();
@@ -1358,10 +1382,19 @@ app.get('/api/git/status', async (_req: Request, res: Response) => {
 app.post('/api/git/sync', async (req: Request, res: Response) => {
   try {
     const { commitMessage } = req.body || {};
-    const result = await performGitPush(commitMessage);
+    const result = await performGitSync(commitMessage);
     res.json({ success: true, ...result });
   } catch (err: any) {
     res.status(500).json({ error: err.message || 'Failed to sync with repository' });
+  }
+});
+
+app.post('/api/git/pull', async (_req: Request, res: Response) => {
+  try {
+    const result = await performGitSync();
+    res.json({ success: true, ...result });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to pull updates from repository' });
   }
 });
 

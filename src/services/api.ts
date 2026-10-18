@@ -346,5 +346,22 @@ export const api = {
       body: JSON.stringify({ commitMessage }),
     });
   },
+  async pullGitRepo(): Promise<{
+    success: boolean;
+    clean: boolean;
+    uncommittedCount: number;
+    uncommittedFiles: string[];
+    lastCommit: { hash: string; message: string; relativeTime: string; author: string };
+    branch: string;
+    remoteUrl: string;
+    repoName: string;
+    lastSyncTime: string | null;
+    lastSyncStatus: 'synced' | 'syncing' | 'error';
+    lastSyncMessage: string | null;
+  }> {
+    return request('/api/git/pull', {
+      method: 'POST',
+    });
+  },
 };
 

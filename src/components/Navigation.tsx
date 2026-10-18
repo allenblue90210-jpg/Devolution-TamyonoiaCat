@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, InAppNotification } from '../types/trust.js';
 import { api } from '../services/api.js';
-import { ShieldCheck, Bell, ChevronDown, UserCheck, LogOut, Check, GitBranch, RefreshCw, ExternalLink, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Bell, ChevronDown, UserCheck, LogOut, Check, GitBranch, RefreshCw, ExternalLink, CheckCircle2, Download } from 'lucide-react';
 
 interface NavigationProps {
   currentUser: User | null;
@@ -50,10 +50,26 @@ export const Navigation: React.FC<NavigationProps> = ({
     try {
       const res = await api.syncGitRepo('chore(sync): manual sync from app UI');
       setGitStatus(res);
-      setSyncMessage('Repository synced and pushed successfully!');
+      setSyncMessage('Repository bidirectional sync completed successfully!');
       setTimeout(() => setSyncMessage(null), 3500);
     } catch (err: any) {
       setSyncMessage(err.message || 'Sync failed');
+      setTimeout(() => setSyncMessage(null), 4000);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const handlePullUpdates = async () => {
+    setSyncing(true);
+    setSyncMessage(null);
+    try {
+      const res = await api.pullGitRepo();
+      setGitStatus(res);
+      setSyncMessage('Pulled latest updates from GitHub!');
+      setTimeout(() => setSyncMessage(null), 3500);
+    } catch (err: any) {
+      setSyncMessage(err.message || 'Pull failed');
       setTimeout(() => setSyncMessage(null), 4000);
     } finally {
       setSyncing(false);
@@ -178,7 +194,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                   </div>
                   <div className="flex justify-between items-center text-[11px]">
                     <span className="text-slate-400">Auto-Sync:</span>
-                    <span className="text-slate-600">Continuously every 45s</span>
+                    <span className="text-slate-600">Active (polls remote & pushes every 30s)</span>
                   </div>
                 </div>
 
@@ -188,14 +204,25 @@ export const Navigation: React.FC<NavigationProps> = ({
                   </div>
                 )}
 
-                <button
-                  onClick={handleManualSync}
-                  disabled={syncing}
-                  className="w-full py-2 px-3 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
-                  <span>{syncing ? 'Pushing to GitHub...' : 'Push & Sync to Repo Now'}</span>
-                </button>
+                <div className="space-y-1.5 pt-1">
+                  <button
+                    onClick={handleManualSync}
+                    disabled={syncing}
+                    className="w-full py-2 px-3 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
+                    <span>{syncing ? 'Syncing with GitHub...' : 'Sync & Push to Repo Now'}</span>
+                  </button>
+
+                  <button
+                    onClick={handlePullUpdates}
+                    disabled={syncing}
+                    className="w-full py-1.5 px-3 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Pull Latest Updates from GitHub</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>
