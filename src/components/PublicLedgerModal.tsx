@@ -1118,6 +1118,8 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
                   <option value="Financial & Lending">Financial & Lending</option>
                   <option value="Equipment & Machinery">Equipment & Machinery</option>
                   <option value="Professional Milestone">Professional Milestone</option>
+                  <option value="Personal Promise">Personal Promise</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
 
@@ -1299,6 +1301,7 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
                     <option value="Contract Services">Contract Services</option>
                     <option value="Vehicle Purchase/Lease">Vehicle Purchase/Lease</option>
                     <option value="Financial Loan/Settlement">Financial Loan/Settlement</option>
+                    <option value="Other">Other</option>
                   </select>
                 </div>
                 <div>
