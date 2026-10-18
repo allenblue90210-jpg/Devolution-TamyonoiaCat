@@ -31,6 +31,7 @@ import {
   Compass,
   MapPin,
   Briefcase,
+  ChevronRight,
 } from 'lucide-react';
 
 interface PublicLedgerScreenProps {
@@ -551,7 +552,9 @@ export const PublicLedgerScreen: React.FC<PublicLedgerScreenProps> = ({
                       <div className="flex items-center gap-1.5">
                         <h3 className="font-bold text-slate-900 text-sm truncate">{person.fullName}</h3>
                         {person.identityStatus === 'verified' && (
-                          <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" title="Verified Identity" />
+                          <span title="Verified Identity" className="inline-flex">
+                            <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                          </span>
                         )}
                       </div>
                       <div className="text-xs text-slate-500 font-mono">@{person.username}</div>

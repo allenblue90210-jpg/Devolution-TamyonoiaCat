@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
+import fs from 'fs';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { db } from './server/db.js';
@@ -1448,9 +1449,13 @@ app.post('/api/git/pull', async (_req: Request, res: Response) => {
 async function initGitConfig() {
   try {
     await execAsync('git config user.name "allenblue90210-jpg"');
-    await execAsync('git config user.email "allenkinetic004@gmail.com"');
+    await execAsync('git config user.email "allenkinetic005@gmail.com"');
     await execAsync('git config pull.rebase false');
-    const token = process.env.GITHUB_TOKEN;
+    let token = process.env.GITHUB_TOKEN;
+    const tokenFile = path.resolve(process.cwd(), '.github_token');
+    if (!token && fs.existsSync(tokenFile)) {
+      token = fs.readFileSync(tokenFile, 'utf-8').trim();
+    }
     if (token) {
       await execAsync(`git remote set-url origin https://${token}@github.com/allenblue90210-jpg/Devolution-TamyonoiaCat.git`);
     }
