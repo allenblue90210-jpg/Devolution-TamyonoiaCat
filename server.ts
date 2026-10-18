@@ -1028,6 +1028,30 @@ app.post('/api/receipts/:id/dispute', (req: Request, res: Response) => {
   res.json({ receipt, dispute, message: 'Dispute recorded and escalated for review.' });
 });
 
+app.post('/api/receipts/:id/rate', (req: Request, res: Response) => {
+  const receipt = db.getReceiptById(req.params.id);
+  if (!receipt) return res.status(404).json({ error: 'Trust receipt not found.' });
+  const userId = getSessionUserId(req);
+  const user = db.getUserById(userId);
+  const { rating, badge, comment } = req.body || {};
+  const numRating = Number(rating) || 5;
+
+  const receiptRating: ReceiptRating = {
+    id: `rcp_rate_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    receiptId: receipt.id,
+    authorId: userId,
+    authorName: user?.fullName || 'Verified Member',
+    authorAvatar: user?.avatarUrl,
+    rating: Math.min(5, Math.max(1, numRating)),
+    badge: badge || 'Full Fulfillment Verified',
+    comment: (comment || '').trim(),
+    createdAt: new Date().toISOString(),
+  };
+
+  const updated = db.rateReceipt(receipt.id, receiptRating);
+  res.status(201).json({ rating: receiptRating, receipt: updated, message: 'Receipt rated and verified.' });
+});
+
 /* ==========================================================================
    PROFESSIONAL REFERENCES & REVIEWS
    ========================================================================== */
@@ -1458,6 +1482,52 @@ app.put('/api/commitments/:id/rate', (req: Request, res: Response) => {
   const badge = ratingBadge || (numRating === 100 ? '100% Exemplary Good Faith' : '50% Partial / Settled with Caveats');
   const updated = db.rateCommitment(commitment.id, numRating, badge);
   res.json({ commitment: updated, message: `Pact rated at ${numRating}%.` });
+});
+
+app.post('/api/commitments/:id/rate-review', (req: Request, res: Response) => {
+  const commitment = db.getCommitmentById(req.params.id);
+  if (!commitment) return res.status(404).json({ error: 'Commitment pact not found.' });
+  const userId = getSessionUserId(req);
+  const user = db.getUserById(userId);
+  const { rating, ratingPercent, badge, comment } = req.body || {};
+  const numRating = Number(rating) || 5;
+  const numPercent = ratingPercent ? Number(ratingPercent) : numRating >= 4 ? 100 : 50;
+
+  const pactRating: PactRating = {
+    id: `pct_rate_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    commitmentId: commitment.id,
+    authorId: userId,
+    authorName: user?.fullName || 'Verified Member',
+    authorAvatar: user?.avatarUrl,
+    rating: Math.min(5, Math.max(1, numRating)),
+    ratingPercent: numPercent,
+    badge: badge || (numPercent === 100 ? '100% Flawless Honor' : '50% Settled with Caveats'),
+    comment: (comment || '').trim(),
+    createdAt: new Date().toISOString(),
+  };
+
+  db.ratePactReview(commitment.id, pactRating);
+
+  if (comment && comment.trim()) {
+    let authorRole: 'Requester' | 'Committer' | 'Witness Observer' | 'Verified Counterparty' = 'Witness Observer';
+    if (userId === commitment.requesterId) authorRole = 'Requester';
+    else if (userId === commitment.committerId) authorRole = 'Committer';
+
+    db.addCommitmentComment(commitment.id, {
+      id: `pcmt_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      commitmentId: commitment.id,
+      authorId: userId,
+      authorName: user?.fullName || 'Verified Member',
+      authorAvatar: user?.avatarUrl,
+      authorRole,
+      text: comment.trim(),
+      ratingPercent: (numPercent === 100 || numPercent === 50) ? (numPercent as 100 | 50) : null,
+      createdAt: new Date().toISOString(),
+    });
+  }
+
+  const refreshed = db.getCommitmentById(commitment.id);
+  res.status(201).json({ rating: pactRating, commitment: refreshed, message: 'Pact reviewed, rated and recorded to ledger.' });
 });
 
 app.post('/api/commitments/:id/impression', (req: Request, res: Response) => {
