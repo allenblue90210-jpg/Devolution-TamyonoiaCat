@@ -79,6 +79,50 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
   // State for Dual Checkout Rating Selection (100% or 50%)
   const [checkoutRatings, setCheckoutRatings] = useState<Record<string, 100 | 50>>({});
 
+  // Rate Pact Modal State
+  const [showRatePactModal, setShowRatePactModal] = useState(false);
+  const [ratePactTarget, setRatePactTarget] = useState<TrustCommitment | null>(null);
+  const [ratePactStars, setRatePactStars] = useState<number>(5);
+  const [ratePactPercent, setRatePactPercent] = useState<number>(100);
+  const [ratePactBadge, setRatePactBadge] = useState<string>('100% Exemplary Good Faith Handover');
+  const [ratePactComment, setRatePactComment] = useState<string>('');
+  const [submittingPactRating, setSubmittingPactRating] = useState(false);
+
+  const handleOpenRatePactModal = (c: TrustCommitment) => {
+    setRatePactTarget(c);
+    setRatePactStars(5);
+    setRatePactPercent(100);
+    setRatePactBadge('100% Exemplary Good Faith Handover');
+    setRatePactComment('');
+    setShowRatePactModal(true);
+  };
+
+  const handleSubmitPactRating = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!ratePactTarget) return;
+    try {
+      setSubmittingPactRating(true);
+      const res = await api.ratePactReview(
+        ratePactTarget.id,
+        ratePactStars,
+        ratePactPercent,
+        ratePactBadge,
+        ratePactComment
+      );
+      setCommitments((prev) =>
+        prev.map((c) => (c.id === ratePactTarget.id ? res.commitment : c))
+      );
+      setShowRatePactModal(false);
+      setActionSuccessMessage(`Pact #${ratePactTarget.id} rated at ${ratePactStars} ★ (${ratePactBadge}) & synchronized to ledger!`);
+      setTimeout(() => setActionSuccessMessage(null), 4000);
+      onRefreshAllData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to submit pact rating');
+    } finally {
+      setSubmittingPactRating(false);
+    }
+  };
+
   // Live Clock Tick for Real-Time Countdown
   const [currentTime, setCurrentTime] = useState(Date.now());
 
