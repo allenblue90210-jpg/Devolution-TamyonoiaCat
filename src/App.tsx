@@ -70,6 +70,18 @@ export default function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
+  // Global Cmd+K / Ctrl+K listener for quick search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowSearchModal((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const handleSelectTab = (tab: string) => {
     if (tab !== currentTab) {
       setTabHistory((prev) => (prev[prev.length - 1] === currentTab ? prev : [...prev, currentTab]));
@@ -393,11 +405,18 @@ export default function App() {
         onOpenAuth={() => setShowAuthModal(true)}
         onSwitchUser={handleSwitchUser}
         availableUsers={availableUsers}
+        onOpenSearch={() => setShowSearchModal(true)}
       />
 
       <main className="flex-1 pb-16">{renderContent()}</main>
 
       {/* Modals */}
+      <PeopleSearchModal
+        isOpen={showSearchModal}
+        onClose={() => setShowSearchModal(false)}
+        onSelectUser={(username) => handleSelectTab(`profile-${username}`)}
+      />
+
       {showAuthModal && (
         <AuthModal
           onClose={() => setShowAuthModal(false)}
