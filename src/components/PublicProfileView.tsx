@@ -434,9 +434,16 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0">
+                      <div className="flex items-center gap-2 min-w-0 flex-wrap">
                         <span className="font-mono font-bold text-indigo-700 shrink-0">{cmt.id}</span>
                         <span className="font-bold text-slate-900 truncate">{cmt.title}</span>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider shrink-0 ${
+                          cmt.category === 'Other'
+                            ? 'bg-purple-100 text-purple-700 border border-purple-200'
+                            : 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                        }`}>
+                          {cmt.category === 'Other' && cmt.otherCategoryDetails ? `Other: ${cmt.otherCategoryDetails}` : cmt.category}
+                        </span>
                       </div>
                       <span
                         className={`px-2 py-0.5 rounded text-[10px] font-bold shrink-0 ${
@@ -516,7 +523,9 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
                       </span>
                     </div>
                     <div className="flex flex-wrap items-center gap-2 text-slate-500 text-[11px]">
-                      <span>Category: {rc.interactionCategory}</span>
+                      <span>
+                        Category: {rc.interactionCategory === 'Other' && rc.otherCategoryDetails ? `Other: ${rc.otherCategoryDetails}` : rc.interactionCategory}
+                      </span>
                       <span aria-hidden="true">·</span>
                       <span>Counterparty: {rc.counterpartyName}</span>
                       {rc.transactionValue && (
