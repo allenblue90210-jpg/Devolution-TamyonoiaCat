@@ -328,7 +328,11 @@ export const api = {
       method: 'PUT',
     });
   },
-  async checkoutCommitment(id: string): Promise<{
+  async checkoutCommitment(
+    id: string,
+    ratingPercent: number = 100,
+    ratingBadge?: string
+  ): Promise<{
     commitment: TrustCommitment;
     receipt: TrustReceipt;
     pointsAwarded: number;
@@ -337,6 +341,34 @@ export const api = {
   }> {
     return request(`/api/commitments/${id}/checkout`, {
       method: 'PUT',
+      body: JSON.stringify({ ratingPercent, ratingBadge }),
+    });
+  },
+  async addCommitmentComment(
+    id: string,
+    text: string,
+    ratingPercent?: 100 | 50 | null
+  ): Promise<{
+    comment: PactComment;
+    commitment: TrustCommitment;
+    message: string;
+  }> {
+    return request(`/api/commitments/${id}/comments`, {
+      method: 'POST',
+      body: JSON.stringify({ text, ratingPercent }),
+    });
+  },
+  async rateCommitment(
+    id: string,
+    ratingPercent: 100 | 50,
+    ratingBadge?: string
+  ): Promise<{
+    commitment: TrustCommitment;
+    message: string;
+  }> {
+    return request(`/api/commitments/${id}/rate`, {
+      method: 'PUT',
+      body: JSON.stringify({ ratingPercent, ratingBadge }),
     });
   },
   async recordCommitmentImpression(

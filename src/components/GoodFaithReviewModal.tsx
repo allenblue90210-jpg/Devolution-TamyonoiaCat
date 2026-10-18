@@ -129,36 +129,97 @@ export const GoodFaithReviewModal: React.FC<GoodFaithReviewModalProps> = ({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-          {/* Star Rating Selector */}
-          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2 text-center">
-            <label className="block text-xs font-bold text-slate-800">
-              Select Good Faith Rating (1 to 5 Stars) *
-            </label>
-            <div className="flex items-center justify-center gap-1 py-1">
-              {[1, 2, 3, 4, 5].map((star) => {
-                const active = (hoverRating || rating) >= star;
-                return (
-                  <button
-                    key={star}
-                    type="button"
-                    onMouseEnter={() => setHoverRating(star)}
-                    onMouseLeave={() => setHoverRating(0)}
-                    onClick={() => setRating(star)}
-                    className="p-1 focus:outline-hidden transform hover:scale-110 transition-transform cursor-pointer"
-                  >
-                    <Star
-                      className={`w-7 h-7 transition-colors ${
-                        active
-                          ? 'text-amber-500 fill-amber-400 filter drop-shadow-xs'
-                          : 'text-slate-300'
-                      }`}
-                    />
-                  </button>
-                );
-              })}
+          {/* Rating Percentage Selector (100% or 50% Presets) */}
+          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3 text-center">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-bold text-slate-800">
+                Good Faith Rating Level *
+              </label>
+              <span className={`px-2 py-0.5 rounded-full text-[11px] font-extrabold ${
+                rating === 5
+                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                  : rating === 3 || rating === 4
+                  ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                  : 'bg-red-100 text-red-800 border border-red-300'
+              }`}>
+                {rating === 5 ? '100% Rating' : rating === 3 ? '50% Rating' : `${rating * 20}% Rating`}
+              </span>
             </div>
-            <div className="text-[11px] font-semibold text-indigo-700">
-              {getRatingLabel(hoverRating || rating)}
+
+            {/* Quick 100% vs 50% Toggle Buttons */}
+            <div className="grid grid-cols-2 gap-2 text-left">
+              <button
+                type="button"
+                onClick={() => {
+                  setRating(5);
+                  setBadge('Exemplary Integrity');
+                }}
+                className={`p-2.5 rounded-lg border text-xs transition-all cursor-pointer ${
+                  rating === 5
+                    ? 'bg-emerald-50 border-emerald-500 text-emerald-950 font-bold ring-2 ring-emerald-300'
+                    : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-1.5 font-bold text-emerald-800">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span>100% Rating</span>
+                </div>
+                <p className="text-[10px] text-slate-500 mt-0.5">
+                  5 Stars · Full Good Faith & Flawless Honoring
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setRating(3);
+                  setBadge('Honest Dealings');
+                }}
+                className={`p-2.5 rounded-lg border text-xs transition-all cursor-pointer ${
+                  rating === 3
+                    ? 'bg-amber-50 border-amber-500 text-amber-950 font-bold ring-2 ring-amber-300'
+                    : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-1.5 font-bold text-amber-800">
+                  <Star className="w-4 h-4 text-amber-600 fill-amber-500" />
+                  <span>50% Rating</span>
+                </div>
+                <p className="text-[10px] text-slate-500 mt-0.5">
+                  3 Stars · Partial Fulfillment / Cautionary
+                </p>
+              </button>
+            </div>
+
+            {/* Interactive 5-Star Row */}
+            <div className="pt-1">
+              <div className="flex items-center justify-center gap-1 py-1">
+                {[1, 2, 3, 4, 5].map((star) => {
+                  const active = (hoverRating || rating) >= star;
+                  return (
+                    <button
+                      key={star}
+                      type="button"
+                      onMouseEnter={() => setHoverRating(star)}
+                      onMouseLeave={() => setHoverRating(0)}
+                      onClick={() => setRating(star)}
+                      className="p-1 focus:outline-hidden transform hover:scale-110 transition-transform cursor-pointer"
+                      title={`${star * 20}% Rating`}
+                    >
+                      <Star
+                        className={`w-7 h-7 transition-colors ${
+                          active
+                            ? 'text-amber-500 fill-amber-400 filter drop-shadow-xs'
+                            : 'text-slate-300'
+                        }`}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="text-[11px] font-semibold text-indigo-700 mt-1">
+                {getRatingLabel(hoverRating || rating)}
+              </div>
             </div>
           </div>
 
