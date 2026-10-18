@@ -27,7 +27,7 @@ import { PhoneVerificationModal } from './components/PhoneVerificationModal.js';
 import { IdentityVerificationModal } from './components/IdentityVerificationModal.js';
 import { AuthModal } from './components/AuthModal.js';
 import { PeopleSearchModal } from './components/PeopleSearchModal.js';
-import { PublicLedgerModal } from './components/PublicLedgerModal.js';
+import { PublicLedgerScreen } from './components/PublicLedgerScreen.js';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
