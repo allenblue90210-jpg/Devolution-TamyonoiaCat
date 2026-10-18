@@ -12,6 +12,10 @@ import {
   TrustCommitment,
   GoodFaithRating,
   PactComment,
+  PactRating,
+  ReceiptRating,
+  RememberRecord,
+  RememberCorroboration,
 } from '../src/types/trust.js';
 
 interface DatabaseSchema {
@@ -27,6 +31,7 @@ interface DatabaseSchema {
   phoneOtps: Record<string, { code: string; expiresAt: number }>;
   goodFaithRatings?: GoodFaithRating[];
   impressions?: Record<string, { impressions: number; witnessCount: number }>;
+  rememberRecords?: RememberRecord[];
 }
 
 const DB_FILE = path.resolve(process.cwd(), 'data', 'db.json');
