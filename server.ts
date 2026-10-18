@@ -18,6 +18,10 @@ import {
   TrustCommitment,
   GoodFaithRating,
   PactComment,
+  PactRating,
+  ReceiptRating,
+  RememberRecord,
+  RememberCorroboration,
 } from './src/types/trust.js';
 
 const app = express();

@@ -1560,6 +1560,120 @@ class Database {
     return commitment;
   }
 
+  public ratePactReview(commitmentId: string, pactRating: PactRating): TrustCommitment | null {
+    const commitment = this.data.commitments.find((c) => c.id === commitmentId);
+    if (!commitment) return null;
+    if (!commitment.ratingsList) commitment.ratingsList = [];
+    commitment.ratingsList.push(pactRating);
+    commitment.ratingsCount = commitment.ratingsList.length;
+    commitment.averageRating = Number(
+      (commitment.ratingsList.reduce((acc, r) => acc + (r.rating || 5), 0) / commitment.ratingsList.length).toFixed(1)
+    );
+    if (pactRating.ratingPercent) {
+      commitment.ratingPercent = pactRating.ratingPercent;
+    }
+    if (pactRating.badge) {
+      commitment.ratingBadge = pactRating.badge;
+    }
+    this.persist();
+    return commitment;
+  }
+
+  public rateReceipt(receiptId: string, rating: ReceiptRating): TrustReceipt | null {
+    const receipt = this.data.receipts.find((r) => r.id === receiptId);
+    if (!receipt) return null;
+    if (!receipt.ratings) receipt.ratings = [];
+    receipt.ratings.push(rating);
+    receipt.ratingsCount = receipt.ratings.length;
+    receipt.averageRating = Number(
+      (receipt.ratings.reduce((acc, r) => acc + (r.rating || 5), 0) / receipt.ratings.length).toFixed(1)
+    );
+    this.persist();
+    return receipt;
+  }
+
+  // Remember & Evidence Ledger Methods
+  public getRememberRecords(tag?: string, filter?: string, q?: string): RememberRecord[] {
+    let list = this.data.rememberRecords || [];
+    if (tag && tag !== 'all') {
+      const lowerTag = tag.toLowerCase();
+      list = list.filter((r) => r.tags.some((t) => t.toLowerCase() === lowerTag));
+    }
+    if (filter === 'verified') {
+      list = list.filter((r) => r.status === 'verified');
+    } else if (filter === 'pending_review') {
+      list = list.filter((r) => r.status === 'pending_review' || r.attachedReviewer.status === 'pending');
+    } else if (filter === 'disputed') {
+      list = list.filter((r) => r.status === 'disputed' || r.attachedReviewer.status === 'contested');
+    }
+    if (q && q.trim()) {
+      const query = q.toLowerCase();
+      list = list.filter(
+        (r) =>
+          r.title.toLowerCase().includes(query) ||
+          r.description.toLowerCase().includes(query) ||
+          r.targetName.toLowerCase().includes(query) ||
+          r.authorName.toLowerCase().includes(query) ||
+          r.attachedReviewer.name.toLowerCase().includes(query) ||
+          r.tags.some((t) => t.toLowerCase().includes(query))
+      );
+    }
+    return list;
+  }
+
+  public getRememberRecordById(id: string): RememberRecord | undefined {
+    return (this.data.rememberRecords || []).find((r) => r.id === id);
+  }
+
+  public createRememberRecord(record: RememberRecord): RememberRecord {
+    if (!this.data.rememberRecords) this.data.rememberRecords = [];
+    this.data.rememberRecords.unshift(record);
+    this.persist();
+    return record;
+  }
+
+  public reviewRememberRecord(
+    id: string,
+    reviewerId: string,
+    verdict: 'verified_corroborated' | 'contested' | 'under_review',
+    verdictComment: string,
+    ratingScore: number = 5
+  ): RememberRecord | null {
+    if (!this.data.rememberRecords) return null;
+    const record = this.data.rememberRecords.find((r) => r.id === id);
+    if (!record) return null;
+    record.attachedReviewer.status = verdict;
+    record.attachedReviewer.verdictComment = verdictComment;
+    record.attachedReviewer.reviewedAt = new Date().toISOString();
+    record.attachedReviewer.ratingScore = ratingScore;
+    if (verdict === 'verified_corroborated') {
+      record.status = 'verified';
+      record.veracityScore = Math.min(100, (record.veracityScore || 90) + 5);
+    } else if (verdict === 'contested') {
+      record.status = 'disputed';
+      record.veracityScore = Math.max(30, (record.veracityScore || 90) - 25);
+    }
+    record.updatedAt = new Date().toISOString();
+    this.persist();
+    return record;
+  }
+
+  public corroborateRememberRecord(id: string, corroboration: RememberCorroboration): RememberRecord | null {
+    if (!this.data.rememberRecords) return null;
+    const record = this.data.rememberRecords.find((r) => r.id === id);
+    if (!record) return null;
+    if (!record.corroborations) record.corroborations = [];
+    record.corroborations.push(corroboration);
+    if (corroboration.verdict === 'corroborated') {
+      record.veracityScore = Math.min(100, (record.veracityScore || 90) + 2);
+    } else if (corroboration.verdict === 'refuted') {
+      record.veracityScore = Math.max(20, (record.veracityScore || 90) - 10);
+    }
+    record.updatedAt = new Date().toISOString();
+    this.persist();
+    return record;
+  }
+
   // Good Faith Community Ratings & Comments
   public getGoodFaithRatings(targetId?: string): GoodFaithRating[] {
     const list = this.data.goodFaithRatings || [];
