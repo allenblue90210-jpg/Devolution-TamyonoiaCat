@@ -14,6 +14,7 @@ import {
   DisputeReport,
   InAppNotification,
   BusinessEntity,
+  TrustCommitment,
 } from './src/types/trust.js';
 
 const app = express();
@@ -284,8 +285,9 @@ app.get('/api/profiles/:username', (req: Request, res: Response) => {
 
   const references = db.getReferencesForUser(user.id).filter((rf) => rf.status === 'active');
   const disputes = db.getDisputes().filter((d) => d.targetId === user.id && d.status === 'open');
+  const publicCommitments = db.getCommitmentsForUser(user.id).filter((c) => c.isPublic);
 
-  const reputation = calculateReputation(user, allEvidence, allRelationships, allReceipts, references, disputes);
+  const reputation = calculateReputation(user, allEvidence, allRelationships, allReceipts, references, disputes, db.getCommitments());
 
   res.json({
     user: {
@@ -314,6 +316,7 @@ app.get('/api/profiles/:username', (req: Request, res: Response) => {
     publicEndorsers: user.privacySettings.showPublicEndorsers ? publicEndorsers : [],
     publicEvidence: user.privacySettings.showCredentials ? publicEvidence : [],
     publicReceipts,
+    publicCommitments,
     references,
     reputation,
   });
@@ -935,7 +938,7 @@ app.get('/api/reputation/:userId', (req: Request, res: Response) => {
   const references = db.getReferencesForUser(userId);
   const disputes = db.getDisputes().filter((d) => d.targetId === userId);
 
-  const breakdown = calculateReputation(user, evidence, relationships, receipts, references, disputes);
+  const breakdown = calculateReputation(user, evidence, relationships, receipts, references, disputes, db.getCommitments());
   res.json({ breakdown });
 });
 
