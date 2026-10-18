@@ -728,6 +728,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                     <option value="Equipment & Machinery">Equipment & Machinery</option>
                     <option value="Professional Milestone">Professional Milestone</option>
                     <option value="Personal Promise">Personal Promise</option>
+                    <option value="Other">Other</option>
                   </select>
                 </div>
 

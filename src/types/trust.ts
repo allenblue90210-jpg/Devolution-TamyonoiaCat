@@ -188,7 +188,8 @@ export interface TrustReceipt {
     | 'Loan / Micro-credit Repayment'
     | 'Property Lease'
     | 'Joint Venture'
-    | 'Service Contract';
+    | 'Service Contract'
+    | 'Other';
   title: string;
   description: string;
   transactionValue?: string;

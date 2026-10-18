@@ -542,6 +542,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                     <option value="Loan / Micro-credit Repayment">Loan / Micro-credit Repayment</option>
                     <option value="Property Lease">Property Lease</option>
                     <option value="Joint Venture">Joint Venture</option>
+                    <option value="Other">Other</option>
                   </select>
                 </div>
 
