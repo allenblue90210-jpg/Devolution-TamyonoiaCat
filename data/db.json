@@ -533,6 +533,89 @@
       "isPublic": true,
       "createdAt": "2025-03-20T08:00:00.000Z",
       "completedAt": "2025-05-10T16:00:00.000Z"
+    },
+    {
+      "id": "TR-61491",
+      "creatorId": "usr_allen_001",
+      "creatorName": "Allen Okoro",
+      "counterpartyName": "Dr. Sarah Adebayo",
+      "counterpartyContact": "Attested Trust Identity",
+      "counterpartyUserId": "usr_sarah_002",
+      "interactionCategory": "Other",
+      "otherCategoryDetails": "Specialty Research Equipment Custody & Calibration Pact",
+      "title": "Fulfilled Commitment: High-Precision Spectral Sensor Kit Custody & Return",
+      "description": "Dual-attested fulfillment of time-locked trust pact. Custody loan pact: Field spectrometer rig and optical sensors loaned to User B (Sarah) for cleanroom mineral testing. Pledged to be returned with zero scratch calibration by deadline.. Committer pledged: \"Sensors will be returned cleaned and calibrated by 2:00 AM.\".",
+      "status": "completed",
+      "completionConditions": "Delivered by deadline (10/22/2026, 2:00:00 AM) and dual-verified.",
+      "isFulfillmentConfirmed": true,
+      "evidenceAttachments": [
+        {
+          "name": "Dual-Signoff_Attestation_TR-61491.pdf",
+          "date": "2026-10-18",
+          "size": "142 KB"
+        }
+      ],
+      "history": [
+        {
+          "timestamp": "2026-10-18T10:00:00.000Z",
+          "actor": "Allen Okoro",
+          "event": "Pact Request Created"
+        },
+        {
+          "timestamp": "2026-10-18T21:33:18.047Z",
+          "actor": "Dr. Sarah Adebayo",
+          "event": "Pledge Fulfilled & Handover Submitted"
+        },
+        {
+          "timestamp": "2026-10-18T21:33:18.047Z",
+          "actor": "Allen Okoro",
+          "event": "Dual Checkout Confirmed & Trust Points Awarded"
+        }
+      ],
+      "isPublic": true,
+      "createdAt": "2026-10-18T10:00:00.000Z",
+      "completedAt": "2026-10-18T21:33:18.047Z"
+    },
+    {
+      "id": "TR-66576",
+      "creatorId": "usr_allen_001",
+      "creatorName": "Allen Okoro",
+      "counterpartyName": "Sarah Adesina",
+      "counterpartyContact": "Attested Trust Identity",
+      "counterpartyUserId": "usr_sarah_002",
+      "interactionCategory": "Service Contract",
+      "title": "Fulfilled Commitment: Loaner Audi RS5 Vehicle Return",
+      "description": "Dual-attested fulfillment of time-locked trust pact. Need my car back until tomorrow for client site review. Committer pledged: \"Ill bring it by 2am parked safely in the front driveway with full tank.\".",
+      "status": "completed",
+      "completionConditions": "Delivered by deadline (10/19/2026, 2:00:00 AM) and dual-verified.",
+      "isFulfillmentConfirmed": true,
+      "evidenceAttachments": [
+        {
+          "name": "Dual-Signoff_Attestation_TR-66576.pdf",
+          "date": "2026-10-18",
+          "size": "142 KB"
+        }
+      ],
+      "history": [
+        {
+          "timestamp": "2026-10-18T16:15:51.620Z",
+          "actor": "Allen Okoro",
+          "event": "Pact Request Created"
+        },
+        {
+          "timestamp": "2026-10-18T21:33:23.539Z",
+          "actor": "Sarah Adesina",
+          "event": "Pledge Fulfilled & Handover Submitted"
+        },
+        {
+          "timestamp": "2026-10-18T21:33:23.539Z",
+          "actor": "Allen Okoro",
+          "event": "Dual Checkout Confirmed & Trust Points Awarded"
+        }
+      ],
+      "isPublic": true,
+      "createdAt": "2026-10-18T16:15:51.620Z",
+      "completedAt": "2026-10-18T21:33:23.539Z"
     }
   ],
   "references": [
@@ -579,6 +662,24 @@
   ],
   "disputes": [],
   "notifications": [
+    {
+      "id": "notif_1792359203546",
+      "userId": "usr_sarah_002",
+      "type": "receipt_action",
+      "title": "Commitment Successfully Checked Out!",
+      "message": "Checkout confirmed for 'Loaner Audi RS5 Vehicle Return'. Dual-signed Trust Receipt TR-66576 generated and trust rating boosted by +25 pts!",
+      "isRead": false,
+      "createdAt": "2026-10-18T21:33:23.539Z"
+    },
+    {
+      "id": "notif_1792359198057",
+      "userId": "usr_sarah_002",
+      "type": "receipt_action",
+      "title": "Commitment Successfully Checked Out!",
+      "message": "Checkout confirmed for 'High-Precision Spectral Sensor Kit Custody & Return'. Dual-signed Trust Receipt TR-61491 generated and trust rating boosted by +35 pts!",
+      "isRead": false,
+      "createdAt": "2026-10-18T21:33:18.047Z"
+    },
     {
       "id": "notif_1792340155710",
       "userId": "usr_allen_001",
@@ -676,7 +777,7 @@
       "committerAvatar": "/src/assets/images/avatar_female_scientist_1792334645228.jpg",
       "deadline": "2026-10-22T02:00:00.000Z",
       "committerPledgeNote": "Sensors will be returned cleaned and calibrated by 2:00 AM.",
-      "status": "active",
+      "status": "completed",
       "trustRewardPoints": 35,
       "penaltyRateDailyPercent": 30,
       "penaltyCurrentDeductionPercent": 0,
@@ -686,7 +787,10 @@
       "createdAt": "2026-10-18T10:00:00.000Z",
       "impressions": 1420,
       "witnessCount": 71,
-      "positiveImpressions": 56
+      "positiveImpressions": 56,
+      "checkedOutByRequesterAt": "2026-10-18T21:33:18.047Z",
+      "completedAt": "2026-10-18T21:33:18.047Z",
+      "linkedReceiptId": "TR-61491"
     },
     {
       "id": "TC-3107",
@@ -700,7 +804,7 @@
       "committerName": "Sarah Adesina",
       "committerAvatar": "/src/assets/images/avatar_consultant_1792334644466.jpg",
       "deadline": "2026-10-19T02:00:00.000Z",
-      "status": "active",
+      "status": "completed",
       "trustRewardPoints": 25,
       "penaltyRateDailyPercent": 30,
       "penaltyCurrentDeductionPercent": 0,
@@ -711,7 +815,10 @@
       "committerPledgeNote": "Ill bring it by 2am parked safely in the front driveway with full tank.",
       "impressions": 980,
       "witnessCount": 49,
-      "positiveImpressions": 39
+      "positiveImpressions": 39,
+      "checkedOutByRequesterAt": "2026-10-18T21:33:23.539Z",
+      "completedAt": "2026-10-18T21:33:23.539Z",
+      "linkedReceiptId": "TR-66576"
     },
     {
       "id": "TC-8012",
