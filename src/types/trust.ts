@@ -40,6 +40,50 @@ export type VerificationResult =
 
 export type ReceiptStatus = 'pending' | 'confirmed' | 'completed' | 'disputed' | 'cancelled';
 
+export type CommitmentCategory =
+  | 'Vehicle & Transportation'
+  | 'Delivery & Logistics'
+  | 'Financial & Lending'
+  | 'Equipment & Machinery'
+  | 'Professional Milestone'
+  | 'Personal Promise';
+
+export type CommitmentStatus =
+  | 'pending_acceptance'
+  | 'active'
+  | 'fulfilled_pending_checkout'
+  | 'completed'
+  | 'overdue'
+  | 'disputed'
+  | 'cancelled';
+
+export interface TrustCommitment {
+  id: string; // e.g. TC-9014
+  title: string;
+  description: string;
+  category: CommitmentCategory;
+  requesterId: string; // User A
+  requesterName: string;
+  requesterAvatar?: string;
+  committerId: string; // User B
+  committerName: string;
+  committerAvatar?: string;
+  deadline: string; // ISO string e.g. 2026-10-19T02:00:00.000Z
+  committerPledgeNote?: string; // e.g. "I'll bring it by 2am"
+  status: CommitmentStatus;
+  trustRewardPoints: number; // e.g. +25
+  penaltyRateDailyPercent: number; // e.g. 30 (daily deduction when overdue)
+  penaltyCurrentDeductionPercent: number; // e.g. 30, 60
+  isOverdue: boolean;
+  daysOverdue: number;
+  checkedOutByCommitterAt?: string | null;
+  checkedOutByRequesterAt?: string | null;
+  linkedReceiptId?: string | null;
+  isPublic: boolean;
+  createdAt: string;
+  completedAt?: string | null;
+}
+
 export type ReferenceType =
   | 'relationship_confirmed'
   | 'interaction_linked'
