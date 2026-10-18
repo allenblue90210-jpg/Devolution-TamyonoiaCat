@@ -208,6 +208,18 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
         </div>
       )}
 
+      {toastMessage && (
+        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 font-medium flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{toastMessage}</span>
+          </div>
+          <button onClick={() => setToastMessage(null)} className="text-emerald-700 hover:text-emerald-950">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Header Banner */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xs">
         <div className="space-y-1">
@@ -464,16 +476,64 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                   ))}
                 </div>
               </div>
+
+              {/* Peer Ratings & Reviews Section */}
+              <div className="pt-2 border-t border-slate-100 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 font-bold text-slate-800">
+                    <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                    <span>Peer Ratings & Reviews ({selectedReceipt.ratings?.length || 0})</span>
+                  </div>
+                  {selectedReceipt.averageRating && (
+                    <span className="font-mono font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                      Average: {selectedReceipt.averageRating} / 5 ★
+                    </span>
+                  )}
+                </div>
+
+                {selectedReceipt.ratings && selectedReceipt.ratings.length > 0 ? (
+                  <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                    {selectedReceipt.ratings.map((rt) => (
+                      <div key={rt.id} className="p-2.5 rounded-lg bg-slate-50 border border-slate-200/80 space-y-1">
+                        <div className="flex items-center justify-between gap-2 text-[11px]">
+                          <span className="font-bold text-slate-900">{rt.authorName}</span>
+                          <div className="flex items-center gap-1 text-amber-600 font-mono font-bold">
+                            <span>{rt.rating} ★</span>
+                            {rt.badge && (
+                              <span className="text-[10px] text-slate-500 font-normal">· {rt.badge}</span>
+                            )}
+                          </div>
+                        </div>
+                        {rt.comment && <p className="text-slate-700 text-xs">{rt.comment}</p>}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-slate-400 italic text-[11px]">
+                    No ratings submitted for this receipt yet. Rate this transaction below.
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Bilateral Action Controls (Sandbox Interactive!) */}
             <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
-              <button
-                onClick={() => setShowDisputeModal(true)}
-                className="px-3 py-1.5 text-xs text-red-700 bg-red-50 hover:bg-red-100 rounded-lg font-medium"
-              >
-                Raise Dispute / Flag
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowDisputeModal(true)}
+                  className="px-3 py-1.5 text-xs text-red-700 bg-red-50 hover:bg-red-100 rounded-lg font-medium cursor-pointer"
+                >
+                  Raise Dispute / Flag
+                </button>
+
+                <button
+                  onClick={() => handleOpenRateModal(selectedReceipt)}
+                  className="px-3 py-1.5 text-xs text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Star className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Rate & Review Receipt</span>
+                </button>
+              </div>
 
               <div className="flex items-center gap-2">
                 {selectedReceipt.status === 'pending' && (
