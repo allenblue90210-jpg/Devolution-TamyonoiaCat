@@ -27,6 +27,7 @@ import { PhoneVerificationModal } from './components/PhoneVerificationModal.js';
 import { IdentityVerificationModal } from './components/IdentityVerificationModal.js';
 import { AuthModal } from './components/AuthModal.js';
 import { PeopleSearchModal } from './components/PeopleSearchModal.js';
+import { PublicLedgerModal } from './components/PublicLedgerModal.js';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -49,6 +50,7 @@ export default function App() {
   const [showPhoneModal, setShowPhoneModal] = useState<boolean>(false);
   const [showIdentityModal, setShowIdentityModal] = useState<boolean>(false);
   const [showSearchModal, setShowSearchModal] = useState<boolean>(false);
+  const [showPublicLedgerModal, setShowPublicLedgerModal] = useState<boolean>(false);
 
   const [tabHistory, setTabHistory] = useState<string[]>([]);
 
