@@ -1022,7 +1022,10 @@ app.post('/api/commitments', (req: Request, res: Response) => {
     targetCommitter = db.getUserByUsername(committerUsername);
   }
   if (!targetCommitter) {
-    targetCommitter = db.getUserById('usr_sarah_002') || db.getUsers()[1];
+    targetCommitter = db.getUserById('usr_sarah_002') || db.getState().users[0];
+  }
+  if (!targetCommitter) {
+    return res.status(400).json({ error: 'Committer counterparty not found' });
   }
 
   const newCommitment: TrustCommitment = {
@@ -1163,7 +1166,7 @@ app.put('/api/commitments/:id/checkout', (req: Request, res: Response) => {
     completedAt: now.toISOString(),
   };
 
-  db.createReceipt(trustReceipt);
+  db.addReceipt(trustReceipt);
 
   const updated = db.updateCommitment(commitment.id, {
     status: 'completed',
