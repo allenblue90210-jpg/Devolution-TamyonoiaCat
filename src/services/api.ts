@@ -480,5 +480,83 @@ export const api = {
   async getImpressions(targetId: string = 'network'): Promise<ProfileImpressions> {
     return request(`/api/impressions/${encodeURIComponent(targetId)}`);
   },
+
+  // Trust Receipts Rating & Reviews
+  async rateReceipt(
+    id: string,
+    rating: number,
+    badge?: string,
+    comment?: string
+  ): Promise<{ rating: ReceiptRating; receipt: TrustReceipt; message: string }> {
+    return request(`/api/receipts/${id}/rate`, {
+      method: 'POST',
+      body: JSON.stringify({ rating, badge, comment }),
+    });
+  },
+
+  // Comprehensive Pact Review & Rating
+  async ratePactReview(
+    id: string,
+    rating: number,
+    ratingPercent?: number,
+    badge?: string,
+    comment?: string
+  ): Promise<{ rating: PactRating; commitment: TrustCommitment; message: string }> {
+    return request(`/api/commitments/${id}/rate-review`, {
+      method: 'POST',
+      body: JSON.stringify({ rating, ratingPercent, badge, comment }),
+    });
+  },
+
+  // Remember & Evidence Ledger API
+  async getRememberRecords(params: { tag?: string; filter?: string; q?: string } = {}): Promise<{
+    records: RememberRecord[];
+    count: number;
+  }> {
+    const q = new URLSearchParams();
+    if (params.tag && params.tag !== 'all') q.set('tag', params.tag);
+    if (params.filter) q.set('filter', params.filter);
+    if (params.q) q.set('q', params.q);
+    const queryStr = q.toString() ? `?${q.toString()}` : '';
+    return request(`/api/remember${queryStr}`);
+  },
+
+  async getRememberRecordById(id: string): Promise<{ record: RememberRecord }> {
+    return request(`/api/remember/${id}`);
+  },
+
+  async createRememberRecord(data: Partial<RememberRecord>): Promise<{
+    record: RememberRecord;
+    message: string;
+  }> {
+    return request('/api/remember', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async reviewRememberRecord(
+    id: string,
+    verdict: 'verified_corroborated' | 'contested' | 'under_review',
+    verdictComment: string,
+    ratingScore?: number
+  ): Promise<{ record: RememberRecord; message: string }> {
+    return request(`/api/remember/${id}/review`, {
+      method: 'PUT',
+      body: JSON.stringify({ verdict, verdictComment, ratingScore }),
+    });
+  },
+
+  async corroborateRememberRecord(
+    id: string,
+    verdict: 'corroborated' | 'neutral' | 'refuted',
+    note: string,
+    evidenceName?: string
+  ): Promise<{ record: RememberRecord; corroboration: RememberCorroboration; message: string }> {
+    return request(`/api/remember/${id}/corroborate`, {
+      method: 'POST',
+      body: JSON.stringify({ verdict, note, evidenceName }),
+    });
+  },
 };
 
