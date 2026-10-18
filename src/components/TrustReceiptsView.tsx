@@ -16,6 +16,7 @@ import {
   ArrowLeft,
   Globe,
   Lock,
+  Tag,
 } from 'lucide-react';
 
 interface TrustReceiptsViewProps {
