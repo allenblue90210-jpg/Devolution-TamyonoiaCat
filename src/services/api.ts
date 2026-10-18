@@ -300,6 +300,7 @@ export const api = {
     otherCategoryDetails?: string;
     committerId?: string;
     committerUsername?: string;
+    committerName?: string;
     deadline: string;
     trustRewardPoints?: number;
     isPublic?: boolean;

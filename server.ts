@@ -1075,21 +1075,31 @@ app.post('/api/commitments', (req: Request, res: Response) => {
   const requester = db.getUserById(requesterId);
   if (!requester) return res.status(401).json({ error: 'Unauthorized user' });
 
-  const { title, description, category, otherCategoryDetails, committerId, committerUsername, deadline, trustRewardPoints, isPublic } = req.body;
+  const {
+    title,
+    description,
+    category,
+    otherCategoryDetails,
+    committerId,
+    committerUsername,
+    committerName: explicitCommitterName,
+    deadline,
+    trustRewardPoints,
+    isPublic,
+  } = req.body;
   if (!title || !description || !deadline) {
     return res.status(400).json({ error: 'Title, description, and target deadline are required.' });
   }
 
-  let targetCommitter = committerId ? db.getUserById(committerId) : null;
+  let targetCommitter = committerId && committerId !== 'other' ? db.getUserById(committerId) : null;
   if (!targetCommitter && committerUsername) {
     targetCommitter = db.getUserByUsername(committerUsername);
   }
-  if (!targetCommitter) {
-    targetCommitter = db.getUserById('usr_sarah_002') || db.getState().users[0];
-  }
-  if (!targetCommitter) {
-    return res.status(400).json({ error: 'Committer counterparty not found' });
-  }
+
+  const isExternalCommitter = committerId === 'other' || (!targetCommitter && Boolean(explicitCommitterName));
+  const finalCommitterId = targetCommitter ? targetCommitter.id : `ext_${Date.now()}`;
+  const finalCommitterName = targetCommitter ? targetCommitter.fullName : (explicitCommitterName || 'External Counterparty');
+  const finalCommitterAvatar = targetCommitter ? targetCommitter.avatarUrl : '';
 
   const newCommitment: TrustCommitment = {
     id: `TC-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -1100,9 +1110,9 @@ app.post('/api/commitments', (req: Request, res: Response) => {
     requesterId,
     requesterName: requester.fullName,
     requesterAvatar: requester.avatarUrl,
-    committerId: targetCommitter.id,
-    committerName: targetCommitter.fullName,
-    committerAvatar: targetCommitter.avatarUrl,
+    committerId: finalCommitterId,
+    committerName: finalCommitterName,
+    committerAvatar: finalCommitterAvatar,
     deadline,
     status: 'pending_acceptance',
     trustRewardPoints: Number(trustRewardPoints) || 25,
@@ -1120,15 +1130,17 @@ app.post('/api/commitments', (req: Request, res: Response) => {
 
   db.createCommitment(newCommitment);
 
-  db.addNotification({
-    id: `notif_${Date.now()}`,
-    userId: targetCommitter.id,
-    type: 'receipt_action',
-    title: 'New Commitment Request Received',
-    message: `${requester.fullName} created a commitment pact: '${title}'. Sign your pledge and confirmed delivery time.`,
-    isRead: false,
-    createdAt: new Date().toISOString(),
-  });
+  if (targetCommitter) {
+    db.addNotification({
+      id: `notif_${Date.now()}`,
+      userId: targetCommitter.id,
+      type: 'receipt_action',
+      title: 'New Commitment Request Received',
+      message: `${requester.fullName} created a commitment pact: '${title}'. Sign your pledge and confirmed delivery time.`,
+      isRead: false,
+      createdAt: new Date().toISOString(),
+    });
+  }
 
   res.status(201).json({ commitment: newCommitment, message: 'Commitment request created and posted.' });
 });
