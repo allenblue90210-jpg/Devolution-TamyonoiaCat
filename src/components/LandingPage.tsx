@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, CheckCircle2, Users, Receipt, Award, Lock, ArrowRight, ExternalLink, HelpCircle, ChevronRight, FileText, Check } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, Users, Receipt, Award, Lock, ArrowRight, ExternalLink, HelpCircle, ChevronRight, FileText, Check, Clock, Timer, Flame } from 'lucide-react';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -63,19 +63,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 Establish credibility through verified identities, independently confirmed peer relationships, dual-signed transaction receipts, and official registry credentials. An independent platform for individuals, founders, and businesses.
               </p>
 
-              <div className="pt-2 flex flex-wrap items-center gap-4">
+              <div className="pt-2 flex flex-wrap items-center gap-3">
                 <button
                   onClick={onGetStarted}
-                  className="px-6 py-3 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm inline-flex items-center gap-2"
+                  className="px-5 py-3 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm inline-flex items-center gap-2"
                 >
                   <span>Build Your Trust Profile</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => onExploreProfile('allenokoro')}
-                  className="px-6 py-3 text-sm font-semibold text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
+                  onClick={() => onNavigateTab('commitments')}
+                  className="px-5 py-3 text-sm font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors inline-flex items-center gap-2"
                 >
-                  Inspect Example Verified Profile
+                  <Clock className="w-4 h-4 text-indigo-600" />
+                  <span>Time-Locked Commitments</span>
+                </button>
+                <button
+                  onClick={() => onExploreProfile('allenokoro')}
+                  className="px-5 py-3 text-sm font-semibold text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
+                >
+                  View Verified Profile
                 </button>
               </div>
 
