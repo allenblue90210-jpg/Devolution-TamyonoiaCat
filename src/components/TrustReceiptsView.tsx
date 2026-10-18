@@ -616,6 +616,27 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                 />
               </div>
 
+              {/* Public vs Private Receipt Privacy Selector */}
+              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <div className="text-xs font-semibold text-slate-900 flex items-center gap-1.5">
+                    {isPublic ? <Globe className="w-3.5 h-3.5 text-indigo-600" /> : <Lock className="w-3.5 h-3.5 text-slate-500" />}
+                    <span>{isPublic ? 'Public Trust Receipt' : 'Private Trust Receipt'}</span>
+                  </div>
+                  <div className="text-[11px] text-slate-500 leading-tight">
+                    {isPublic
+                      ? 'Note: Public receipts appear on the public evidentiary ledger for anyone to inspect.'
+                      : 'Note: Private receipts remain completely confidential between counterparties only.'}
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={isPublic}
+                  onChange={(e) => setIsPublic(e.target.checked)}
+                  className="w-4 h-4 text-indigo-600 rounded border-slate-300"
+                />
+              </div>
+
               <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
                 <button
                   type="button"
