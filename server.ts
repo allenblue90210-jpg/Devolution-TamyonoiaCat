@@ -16,6 +16,7 @@ import {
   InAppNotification,
   BusinessEntity,
   TrustCommitment,
+  GoodFaithRating,
 } from './src/types/trust.js';
 
 const app = express();
