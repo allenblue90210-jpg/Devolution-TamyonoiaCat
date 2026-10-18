@@ -197,6 +197,8 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
         return <Wrench className="w-4 h-4 text-amber-600" />;
       case 'Professional Milestone':
         return <Briefcase className="w-4 h-4 text-purple-600" />;
+      case 'Other':
+        return <Tag className="w-4 h-4 text-purple-600" />;
       default:
         return <HeartHandshake className="w-4 h-4 text-slate-600" />;
     }
@@ -240,6 +242,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
   const activeCount = commitments.filter((c) => c.status === 'active' || c.status === 'fulfilled_pending_checkout').length;
   const completedCount = commitments.filter((c) => c.status === 'completed').length;
   const overdueCount = commitments.filter((c) => c.status === 'overdue' || (c.status !== 'completed' && new Date(c.deadline).getTime() < currentTime)).length;
+  const otherCount = commitments.filter((c) => c.category === 'Other').length;
   const onTimeRate = totalCount > 0 ? Math.round((completedCount / Math.max(1, completedCount + overdueCount)) * 100) : 100;
 
   // Filtered List
@@ -257,6 +260,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
     }
     if (activeFilter === 'completed') return c.status === 'completed';
     if (activeFilter === 'overdue') return c.status === 'overdue' || isPastDeadline;
+    if (activeFilter === 'other') return c.category === 'Other';
     return true;
   });
 
@@ -380,6 +384,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
           { id: 'action_needed', label: 'Action Needed' },
           { id: 'completed', label: `Completed (${completedCount})` },
           { id: 'overdue', label: `Overdue / Defaulted (${overdueCount})` },
+          { id: 'other', label: `Other Pacts (${otherCount})` },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -442,7 +447,13 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
                       {getCategoryIcon(c.category)}
-                      <span>{c.category}</span>
+                      {c.category === 'Other' ? (
+                        <span className="font-semibold text-purple-700">
+                          {c.otherCategoryDetails ? `Other: ${c.otherCategoryDetails}` : 'Other (Custom)'}
+                        </span>
+                      ) : (
+                        <span>{c.category}</span>
+                      )}
                       <span className="text-slate-300 font-mono">·</span>
                       <span className="font-mono text-slate-500 text-[11px]">{c.id}</span>
                     </div>
