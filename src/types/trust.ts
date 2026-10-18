@@ -136,6 +136,10 @@ export interface User {
   businessName?: string;
   businessRegNumber?: string;
   privacySettings: UserPrivacySettings;
+  impressions?: number;
+  witnessCount?: number;
+  goodFaithRating?: number;
+  ratingsCount?: number;
   createdAt: string;
 }
 
@@ -346,3 +350,38 @@ export interface ReputationBreakdown {
   transparentFormulaNotice: string;
   disclaimer: string;
 }
+
+export type GoodFaithBadge =
+  | 'Exemplary Integrity'
+  | 'Verified Partner'
+  | 'Prompt Delivery'
+  | 'Honest Dealings'
+  | 'Trusted Collaborator'
+  | 'Civic Good Faith';
+
+export interface GoodFaithRating {
+  id: string;
+  targetUserId?: string; // target profile user ID or 'network'
+  targetUsername?: string; // e.g. 'allenokoro', 'sarah_adesina', etc.
+  authorId?: string;
+  authorName: string;
+  authorAvatar?: string;
+  authorTitle?: string;
+  rating: number; // 1 to 5
+  goodFaithBadge?: GoodFaithBadge;
+  comment: string;
+  context?: string; // e.g. "Software Architecture & Delivery"
+  impressions?: number;
+  helpfulCount: number;
+  hasMarkedHelpful?: boolean;
+  createdAt: string;
+}
+
+export interface ProfileImpressions {
+  targetId: string;
+  impressions: number;
+  witnessCount: number;
+  averageRating: number;
+  ratingsCount: number;
+}
+
