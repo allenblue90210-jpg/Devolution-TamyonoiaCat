@@ -9,6 +9,7 @@ import {
   DisputeReport,
   InAppNotification,
   BusinessEntity,
+  TrustCommitment,
 } from '../src/types/trust.js';
 
 interface DatabaseSchema {
@@ -20,6 +21,7 @@ interface DatabaseSchema {
   disputes: DisputeReport[];
   notifications: InAppNotification[];
   businesses: BusinessEntity[];
+  commitments: TrustCommitment[];
   phoneOtps: Record<string, { code: string; expiresAt: number }>;
 }
 
