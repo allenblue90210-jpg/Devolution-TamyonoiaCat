@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api.js';
-import { User, EvidenceItem, ProfessionalReference, ReputationBreakdown } from '../types/trust.js';
+import { User, EvidenceItem, ProfessionalReference, ReputationBreakdown, TrustCommitment } from '../types/trust.js';
 import {
   ShieldCheck,
   CheckCircle2,
@@ -19,6 +19,10 @@ import {
   Calendar,
   MessageSquare,
   FileCheck,
+  Clock,
+  Timer,
+  Flame,
+  TrendingUp,
 } from 'lucide-react';
 
 interface PublicProfileViewProps {
@@ -36,6 +40,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
     publicEndorsers: any[];
     publicEvidence: EvidenceItem[];
     publicReceipts: any[];
+    publicCommitments?: TrustCommitment[];
     references: ProfessionalReference[];
     reputation: ReputationBreakdown;
   } | null>(null);

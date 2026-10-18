@@ -17,6 +17,7 @@ import { EvidenceCenter } from './components/EvidenceCenter.js';
 import { RelationshipsView } from './components/RelationshipsView.js';
 import { AcceptInviteView } from './components/AcceptInviteView.js';
 import { TrustReceiptsView } from './components/TrustReceiptsView.js';
+import { CommitmentsView } from './components/CommitmentsView.js';
 import { PublicProfileView } from './components/PublicProfileView.js';
 import { ReputationView } from './components/ReputationView.js';
 import { DirectoryView } from './components/DirectoryView.js';
@@ -252,6 +253,16 @@ export default function App() {
               Sign In to View Dashboard
             </button>
           </div>
+        );
+
+      case 'commitments':
+        return (
+          <CommitmentsView
+            currentUser={currentUser}
+            onSelectTab={handleSelectTab}
+            availableUsers={availableUsers}
+            onRefreshAllData={refreshData}
+          />
         );
 
       case 'evidence':
