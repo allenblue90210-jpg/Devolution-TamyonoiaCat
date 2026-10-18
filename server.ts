@@ -1323,6 +1323,10 @@ app.put('/api/commitments/:id/checkout', (req: Request, res: Response) => {
   const commitment = db.getCommitmentById(req.params.id);
   if (!commitment) return res.status(404).json({ error: 'Commitment not found' });
 
+  const { ratingPercent = 100, ratingBadge } = req.body || {};
+  const numRating = Number(ratingPercent) === 50 ? 50 : 100;
+  const verifiedBadge = ratingBadge || (numRating === 100 ? '100% Exemplary Good Faith Handover' : '50% Partial / Settled with Caveats');
+
   const now = new Date();
   const deadlineDate = new Date(commitment.deadline);
   const isFulfilledOnTime = now.getTime() <= deadlineDate.getTime();
@@ -1338,9 +1342,9 @@ app.put('/api/commitments/:id/checkout', (req: Request, res: Response) => {
     interactionCategory: commitment.category === 'Other' ? 'Other' : 'Service Contract',
     otherCategoryDetails: commitment.category === 'Other' ? (commitment.otherCategoryDetails || 'Custom Handover Pact') : undefined,
     title: `Fulfilled Commitment: ${commitment.title}`,
-    description: `Dual-attested fulfillment of time-locked trust pact. ${commitment.description}. Committer pledged: "${commitment.committerPledgeNote || 'As agreed'}".`,
+    description: `Dual-attested fulfillment of time-locked trust pact (${numRating}% Rating). ${commitment.description}. Committer pledged: "${commitment.committerPledgeNote || 'As agreed'}".`,
     status: 'completed',
-    completionConditions: `Delivered by deadline (${new Date(commitment.deadline).toLocaleString()}) and dual-verified.`,
+    completionConditions: `Delivered by deadline (${new Date(commitment.deadline).toLocaleString()}) and dual-verified at ${numRating}% rating.`,
     isFulfillmentConfirmed: true,
     evidenceAttachments: [
       {
@@ -1363,7 +1367,7 @@ app.put('/api/commitments/:id/checkout', (req: Request, res: Response) => {
       {
         timestamp: now.toISOString(),
         actor: commitment.requesterName,
-        event: 'Dual Checkout Confirmed & Trust Points Awarded',
+        event: `Dual Checkout Confirmed (${numRating}% Rating Awarded)`,
       },
     ],
     isPublic: commitment.isPublic,
@@ -1381,14 +1385,16 @@ app.put('/api/commitments/:id/checkout', (req: Request, res: Response) => {
     checkedOutByRequesterAt: now.toISOString(),
     completedAt: now.toISOString(),
     linkedReceiptId: receiptId,
+    ratingPercent: numRating,
+    ratingBadge: verifiedBadge,
   });
 
   db.addNotification({
     id: `notif_${Date.now()}`,
     userId: commitment.committerId,
     type: 'receipt_action',
-    title: 'Commitment Successfully Checked Out!',
-    message: `Checkout confirmed for '${commitment.title}'. Dual-signed Trust Receipt ${receiptId} generated and trust rating boosted by +${commitment.trustRewardPoints} pts!`,
+    title: `Commitment Checked Out (${numRating}% Rating)!`,
+    message: `Checkout confirmed for '${commitment.title}' at ${numRating}% rating. Dual-signed Trust Receipt ${receiptId} generated!`,
     isRead: false,
     createdAt: now.toISOString(),
   });
@@ -1396,10 +1402,58 @@ app.put('/api/commitments/:id/checkout', (req: Request, res: Response) => {
   res.json({
     commitment: updated,
     receipt: trustReceipt,
-    pointsAwarded: commitment.trustRewardPoints,
+    pointsAwarded: numRating === 100 ? commitment.trustRewardPoints : Math.round(commitment.trustRewardPoints * 0.5),
     onTime: isFulfilledOnTime,
-    message: 'Checkout confirmed! Trust Receipt generated and rating boosted.',
+    message: `Checkout confirmed at ${numRating}% rating! Trust Receipt generated and reputation updated.`,
   });
+});
+
+app.post('/api/commitments/:id/comments', (req: Request, res: Response) => {
+  const commitment = db.getCommitmentById(req.params.id);
+  if (!commitment) return res.status(404).json({ error: 'Commitment not found' });
+  const userId = getSessionUserId(req);
+  const user = db.getUserById(userId);
+  const { text, ratingPercent } = req.body || {};
+  if (!text || !text.trim()) {
+    return res.status(400).json({ error: 'Comment text is required.' });
+  }
+
+  let authorRole: 'Requester' | 'Committer' | 'Witness Observer' | 'Verified Counterparty' = 'Witness Observer';
+  if (userId === commitment.requesterId) {
+    authorRole = 'Requester';
+  } else if (userId === commitment.committerId) {
+    authorRole = 'Committer';
+  }
+
+  const numRating = ratingPercent === 100 || ratingPercent === 50 ? ratingPercent : null;
+
+  const comment: PactComment = {
+    id: `pcmt_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    commitmentId: commitment.id,
+    authorId: userId,
+    authorName: user?.fullName || 'Verified Member',
+    authorAvatar: user?.avatarUrl,
+    authorRole,
+    text: text.trim(),
+    ratingPercent: numRating,
+    createdAt: new Date().toISOString(),
+  };
+
+  const updated = db.addCommitmentComment(commitment.id, comment);
+  res.status(201).json({ comment, commitment: updated, message: 'Comment added to pact successfully.' });
+});
+
+app.put('/api/commitments/:id/rate', (req: Request, res: Response) => {
+  const commitment = db.getCommitmentById(req.params.id);
+  if (!commitment) return res.status(404).json({ error: 'Commitment not found' });
+  const { ratingPercent, ratingBadge } = req.body || {};
+  const numRating = Number(ratingPercent);
+  if (numRating !== 100 && numRating !== 50) {
+    return res.status(400).json({ error: 'Rating must be either 100% or 50%.' });
+  }
+  const badge = ratingBadge || (numRating === 100 ? '100% Exemplary Good Faith' : '50% Partial / Settled with Caveats');
+  const updated = db.rateCommitment(commitment.id, numRating, badge);
+  res.json({ commitment: updated, message: `Pact rated at ${numRating}%.` });
 });
 
 app.post('/api/commitments/:id/impression', (req: Request, res: Response) => {
