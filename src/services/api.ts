@@ -401,5 +401,47 @@ export const api = {
       method: 'POST',
     });
   },
+  async getRatings(target?: string): Promise<{
+    ratings: GoodFaithRating[];
+    averageRating: number;
+    totalRatings: number;
+    impressions: number;
+    witnessCount: number;
+  }> {
+    const q = target ? `?target=${encodeURIComponent(target)}` : '';
+    return request(`/api/ratings${q}`);
+  },
+  async createRating(data: {
+    targetUserId?: string;
+    targetUsername?: string;
+    authorName?: string;
+    authorTitle?: string;
+    rating: number;
+    goodFaithBadge?: string;
+    comment: string;
+    context?: string;
+  }): Promise<{ rating: GoodFaithRating; message: string }> {
+    return request('/api/ratings', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  async markRatingHelpful(id: string): Promise<{ rating: GoodFaithRating; message: string }> {
+    return request(`/api/ratings/${id}/helpful`, {
+      method: 'POST',
+    });
+  },
+  async recordImpression(
+    targetId: string = 'network',
+    isWitness: boolean = false
+  ): Promise<ProfileImpressions> {
+    return request('/api/impressions', {
+      method: 'POST',
+      body: JSON.stringify({ targetId, isWitness }),
+    });
+  },
+  async getImpressions(targetId: string = 'network'): Promise<ProfileImpressions> {
+    return request(`/api/impressions/${encodeURIComponent(targetId)}`);
+  },
 };
 
