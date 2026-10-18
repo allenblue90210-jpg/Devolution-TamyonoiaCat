@@ -67,6 +67,7 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
   const [postTitle, setPostTitle] = useState('');
   const [postDescription, setPostDescription] = useState('');
   const [postCategory, setPostCategory] = useState<CommitmentCategory>('Vehicle & Transportation');
+  const [postOtherCategoryDetails, setPostOtherCategoryDetails] = useState('');
   const [postCommitterId, setPostCommitterId] = useState('');
   const [postDeadlineDate, setPostDeadlineDate] = useState('');
   const [postDeadlineTime, setPostDeadlineTime] = useState('02:00');
@@ -80,6 +81,7 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
   const [recCounterpartyName, setRecCounterpartyName] = useState('');
   const [recCounterpartyContact, setRecCounterpartyContact] = useState('');
   const [recCategory, setRecCategory] = useState<TrustReceipt['interactionCategory']>('Freelance Project');
+  const [recOtherCategoryDetails, setRecOtherCategoryDetails] = useState('');
   const [recTitle, setRecTitle] = useState('');
   const [recDescription, setRecDescription] = useState('');
   const [recValue, setRecValue] = useState('');
@@ -159,6 +161,7 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
         title: postTitle,
         description: postDescription,
         category: postCategory,
+        otherCategoryDetails: postCategory === 'Other' ? postOtherCategoryDetails : undefined,
         committerId: postCommitterId || (availableUsers.find((u) => u.id !== currentUser.id)?.id || 'usr_sarah_002'),
         deadline: combinedDeadline,
         trustRewardPoints: postRewardPoints,
@@ -168,6 +171,7 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
       setShowPostCommitment(false);
       setPostTitle('');
       setPostDescription('');
+      setPostOtherCategoryDetails('');
       setToastMessage(
         postIsPublic
           ? 'Public commitment posted and broadcasted to the public ledger!'
@@ -198,6 +202,7 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
         counterpartyName: recCounterpartyName,
         counterpartyContact: recCounterpartyContact,
         interactionCategory: recCategory,
+        otherCategoryDetails: recCategory === 'Other' ? recOtherCategoryDetails : undefined,
         title: recTitle,
         description: recDescription,
         transactionValue: recValue || undefined,
@@ -208,6 +213,7 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
       setShowPostReceipt(false);
       setRecCounterpartyName('');
       setRecCounterpartyContact('');
+      setRecOtherCategoryDetails('');
       setRecTitle('');
       setRecDescription('');
       setRecConditions('');
