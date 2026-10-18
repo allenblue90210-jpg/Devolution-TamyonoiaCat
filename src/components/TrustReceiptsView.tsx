@@ -188,6 +188,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
           { id: 'confirmed', label: 'Confirmed / Active', count: receipts.filter((r) => r.status === 'confirmed').length },
           { id: 'pending', label: 'Pending Sign-Off', count: receipts.filter((r) => r.status === 'pending').length },
           { id: 'disputed', label: 'Disputed', count: receipts.filter((r) => r.status === 'disputed').length },
+          { id: 'other', label: 'Other / Custom', count: receipts.filter((r) => r.interactionCategory === 'Other').length },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -243,7 +244,14 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                     )}
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-slate-500 text-[11px]">
-                    <span className="font-medium text-slate-700">{rc.interactionCategory}</span>
+                    {rc.interactionCategory === 'Other' ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                        <Tag className="w-3 h-3 text-purple-600" />
+                        <span>{rc.otherCategoryDetails ? `Other: ${rc.otherCategoryDetails}` : 'Other (Custom)'}</span>
+                      </span>
+                    ) : (
+                      <span className="font-medium text-slate-700">{rc.interactionCategory}</span>
+                    )}
                     <span aria-hidden="true">·</span>
                     <span>Counterparty: {rc.counterpartyName}</span>
                     {rc.transactionValue && (
@@ -311,7 +319,11 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                 </div>
                 <div>
                   <span className="text-slate-400 block">Category:</span>
-                  <span className="font-semibold text-slate-800">{selectedReceipt.interactionCategory}</span>
+                  <span className="font-semibold text-slate-800">
+                    {selectedReceipt.interactionCategory === 'Other'
+                      ? `Other: ${selectedReceipt.otherCategoryDetails || 'Custom Agreement'}`
+                      : selectedReceipt.interactionCategory}
+                  </span>
                 </div>
                 <div>
                   <span className="text-slate-400 block">Transaction Value:</span>
