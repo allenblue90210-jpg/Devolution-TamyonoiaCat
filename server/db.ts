@@ -895,6 +895,20 @@ class Database {
     return false;
   }
 
+  public markAllNotificationsRead(userId: string): boolean {
+    let updated = false;
+    this.data.notifications.forEach((n) => {
+      if (n.userId === userId && !n.isRead) {
+        n.isRead = true;
+        updated = true;
+      }
+    });
+    if (updated) {
+      this.persist();
+    }
+    return true;
+  }
+
   // Business
   public getBusinessForUser(userId: string): BusinessEntity | undefined {
     return this.data.businesses.find((b) => b.ownerUserId === userId || b.teamMembers.some((m) => m.userId === userId));
