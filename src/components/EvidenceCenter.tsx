@@ -64,6 +64,7 @@ export const EvidenceCenter: React.FC<EvidenceCenterProps> = ({
     { id: 'business', label: 'Business & Registry', count: evidence.filter((e) => e.category === 'business').length },
     { id: 'location', label: 'Physical & Location', count: evidence.filter((e) => e.category === 'location').length },
     { id: 'commitment', label: 'Contracts & Commitments', count: evidence.filter((e) => e.category === 'commitment').length },
+    { id: 'other', label: 'Other Evidence', count: evidence.filter((e) => e.category === 'other').length },
   ];
 
   const filteredEvidence =
@@ -410,6 +411,7 @@ export const EvidenceCenter: React.FC<EvidenceCenterProps> = ({
                     <option value="commitment">Contract & Commitment</option>
                     <option value="contact">Contact Endpoint</option>
                     <option value="identity">Identity Attestation</option>
+                    <option value="other">Other Evidence</option>
                   </select>
                 </div>
 
