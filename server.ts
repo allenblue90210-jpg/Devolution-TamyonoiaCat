@@ -1605,6 +1605,23 @@ async function performGitSync(customMessage?: string) {
   }
 }
 
+let syncDebounceTimer: NodeJS.Timeout | null = null;
+export function triggerGitSyncDebounced(reason = 'data updated') {
+  if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+  syncDebounceTimer = setTimeout(async () => {
+    try {
+      await performGitSync(`chore(sync): auto-sync on ${reason}`);
+    } catch (err: any) {
+      console.warn('[Auto-sync trigger warning]:', err.message);
+    }
+  }, 4000);
+}
+
+// Automatically sync and push when database data changes
+db.onSave(() => {
+  triggerGitSyncDebounced('database state updated');
+});
+
 // Continuous background sync every 30 seconds:
 // Automatically polls GitHub remote for updates and pushes any local changes
 setInterval(async () => {
@@ -1646,7 +1663,7 @@ app.post('/api/git/pull', async (_req: Request, res: Response) => {
 async function initGitConfig() {
   try {
     await execAsync('git config user.name "allenblue90210-jpg"');
-    await execAsync('git config user.email "allenkinetic005@gmail.com"');
+    await execAsync('git config user.email "allenred90210@gmail.com"');
     await execAsync('git config pull.rebase false');
     let token = process.env.GITHUB_TOKEN;
     const tokenFile = path.resolve(process.cwd(), '.github_token');

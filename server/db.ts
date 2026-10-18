@@ -876,6 +876,15 @@ class Database {
     return initial;
   }
 
+  private saveListeners: (() => void)[] = [];
+
+  public onSave(listener: () => void) {
+    this.saveListeners.push(listener);
+    return () => {
+      this.saveListeners = this.saveListeners.filter((l) => l !== listener);
+    };
+  }
+
   private save(data: DatabaseSchema) {
     try {
       const dir = path.dirname(DB_FILE);
@@ -883,6 +892,13 @@ class Database {
         fs.mkdirSync(dir, { recursive: true });
       }
       fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
+      for (const listener of this.saveListeners) {
+        try {
+          listener();
+        } catch (lErr) {
+          console.error('Error in db save listener:', lErr);
+        }
+      }
     } catch (err) {
       console.error('Failed to write database file:', err);
     }
