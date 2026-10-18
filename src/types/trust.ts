@@ -82,6 +82,10 @@ export interface TrustCommitment {
   checkedOutByRequesterAt?: string | null;
   linkedReceiptId?: string | null;
   isPublic: boolean;
+  impressions?: number; // Total public views/impressions
+  witnessCount?: number; // Total network observers who witnessed pact
+  positiveImpressions?: number; // Community confidence endorsements
+  hasWitnessed?: boolean; // Whether current session user witnessed pact
   createdAt: string;
   completedAt?: string | null;
 }

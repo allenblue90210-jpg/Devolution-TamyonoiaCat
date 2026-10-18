@@ -335,6 +335,15 @@ export const api = {
       method: 'PUT',
     });
   },
+  async recordCommitmentImpression(
+    id: string,
+    action: 'view' | 'witness' = 'witness'
+  ): Promise<{ commitment: TrustCommitment; message: string }> {
+    return request(`/api/commitments/${id}/impression`, {
+      method: 'POST',
+      body: JSON.stringify({ action }),
+    });
+  },
 
   // GitHub Continuous Repository Sync
   async getGitStatus(): Promise<{
