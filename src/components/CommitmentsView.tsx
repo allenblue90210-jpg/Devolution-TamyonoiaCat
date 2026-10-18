@@ -552,6 +552,15 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                       )}
                       <span className="text-slate-300 font-mono">·</span>
                       <span className="font-mono text-slate-500 text-[11px]">{c.id}</span>
+                      <span className="text-slate-300 font-mono">·</span>
+                      <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-extrabold ${
+                        (c.ratingPercent ?? 100) === 100
+                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-300'
+                          : 'bg-amber-50 text-amber-800 border border-amber-300'
+                      }`}>
+                        <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                        <span>{c.ratingPercent ?? 100}% Rating</span>
+                      </span>
                       {c.isPublic ? (
                         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                           <Eye className="w-3 h-3 text-emerald-600" />
@@ -682,45 +691,17 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                       <span className="text-emerald-700 font-semibold">+{c.trustRewardPoints} Trust Pts</span>
                       <span className="text-slate-300">|</span>
                       <span className="text-red-700 font-semibold">-30% / day on default</span>
+                      <span className="text-slate-300">|</span>
+                      <span className={`px-2 py-0.5 rounded font-bold text-[10px] ${
+                        (c.ratingPercent ?? 100) === 100
+                          ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                          : 'bg-amber-100 text-amber-900 border border-amber-300'
+                      }`}>
+                        {c.ratingPercent ?? 100}% Rating ({c.ratingBadge || ((c.ratingPercent ?? 100) === 100 ? 'Exemplary Honor' : 'Partial / Settled')})
+                      </span>
                     </div>
                   </div>
                 </div>
-
-                {/* Public Impressions & Observer Witness Row */}
-                {c.isPublic && (
-                  <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 rounded-lg bg-indigo-50/70 border border-indigo-100 text-xs">
-                    <div className="flex flex-wrap items-center gap-2.5 text-[11px]">
-                      <span className="inline-flex items-center gap-1 font-semibold text-slate-800" title="Total public impressions on open ledger">
-                        <Eye className="w-3.5 h-3.5 text-indigo-600" />
-                        <span>{(c.impressions ?? 1420).toLocaleString()} impressions</span>
-                      </span>
-                      <span className="text-slate-300">·</span>
-                      <span className="inline-flex items-center gap-1 text-slate-600" title="Network observers witnessing this pact">
-                        <Users className="w-3.5 h-3.5 text-slate-500" />
-                        <span>{c.witnessCount ?? 24} witnesses</span>
-                      </span>
-                      <span className="text-slate-300">·</span>
-                      <span className="inline-flex items-center gap-1 text-emerald-700 font-medium">
-                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>{c.positiveImpressions ?? 18} credible</span>
-                      </span>
-                    </div>
-
-                    <button
-                      onClick={(e) => handleRecordImpression(c.id, e)}
-                      disabled={c.hasWitnessed}
-                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
-                        c.hasWitnessed
-                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 cursor-default'
-                          : 'bg-white hover:bg-indigo-600 hover:text-white text-indigo-700 border border-indigo-200 hover:border-indigo-600 shadow-2xs'
-                      }`}
-                      title={c.hasWitnessed ? 'You have recorded an impression on this public pact' : 'Witness this public pact (+1 Impression)'}
-                    >
-                      <Eye className="w-3 h-3" />
-                      <span>{c.hasWitnessed ? 'Witnessed ✓' : 'Witness Pact'}</span>
-                    </button>
-                  </div>
-                )}
 
                 {/* Overdue Warning Callout */}
                 {countdown.isOverdue && c.status !== 'completed' && (
@@ -734,6 +715,127 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                     </p>
                   </div>
                 )}
+
+                {/* Pact Comments & Witness Log Section */}
+                <div className="rounded-lg bg-slate-50 border border-slate-200 p-3 space-y-2.5 text-xs">
+                  <div className="flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={() => toggleComments(c.id)}
+                      className="font-bold text-slate-800 flex items-center gap-1.5 hover:text-indigo-600 transition-colors cursor-pointer"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>Comments & Witness Log ({c.comments?.length || 0})</span>
+                      <span className="text-[10px] text-indigo-600 font-semibold underline">
+                        {expandedComments[c.id] ? 'Hide' : 'View & Comment'}
+                      </span>
+                    </button>
+                    <span className="text-[10px] text-slate-500">
+                      Anchored to pact #{c.id}
+                    </span>
+                  </div>
+
+                  {expandedComments[c.id] && (
+                    <div className="space-y-3 pt-2 border-t border-slate-200/80 animate-in fade-in duration-150">
+                      {/* Comments List */}
+                      {c.comments && c.comments.length > 0 ? (
+                        <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                          {c.comments.map((cmt) => (
+                            <div key={cmt.id} className="p-2.5 rounded-lg bg-white border border-slate-200/80 space-y-1 shadow-2xs">
+                              <div className="flex items-center justify-between gap-2 text-[11px]">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-bold text-slate-900">{cmt.authorName}</span>
+                                  <span className="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                                    {cmt.authorRole}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-slate-400 text-[10px]">
+                                  {cmt.ratingPercent && (
+                                    <span className={`px-1.5 py-0.2 rounded font-bold text-[9px] ${
+                                      cmt.ratingPercent === 100
+                                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                        : 'bg-amber-100 text-amber-800 border border-amber-300'
+                                    }`}>
+                                      {cmt.ratingPercent}% Rating
+                                    </span>
+                                  )}
+                                  <span>{new Date(cmt.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                </div>
+                              </div>
+                              <p className="text-slate-700 text-xs leading-relaxed">{cmt.text}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-slate-400 italic text-[11px] py-1">
+                          No comments posted yet. Be the first to post a handover update or witness note.
+                        </p>
+                      )}
+
+                      {/* Add Comment Input Form */}
+                      <div className="space-y-2 pt-2 border-t border-slate-200">
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="font-semibold text-slate-700">Add Pact Comment:</span>
+                          <div className="flex items-center gap-1">
+                            <span className="text-[10px] text-slate-500">Attach Rating:</span>
+                            <button
+                              type="button"
+                              onClick={() => setCommentRatingTags((prev) => ({
+                                ...prev,
+                                [c.id]: prev[c.id] === 100 ? null : 100,
+                              }))}
+                              className={`px-1.5 py-0.5 rounded text-[10px] font-bold border transition-colors cursor-pointer ${
+                                commentRatingTags[c.id] === 100
+                                  ? 'bg-emerald-100 text-emerald-900 border-emerald-400 ring-1 ring-emerald-400'
+                                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                              }`}
+                            >
+                              100% Rating
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setCommentRatingTags((prev) => ({
+                                ...prev,
+                                [c.id]: prev[c.id] === 50 ? null : 50,
+                              }))}
+                              className={`px-1.5 py-0.5 rounded text-[10px] font-bold border transition-colors cursor-pointer ${
+                                commentRatingTags[c.id] === 50
+                                  ? 'bg-amber-100 text-amber-900 border-amber-400 ring-1 ring-amber-400'
+                                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                              }`}
+                            >
+                              50% Rating
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={commentInputs[c.id] || ''}
+                            onChange={(e) => setCommentInputs((prev) => ({ ...prev, [c.id]: e.target.value }))}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleAddComment(c.id);
+                              }
+                            }}
+                            placeholder="Write a progress note, handover update, or witness commentary..."
+                            className="flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleAddComment(c.id)}
+                            disabled={commentSubmitting[c.id] || !commentInputs[c.id]?.trim()}
+                            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white rounded-lg text-xs font-semibold shrink-0 cursor-pointer transition-colors"
+                          >
+                            {commentSubmitting[c.id] ? 'Posting...' : 'Post'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 {/* Card Bottom: Actions */}
                 <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
@@ -749,19 +851,19 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                         value={pledgeNote}
                         onChange={(e) => setPledgeNote(e.target.value)}
                         placeholder="e.g. 'I will bring the car by 2:00 AM parked in front of gate'"
-                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                       />
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => setAcceptingId(null)}
-                          className="px-3 py-1.5 rounded text-slate-600 hover:bg-slate-100 text-xs"
+                          className="px-3 py-1.5 rounded text-slate-600 hover:bg-slate-100 text-xs cursor-pointer"
                         >
                           Cancel
                         </button>
                         <button
                           onClick={() => handleAcceptCommitment(c.id)}
                           disabled={acceptLoading}
-                          className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-semibold text-xs disabled:opacity-50"
+                          className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-semibold text-xs disabled:opacity-50 cursor-pointer"
                         >
                           {acceptLoading ? 'Signing...' : 'Sign & Start Timer'}
                         </button>
@@ -775,7 +877,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                     {c.status === 'completed' && c.linkedReceiptId && (
                       <button
                         onClick={() => onSelectTab('receipts')}
-                        className="text-xs font-semibold text-indigo-600 hover:underline flex items-center gap-1"
+                        className="text-xs font-semibold text-indigo-600 hover:underline flex items-center gap-1 cursor-pointer"
                       >
                         <FileText className="w-3.5 h-3.5" />
                         <span>View Attested Receipt {c.linkedReceiptId}</span>
@@ -789,7 +891,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                           setAcceptingId(c.id);
                           setPledgeNote("I'll bring it by 2am as requested.");
                         }}
-                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-xs"
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-xs cursor-pointer"
                       >
                         <Send className="w-3.5 h-3.5" />
                         <span>Accept & Write Pledge</span>
@@ -800,33 +902,133 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                     {c.status === 'active' && isCommitter && (
                       <button
                         onClick={() => handleFulfillCommitment(c.id)}
-                        className="px-4 py-2 bg-slate-900 hover:bg-black text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-xs"
+                        className="px-4 py-2 bg-slate-900 hover:bg-black text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-xs cursor-pointer"
                       >
                         <Check className="w-3.5 h-3.5" />
                         <span>Mark Handed Over / Fulfilled</span>
                       </button>
                     )}
 
-                    {/* Step 3: User A confirms dual checkout */}
-                    {isRequester && (c.status === 'fulfilled_pending_checkout' || c.status === 'active' || c.status === 'overdue') && (
+                    {/* Rate Pact Options (100% or 50%) */}
+                    <div className="flex items-center gap-1.5 text-xs py-1">
+                      <span className="text-[11px] font-semibold text-slate-600">Rate Pact:</span>
                       <button
-                        onClick={() => handleCheckoutCommitment(c.id)}
-                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-xs"
+                        type="button"
+                        onClick={() => handleRateCommitment(c.id, 100)}
+                        className={`px-2 py-0.5 rounded text-[10px] font-extrabold border transition-all cursor-pointer ${
+                          (c.ratingPercent ?? 100) === 100
+                            ? 'bg-emerald-100 text-emerald-900 border-emerald-400 ring-1 ring-emerald-300'
+                            : 'bg-white text-slate-600 border-slate-200 hover:bg-emerald-50 hover:text-emerald-800'
+                        }`}
+                        title="Rate 100% (Exemplary Full Honor)"
                       >
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Confirm Dual Checkout & Verify</span>
+                        100%
                       </button>
-                    )}
+                      <button
+                        type="button"
+                        onClick={() => handleRateCommitment(c.id, 50)}
+                        className={`px-2 py-0.5 rounded text-[10px] font-extrabold border transition-all cursor-pointer ${
+                          c.ratingPercent === 50
+                            ? 'bg-amber-100 text-amber-900 border-amber-400 ring-1 ring-amber-300'
+                            : 'bg-white text-slate-600 border-slate-200 hover:bg-amber-50 hover:text-amber-800'
+                        }`}
+                        title="Rate 50% (Partial / Settled)"
+                      >
+                        50%
+                      </button>
+                    </div>
 
                     {/* Public Profile Link */}
                     <button
                       onClick={() => onSelectTab(`profile-${c.committerId === 'usr_sarah_002' ? 'sarah_adesina' : 'fatimabello'}`)}
-                      className="text-xs text-slate-500 hover:text-slate-800 flex items-center gap-1 ml-auto"
+                      className="text-xs text-slate-500 hover:text-slate-800 flex items-center gap-1 ml-auto cursor-pointer"
                     >
                       <span>Public Profile</span>
                       <ExternalLink className="w-3 h-3" />
                     </button>
                   </div>
+
+                  {/* Step 3: User A confirms dual checkout with GREEN BUTTON & Rating Choice */}
+                  {isRequester && (c.status === 'fulfilled_pending_checkout' || c.status === 'active' || c.status === 'overdue') && (
+                    <div className="mt-2 p-3 rounded-xl bg-emerald-50/90 border border-emerald-300 space-y-2">
+                      <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                        <span className="font-bold text-emerald-950 flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                          <span>Dual Checkout Verification</span>
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[11px] text-emerald-800 font-medium">Attest Handover Rating:</span>
+                          <button
+                            type="button"
+                            onClick={() => setCheckoutRatings((prev) => ({ ...prev, [c.id]: 100 }))}
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-colors cursor-pointer ${
+                              (checkoutRatings[c.id] ?? 100) === 100
+                                ? 'bg-emerald-600 text-white border-emerald-700 font-extrabold'
+                                : 'bg-white text-emerald-800 border-emerald-300 hover:bg-emerald-100'
+                            }`}
+                          >
+                            100% Rating
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setCheckoutRatings((prev) => ({ ...prev, [c.id]: 50 }))}
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-colors cursor-pointer ${
+                              checkoutRatings[c.id] === 50
+                                ? 'bg-amber-600 text-white border-amber-700 font-extrabold'
+                                : 'bg-white text-amber-800 border-amber-300 hover:bg-amber-100'
+                            }`}
+                          >
+                            50% Rating
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* THE GREEN CHECKOUT BUTTON */}
+                      <button
+                        onClick={() => handleCheckoutCommitment(c.id, checkoutRatings[c.id] ?? 100)}
+                        className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
+                      >
+                        <CheckCircle2 className="w-4 h-4 text-white" />
+                        <span>Confirm Dual Checkout & Verify ({checkoutRatings[c.id] ?? 100}% Rating)</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* PUBLIC IMPRESSIONS & OBSERVER WITNESS ROW — LOCATED DIRECTLY BELOW THE GREEN BUTTON(S) */}
+                  {c.isPublic && (
+                    <div className="mt-2 flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 rounded-lg bg-emerald-50/70 border border-emerald-200 text-xs shadow-2xs">
+                      <div className="flex flex-wrap items-center gap-2 text-[11px]">
+                        <span className="inline-flex items-center gap-1 font-bold text-emerald-950" title="Total public impressions on open ledger">
+                          <Eye className="w-3.5 h-3.5 text-emerald-700" />
+                          <span>{(c.impressions ?? 1420).toLocaleString()} impressions</span>
+                        </span>
+                        <span className="text-emerald-300">·</span>
+                        <span className="inline-flex items-center gap-1 text-slate-700 font-medium" title="Network observers witnessing this pact">
+                          <Users className="w-3.5 h-3.5 text-slate-600" />
+                          <span>{c.witnessCount ?? 24} witnesses</span>
+                        </span>
+                        <span className="text-emerald-300">·</span>
+                        <span className="inline-flex items-center gap-1 text-emerald-800 font-semibold">
+                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>{c.positiveImpressions ?? 18} credible ({c.ratingPercent ?? 100}% confidence)</span>
+                        </span>
+                      </div>
+
+                      <button
+                        onClick={(e) => handleRecordImpression(c.id, e)}
+                        disabled={c.hasWitnessed}
+                        className={`inline-flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
+                          c.hasWitnessed
+                            ? 'bg-emerald-200 text-emerald-900 border border-emerald-300 cursor-default'
+                            : 'bg-white hover:bg-emerald-600 hover:text-white text-emerald-800 border border-emerald-300 hover:border-emerald-600 shadow-2xs'
+                        }`}
+                        title={c.hasWitnessed ? 'You have recorded an impression on this public pact' : 'Witness this public pact (+1 Impression)'}
+                      >
+                        <Eye className="w-3 h-3" />
+                        <span>{c.hasWitnessed ? 'Witnessed ✓' : 'Witness Pact (+1 Impression)'}</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             );
