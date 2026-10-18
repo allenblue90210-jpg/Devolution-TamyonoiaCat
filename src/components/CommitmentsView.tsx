@@ -1278,6 +1278,135 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
           </div>
         </div>
       )}
+
+      {/* Rate & Review Pact Modal */}
+      {showRatePactModal && ratePactTarget && (
+        <div className="fixed inset-0 z-50 overflow-y-auto p-4 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center">
+          <div className="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl p-6 space-y-4 my-auto">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
+                <h3 className="text-base font-bold text-slate-900">
+                  Rate & Review Pact #{ratePactTarget.id}
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowRatePactModal(false)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="text-xs bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1">
+              <div className="font-bold text-slate-900">{ratePactTarget.title}</div>
+              <div className="text-slate-600">Committer: {ratePactTarget.committerName} · Requester: {ratePactTarget.requesterName}</div>
+            </div>
+
+            <form onSubmit={handleSubmitPactRating} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-bold text-slate-800 mb-1">Star Score</label>
+                <div className="flex items-center gap-2">
+                  {[5, 4, 3, 2, 1].map((s) => (
+                    <button
+                      type="button"
+                      key={s}
+                      onClick={() => {
+                        setRatePactStars(s);
+                        setRatePactPercent(s >= 4 ? 100 : 50);
+                      }}
+                      className={`flex-1 py-2 text-xs font-mono font-bold rounded-lg border transition-colors cursor-pointer ${
+                        ratePactStars === s
+                          ? 'bg-amber-500 text-white border-amber-500 shadow-2xs'
+                          : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
+                      }`}
+                    >
+                      {s} ★
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-800 mb-1">Fulfillment Rating Score</label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRatePactPercent(100);
+                      setRatePactBadge('100% Exemplary Good Faith Handover');
+                    }}
+                    className={`flex-1 py-2 text-xs font-bold rounded-lg border transition-colors cursor-pointer ${
+                      ratePactPercent === 100
+                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs'
+                        : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    100% Full Honor
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRatePactPercent(50);
+                      setRatePactBadge('50% Partial / Settled with Minor Caveats');
+                    }}
+                    className={`flex-1 py-2 text-xs font-bold rounded-lg border transition-colors cursor-pointer ${
+                      ratePactPercent === 50
+                        ? 'bg-amber-600 text-white border-amber-600 shadow-2xs'
+                        : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    50% Partial Settle
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-800 mb-1">Rating Badge</label>
+                <select
+                  value={ratePactBadge}
+                  onChange={(e) => setRatePactBadge(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 bg-white"
+                >
+                  <option value="100% Exemplary Good Faith Handover">100% Exemplary Good Faith Handover</option>
+                  <option value="100% Flawless Honor Pledged">100% Flawless Honor Pledged</option>
+                  <option value="Prompt On-Time Delivery">Prompt On-Time Delivery</option>
+                  <option value="50% Partial / Settled with Minor Caveats">50% Partial / Settled with Minor Caveats</option>
+                  <option value="Default Averted / Remedial Fulfilled">Default Averted / Remedial Fulfilled</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-800 mb-1">Review Commentary & Observations</label>
+                <textarea
+                  rows={3}
+                  placeholder="Detail your firsthand observations of fulfillment fidelity, punctuality, and adherence to pledge."
+                  value={ratePactComment}
+                  onChange={(e) => setRatePactComment(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowRatePactModal(false)}
+                  className="px-4 py-2 font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingPactRating}
+                  className="px-4 py-2 font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 rounded-lg shadow-2xs cursor-pointer"
+                >
+                  {submittingPactRating ? 'Recording...' : 'Submit Rating & Comment'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
