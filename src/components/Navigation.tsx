@@ -93,6 +93,7 @@ export const Navigation: React.FC<NavigationProps> = ({
     { id: 'evidence', label: 'Evidence Center' },
     { id: 'relationships', label: 'Social Verification' },
     { id: 'receipts', label: 'Trust Receipts' },
+    { id: 'public-ledger', label: 'Public Ledger' },
     { id: 'directory', label: 'Directory' },
   ];
 
@@ -111,18 +112,25 @@ export const Navigation: React.FC<NavigationProps> = ({
         </button>
 
         {/* Zone 2: 4-5 clean single-line text navigation links */}
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
+        <nav className="hidden md:flex items-center gap-5 text-sm font-medium text-slate-600">
           {navLinks.map((link) => (
             <button
               key={link.id}
-              onClick={() => onSelectTab(link.id)}
-              className={`hover:text-slate-900 transition-colors whitespace-nowrap shrink-0 py-1 ${
+              onClick={() => {
+                if (link.id === 'public-ledger') {
+                  onOpenPublicLedger?.();
+                } else {
+                  onSelectTab(link.id);
+                }
+              }}
+              className={`hover:text-slate-900 transition-colors whitespace-nowrap shrink-0 py-1 flex items-center gap-1.5 ${
                 currentTab === link.id
                   ? 'text-indigo-600 font-semibold border-b-2 border-indigo-600'
                   : 'text-slate-600'
               }`}
             >
-              {link.label}
+              {link.id === 'public-ledger' && <Globe className="w-3.5 h-3.5 text-indigo-600 shrink-0" />}
+              <span>{link.label}</span>
             </button>
           ))}
           <button
@@ -236,17 +244,25 @@ export const Navigation: React.FC<NavigationProps> = ({
             )}
           </div>
 
-          {/* Public Commitments & Trust Receipts Ledger Icon */}
+          {/* Public Commitments & Trust Receipts Ledger Action Button */}
           <button
             onClick={onOpenPublicLedger}
-            className="relative p-2 text-slate-500 hover:text-indigo-600 rounded-lg hover:bg-indigo-50/70 transition-colors flex items-center justify-center cursor-pointer group"
-            title="Public Commitments & Trust Receipts Ledger"
+            className="relative flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-gradient-to-r from-indigo-50 to-indigo-100/60 hover:from-indigo-100 hover:to-indigo-200/70 border border-indigo-200 rounded-lg text-xs font-semibold text-indigo-900 transition-all shadow-2xs hover:shadow-xs cursor-pointer group"
+            title="Public Ledger: View & post public commitments, view public and private trust receipts"
             aria-label="Public Commitments & Trust Receipts Ledger"
           >
-            <Globe className="w-5 h-5 text-slate-600 group-hover:text-indigo-600 transition-colors" />
-            <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
+            <span className="relative flex items-center justify-center">
+              <Globe className="w-4 h-4 text-indigo-600 group-hover:scale-110 transition-transform" />
+              <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
+              </span>
+            </span>
+            <span className="font-bold text-xs text-indigo-950 flex items-center gap-1">
+              <span>Public Ledger</span>
+              <span className="hidden xl:inline text-[10px] font-medium text-indigo-700 bg-white/90 px-1.5 py-0.2 rounded border border-indigo-200/60">
+                Pacts & Receipts
+              </span>
             </span>
           </button>
 
