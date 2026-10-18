@@ -323,6 +323,18 @@ export interface ReputationBreakdown {
       weightDescription: string;
     };
   };
+  trustScore: number; // 0 - 100 calculated score
+  trustGrade: 'A+ Exemplary' | 'A Verified & Reliable' | 'B Good Standing' | 'C Conditional' | 'D Penalized / High Risk';
+  penaltyPercent: number; // e.g. 0, 30, 60
+  penaltyActive: boolean;
+  penaltyNotice: string | null;
+  commitmentsSummary: {
+    total: number;
+    completedOnTime: number;
+    activeCount: number;
+    overdueCount: number;
+    onTimeDeliveryRate: number; // e.g. 96 (%)
+  };
   transparentFormulaNotice: string;
   disclaimer: string;
 }

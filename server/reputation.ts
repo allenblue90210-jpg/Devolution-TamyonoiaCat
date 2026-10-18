@@ -1,12 +1,11 @@
-import { User, EvidenceItem, RelationshipInvite, TrustReceipt, ProfessionalReference, DisputeReport, ReputationBreakdown } from '../src/types/trust.js';
+import { User, EvidenceItem, RelationshipInvite, TrustReceipt, ProfessionalReference, DisputeReport, ReputationBreakdown, TrustCommitment } from '../src/types/trust.js';
 
 /**
  * Server-authoritative Transparent Reputation Engine
  * Version: v1.4-verifiable-criteria
  *
- * Implements strict non-monolithic, multi-dimensional assessment.
- * Avoids vanity metrics, prevents purchased reputation, handles sparse data gracefully,
- * and maintains explicit mathematical transparency with clear warnings.
+ * Implements strict non-monolithic, multi-dimensional assessment with
+ * time-locked commitment tracking and daily -30% penalty enforcement for breaches.
  */
 export function calculateReputation(
   user: User,
@@ -14,7 +13,8 @@ export function calculateReputation(
   relationships: RelationshipInvite[],
   receipts: TrustReceipt[],
   references: ProfessionalReference[],
-  disputes: DisputeReport[]
+  disputes: DisputeReport[],
+  commitments: TrustCommitment[] = []
 ): ReputationBreakdown {
   const confirmedRelationships = relationships.filter((r) => r.status === 'confirmed');
   const vouchedEndorsements = confirmedRelationships.filter((r) => r.hasEndorsement);
@@ -68,11 +68,90 @@ export function calculateReputation(
     summaryLevel = 'Insufficient Evidence';
   }
 
+  // Commitment Analytics & Penalties
+  const userCommitmentsAsCommitter = commitments.filter((c) => c.committerId === user.id);
+  const totalCommitments = userCommitmentsAsCommitter.length;
+  const completedOnTime = userCommitmentsAsCommitter.filter((c) => c.status === 'completed' && !c.isOverdue).length;
+  const activeCount = userCommitmentsAsCommitter.filter((c) => c.status === 'active' || c.status === 'fulfilled_pending_checkout').length;
+  const overdueCommitments = userCommitmentsAsCommitter.filter((c) => c.status === 'overdue' || c.isOverdue);
+  const overdueCount = overdueCommitments.length;
+
+  const onTimeDeliveryRate = totalCommitments > 0
+    ? Math.round((completedOnTime / totalCommitments) * 100)
+    : 100;
+
+  // Base Trust Score Calculation (0 - 100 scale)
+  let calculatedScore = 20; // baseline identity stake
+  if (user.identityStatus === 'verified') calculatedScore += 25;
+  else if (user.identityStatus === 'submitted') calculatedScore += 10;
+  if (user.phoneVerified) calculatedScore += 8;
+  if (user.emailVerified) calculatedScore += 7;
+  calculatedScore += Math.min(20, confirmedRelationships.length * 4);
+  calculatedScore += Math.min(10, verifiedCredentials.length * 5);
+  calculatedScore += Math.min(10, completedReceipts.length * 5);
+
+  if (completedOnTime > 0) {
+    calculatedScore += Math.min(10, completedOnTime * 3);
+  }
+
+  calculatedScore -= activeDisputes * 15;
+  calculatedScore = Math.max(10, Math.min(100, calculatedScore));
+
+  // DAILY OVERDUE PENALTY (-30% per day overdue on unfulfilled commitments)
+  let totalPenaltyPercent = 0;
+  let penaltyNotice: string | null = null;
+
+  if (overdueCount > 0) {
+    const now = Date.now();
+    let maxDaysOverdue = 1;
+    let worstCommitmentTitle = '';
+
+    for (const c of overdueCommitments) {
+      const deadlineMs = new Date(c.deadline).getTime();
+      const diffDays = Math.max(1, Math.ceil((now - deadlineMs) / (1000 * 60 * 60 * 24)));
+      if (diffDays >= maxDaysOverdue) {
+        maxDaysOverdue = diffDays;
+        worstCommitmentTitle = c.title;
+      }
+    }
+
+    // -30% deducted per day overdue (compounds up to 90% max penalty)
+    totalPenaltyPercent = Math.min(90, maxDaysOverdue * 30);
+    const scoreDeduction = Math.round((calculatedScore * totalPenaltyPercent) / 100);
+    calculatedScore = Math.max(5, calculatedScore - scoreDeduction);
+    penaltyNotice = `Active Default Breach: '${worstCommitmentTitle}' is ${maxDaysOverdue} day(s) overdue. Daily -${totalPenaltyPercent}% penalty deducted from trust score.`;
+  }
+
+  let trustGrade: ReputationBreakdown['trustGrade'] = 'A Verified & Reliable';
+  if (overdueCount > 0 || totalPenaltyPercent > 0) {
+    trustGrade = 'D Penalized / High Risk';
+  } else if (calculatedScore >= 90) {
+    trustGrade = 'A+ Exemplary';
+  } else if (calculatedScore >= 80) {
+    trustGrade = 'A Verified & Reliable';
+  } else if (calculatedScore >= 65) {
+    trustGrade = 'B Good Standing';
+  } else {
+    trustGrade = 'C Conditional';
+  }
+
   return {
     userId: user.id,
     summaryLevel,
     methodologyVersion: 'v1.4-verifiable-criteria',
     lastCalculatedAt: new Date().toISOString(),
+    trustScore: calculatedScore,
+    trustGrade,
+    penaltyPercent: totalPenaltyPercent,
+    penaltyActive: overdueCount > 0,
+    penaltyNotice,
+    commitmentsSummary: {
+      total: totalCommitments,
+      completedOnTime,
+      activeCount,
+      overdueCount,
+      onTimeDeliveryRate,
+    },
     dimensions: {
       identityVerification: {
         status: user.identityStatus,
@@ -119,8 +198,8 @@ export function calculateReputation(
       },
     },
     transparentFormulaNotice:
-      'This platform does not generate an opaque single credit or character score. Instead, credibility is demonstrated through granular evidence layers: confirmed identities, dual-signed relationship records, and documented fulfillment receipts.',
+      'Transparent formula: Baseline identity attestation (25 pts) + contact verification (15 pts) + confirmed relationships (20 pts) + verified credentials (10 pts) + documented receipts (10 pts) + commitment on-time fulfillment (10 pts). Unfulfilled overdue commitments trigger an automatic -30% daily reputation decay until rectified or settled.',
     disclaimer:
-      'Identity and relationship confirmation verifies that designated checks were executed with designated parties. It does not constitute a financial credit score, legal warranty, or guarantee of future behavior.',
+      'Identity, relationship, and commitment confirmations verify that designated checks and dual sign-offs were executed with verified counterparties. It operates as an evidence-based reliability ledger.',
   };
 }
