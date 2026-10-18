@@ -15,6 +15,7 @@ import {
   MessageSquare,
   Shield,
   HelpCircle,
+  ArrowLeft,
 } from 'lucide-react';
 
 interface RelationshipsViewProps {
@@ -28,6 +29,7 @@ interface RelationshipsViewProps {
   }) => Promise<{ inviteUrl: string }>;
   onDeleteRelationship: (id: string) => Promise<void>;
   onOpenInviteFlow: (token: string) => void;
+  onBack?: () => void;
 }
 
 export const RelationshipsView: React.FC<RelationshipsViewProps> = ({
@@ -36,6 +38,7 @@ export const RelationshipsView: React.FC<RelationshipsViewProps> = ({
   onInviteContact,
   onDeleteRelationship,
   onOpenInviteFlow,
+  onBack,
 }) => {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [filterCategory, setFilterCategory] = useState<string>('all');

@@ -19,6 +19,7 @@ import {
   Check,
   X,
   FileCheck,
+  ArrowLeft,
 } from 'lucide-react';
 
 interface EvidenceCenterProps {
@@ -29,6 +30,7 @@ interface EvidenceCenterProps {
   onDeleteEvidence: (id: string) => Promise<void>;
   onOpenPhoneModal: () => void;
   onOpenIdentityModal: () => void;
+  onBack?: () => void;
 }
 
 export const EvidenceCenter: React.FC<EvidenceCenterProps> = ({
@@ -39,6 +41,7 @@ export const EvidenceCenter: React.FC<EvidenceCenterProps> = ({
   onDeleteEvidence,
   onOpenPhoneModal,
   onOpenIdentityModal,
+  onBack,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -121,7 +124,20 @@ export const EvidenceCenter: React.FC<EvidenceCenterProps> = ({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      {onBack && (
+        <div>
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg shadow-2xs hover:border-slate-300 transition-all cursor-pointer group"
+            title="Back to Dashboard"
+          >
+            <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:-translate-x-0.5 transition-transform" />
+            <span>Back to Dashboard</span>
+          </button>
+        </div>
+      )}
+
       {/* Header Banner */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xs">
         <div className="space-y-1">
