@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, InAppNotification } from '../types/trust.js';
 import { api } from '../services/api.js';
-import { ShieldCheck, Bell, ChevronDown, UserCheck, LogOut, Check, GitBranch, RefreshCw, ExternalLink, CheckCircle2, Download } from 'lucide-react';
+import { ShieldCheck, Bell, ChevronDown, UserCheck, LogOut, Check, GitBranch, RefreshCw, ExternalLink, CheckCircle2, Download, Search } from 'lucide-react';
 
 interface NavigationProps {
   currentUser: User | null;
@@ -11,6 +11,7 @@ interface NavigationProps {
   onOpenAuth: () => void;
   onSwitchUser: (userId: string) => void;
   availableUsers: Array<{ id: string; username: string; fullName: string; accountType: string; avatarUrl: string }>;
+  onOpenSearch?: () => void;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
@@ -21,6 +22,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   onOpenAuth,
   onSwitchUser,
   availableUsers,
+  onOpenSearch,
 }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -226,6 +228,16 @@ export const Navigation: React.FC<NavigationProps> = ({
               </div>
             )}
           </div>
+
+          {/* Search People Trigger - directly beside notification icon */}
+          <button
+            onClick={onOpenSearch}
+            className="relative p-2 text-slate-500 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors flex items-center justify-center cursor-pointer"
+            title="Search verified people (Cmd+K / Ctrl+K)"
+            aria-label="Search people"
+          >
+            <Search className="w-5 h-5" />
+          </button>
 
           {/* Notifications Trigger */}
           {currentUser && (
