@@ -976,6 +976,12 @@ app.get('/api/notifications', (req: Request, res: Response) => {
   res.json({ notifications: notifs });
 });
 
+app.put('/api/notifications/read-all', (req: Request, res: Response) => {
+  const userId = getSessionUserId(req);
+  db.markAllNotificationsRead(userId);
+  res.json({ success: true, message: 'All notifications marked as read' });
+});
+
 app.put('/api/notifications/:id/read', (req: Request, res: Response) => {
   const userId = getSessionUserId(req);
   const { id } = req.params;

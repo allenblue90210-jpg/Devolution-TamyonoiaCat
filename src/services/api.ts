@@ -244,6 +244,11 @@ export const api = {
       method: 'PUT',
     });
   },
+  async markAllNotificationsRead(): Promise<{ success: boolean; message: string }> {
+    return request('/api/notifications/read-all', {
+      method: 'PUT',
+    });
+  },
 
   // Business
   async getBusiness(): Promise<{ business: BusinessEntity | null }> {
