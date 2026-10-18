@@ -30,6 +30,7 @@ import {
   Star,
   ThumbsUp,
   MessageCircle,
+  X,
 } from 'lucide-react';
 
 interface CommitmentsViewProps {

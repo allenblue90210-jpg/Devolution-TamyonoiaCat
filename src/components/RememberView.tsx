@@ -948,7 +948,7 @@ export const RememberView: React.FC<RememberViewProps> = ({
                   >
                     {availableUsers.map((u) => (
                       <option key={u.id} value={u.id}>
-                        {u.fullName} (@{u.username}) — {u.category || u.accountType}
+                        {u.fullName} (@{u.username}) — {(u as any).category || u.accountType}
                       </option>
                     ))}
                   </select>
