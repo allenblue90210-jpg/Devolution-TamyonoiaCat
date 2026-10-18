@@ -9,7 +9,9 @@
     "start": "tsx server.ts",
     "preview": "vite preview",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "sync": "git add -A && (git diff --cached --quiet || git commit -m 'chore: continuous repo sync') && git push origin main",
+    "push": "git add -A && (git diff --cached --quiet || git commit -m 'chore: manual push to repo') && git push origin main"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

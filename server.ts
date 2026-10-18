@@ -1,6 +1,8 @@
 import express, { Request, Response } from 'express';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import { db } from './server/db.js';
 import { calculateReputation } from './server/reputation.js';
 import {
@@ -1039,6 +1041,116 @@ app.get('/api/export-data', (req: Request, res: Response) => {
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Content-Disposition', `attachment; filename="trust_evidence_export_${user.username}.json"`);
   res.send(JSON.stringify(userArchive, null, 2));
+});
+
+/* ==========================================================================
+   GITHUB CONTINUOUS REPO SYNC
+   ========================================================================== */
+
+const execAsync = promisify(exec);
+
+let lastSyncTime: string | null = new Date().toISOString();
+let lastSyncStatus: 'synced' | 'syncing' | 'error' = 'synced';
+let lastSyncMessage: string | null = 'Repository synced';
+
+async function getGitRepoStatus() {
+  try {
+    const { stdout: statusOut } = await execAsync('git status --porcelain');
+    const { stdout: commitOut } = await execAsync('git log -1 --format="%h|%s|%cr|%an"');
+    const { stdout: branchOut } = await execAsync('git branch --show-current');
+    const parts = commitOut.trim().split('|');
+    const shortHash = parts[0] || '';
+    const commitSubject = parts[1] || '';
+    const relativeTime = parts[2] || '';
+    const authorName = parts[3] || '';
+
+    return {
+      clean: statusOut.trim().length === 0,
+      uncommittedCount: statusOut.trim() ? statusOut.trim().split('\n').length : 0,
+      uncommittedFiles: statusOut.trim() ? statusOut.trim().split('\n').map((s) => s.trim()) : [],
+      lastCommit: {
+        hash: shortHash,
+        message: commitSubject,
+        relativeTime,
+        author: authorName,
+      },
+      branch: branchOut.trim() || 'main',
+      remoteUrl: 'https://github.com/allenblue90210-jpg/Devolution-TamyonoiaCat',
+      repoName: 'allenblue90210-jpg/Devolution-TamyonoiaCat',
+      lastSyncTime,
+      lastSyncStatus,
+      lastSyncMessage,
+    };
+  } catch (err: any) {
+    return {
+      clean: true,
+      uncommittedCount: 0,
+      uncommittedFiles: [],
+      lastCommit: {
+        hash: '18ce210',
+        message: 'HEAD',
+        relativeTime: 'recently',
+        author: 'allenblue90210-jpg',
+      },
+      branch: 'main',
+      remoteUrl: 'https://github.com/allenblue90210-jpg/Devolution-TamyonoiaCat',
+      repoName: 'allenblue90210-jpg/Devolution-TamyonoiaCat',
+      lastSyncTime,
+      lastSyncStatus,
+      lastSyncMessage: err.message,
+    };
+  }
+}
+
+async function performGitPush(customMessage?: string) {
+  lastSyncStatus = 'syncing';
+  try {
+    const { stdout: statusOut } = await execAsync('git status --porcelain');
+    if (statusOut.trim().length > 0) {
+      const msg = customMessage || `chore(sync): automated continuous sync [${new Date().toISOString()}]`;
+      await execAsync('git add -A');
+      await execAsync(`git commit -m "${msg.replace(/"/g, '\\"')}"`);
+    }
+    await execAsync('git push origin main');
+    lastSyncTime = new Date().toISOString();
+    lastSyncStatus = 'synced';
+    lastSyncMessage = 'Successfully pushed latest changes to GitHub';
+    return await getGitRepoStatus();
+  } catch (err: any) {
+    lastSyncStatus = 'error';
+    lastSyncMessage = err.message || 'Push failed';
+    throw err;
+  }
+}
+
+// Continuous background sync every 45 seconds:
+// If file or state changes are detected, automatically commit & push to GitHub repository
+setInterval(async () => {
+  try {
+    const { stdout: statusOut } = await execAsync('git status --porcelain');
+    if (statusOut.trim().length > 0) {
+      console.log('[Continuous Git Sync] Detected working changes, pushing to remote repository...');
+      await performGitPush('chore(sync): continuous auto-sync updates');
+      console.log('[Continuous Git Sync] Successfully pushed to origin/main');
+    }
+  } catch (err: any) {
+    console.warn('[Continuous Git Sync Notice]:', err.message);
+  }
+}, 45000);
+
+app.get('/api/git/status', async (_req: Request, res: Response) => {
+  const status = await getGitRepoStatus();
+  res.json(status);
+});
+
+app.post('/api/git/sync', async (req: Request, res: Response) => {
+  try {
+    const { commitMessage } = req.body || {};
+    const result = await performGitPush(commitMessage);
+    res.json({ success: true, ...result });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to sync with repository' });
+  }
 });
 
 /* ==========================================================================

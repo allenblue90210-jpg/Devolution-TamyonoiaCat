@@ -262,4 +262,39 @@ export const api = {
       body: JSON.stringify(data),
     });
   },
+
+  // GitHub Continuous Repository Sync
+  async getGitStatus(): Promise<{
+    clean: boolean;
+    uncommittedCount: number;
+    uncommittedFiles: string[];
+    lastCommit: { hash: string; message: string; relativeTime: string; author: string };
+    branch: string;
+    remoteUrl: string;
+    repoName: string;
+    lastSyncTime: string | null;
+    lastSyncStatus: 'synced' | 'syncing' | 'error';
+    lastSyncMessage: string | null;
+  }> {
+    return request('/api/git/status');
+  },
+  async syncGitRepo(commitMessage?: string): Promise<{
+    success: boolean;
+    clean: boolean;
+    uncommittedCount: number;
+    uncommittedFiles: string[];
+    lastCommit: { hash: string; message: string; relativeTime: string; author: string };
+    branch: string;
+    remoteUrl: string;
+    repoName: string;
+    lastSyncTime: string | null;
+    lastSyncStatus: 'synced' | 'syncing' | 'error';
+    lastSyncMessage: string | null;
+  }> {
+    return request('/api/git/sync', {
+      method: 'POST',
+      body: JSON.stringify({ commitMessage }),
+    });
+  },
 };
+

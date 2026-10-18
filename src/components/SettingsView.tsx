@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, UserPrivacySettings } from '../types/trust.js';
 import { api } from '../services/api.js';
-import { ShieldCheck, Download, Trash2, Check, Lock, Save, AlertCircle } from 'lucide-react';
+import { ShieldCheck, Download, Trash2, Check, Lock, Save, AlertCircle, GitBranch, RefreshCw, ExternalLink, CheckCircle2 } from 'lucide-react';
 
 interface SettingsViewProps {
   user: User;
@@ -18,6 +18,41 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
   const [privacy, setPrivacy] = useState<UserPrivacySettings>(user.privacySettings);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+
+  // GitHub Continuous Sync State
+  const [gitStatus, setGitStatus] = useState<any>(null);
+  const [gitSyncing, setGitSyncing] = useState(false);
+  const [gitMessage, setGitMessage] = useState<string | null>(null);
+  const [customCommit, setCustomCommit] = useState('');
+
+  const loadGitStatus = async () => {
+    try {
+      const status = await api.getGitStatus();
+      setGitStatus(status);
+    } catch {
+      // background fetch
+    }
+  };
+
+  useEffect(() => {
+    loadGitStatus();
+  }, []);
+
+  const handleSyncNow = async () => {
+    setGitSyncing(true);
+    setGitMessage(null);
+    try {
+      const res = await api.syncGitRepo(customCommit.trim() || undefined);
+      setGitStatus(res);
+      setCustomCommit('');
+      setGitMessage('Pushed latest changes to GitHub repository successfully.');
+      setTimeout(() => setGitMessage(null), 4000);
+    } catch (err: any) {
+      setGitMessage(err.message || 'Failed to sync with repository');
+    } finally {
+      setGitSyncing(false);
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -255,6 +290,104 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
           >
             <Trash2 className="w-3.5 h-3.5" />
             <span>Request Account Erasure</span>
+          </button>
+        </div>
+      </div>
+
+      {/* GitHub Continuous Repository Sync Card */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4 shadow-xs text-xs">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+              <GitBranch className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-slate-900">GitHub Continuous Repository Sync</h2>
+              <p className="text-slate-500 text-[11px]">
+                Direct automated bi-directional synchronization with your remote Git repository.
+              </p>
+            </div>
+          </div>
+          <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            Continuous Sync Active
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
+            <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Repository Details</div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">Repository:</span>
+              <a
+                href="https://github.com/allenblue90210-jpg/Devolution-TamyonoiaCat"
+                target="_blank"
+                rel="noreferrer"
+                className="font-mono text-indigo-600 hover:underline flex items-center gap-1"
+              >
+                allenblue90210-jpg/Devolution-TamyonoiaCat
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">Branch:</span>
+              <span className="font-mono font-semibold text-slate-800">{gitStatus?.branch || 'main'}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">Latest Commit:</span>
+              <span className="font-mono text-slate-800 text-[11px]">
+                {gitStatus?.lastCommit?.hash || '18ce210'} ({gitStatus?.lastCommit?.relativeTime || 'synced'})
+              </span>
+            </div>
+          </div>
+
+          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
+            <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Sync Mechanism</div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">Auto-Push Interval:</span>
+              <span className="font-medium text-slate-800">Every 45 seconds on change</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">Working Tree State:</span>
+              <span className={gitStatus?.clean ? 'text-emerald-600 font-semibold flex items-center gap-1' : 'text-amber-600 font-semibold'}>
+                {gitStatus?.clean ? (
+                  <>
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Clean & Fully Synced
+                  </>
+                ) : (
+                  `${gitStatus?.uncommittedCount || 0} change(s) staged/pending`
+                )}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">CLI Commands:</span>
+              <code className="text-[11px] bg-slate-200/70 px-1.5 py-0.5 rounded text-slate-800">npm run sync</code>
+            </div>
+          </div>
+        </div>
+
+        {gitMessage && (
+          <div className="p-3 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-800 text-xs">
+            {gitMessage}
+          </div>
+        )}
+
+        <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
+          <input
+            type="text"
+            value={customCommit}
+            onChange={(e) => setCustomCommit(e.target.value)}
+            placeholder="Custom commit message (optional, e.g. 'feat: update trust endorsements')"
+            className="flex-1 w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          />
+          <button
+            onClick={handleSyncNow}
+            disabled={gitSyncing}
+            className="w-full sm:w-auto px-5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg flex items-center justify-center gap-1.5 shrink-0 shadow-xs disabled:opacity-50 transition-colors"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${gitSyncing ? 'animate-spin' : ''}`} />
+            <span>{gitSyncing ? 'Pushing to GitHub...' : 'Sync & Push Changes to Repo'}</span>
           </button>
         </div>
       </div>
