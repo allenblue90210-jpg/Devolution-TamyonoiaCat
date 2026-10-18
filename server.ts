@@ -1534,7 +1534,7 @@ app.get('/api/export-data', (req: Request, res: Response) => {
 
   const userArchive = {
     exportTimestamp: new Date().toISOString(),
-    legalNotice: 'Aegis Trust Network — Data Subject Access Archive (NDPR/GDPR Article 15/20 Compliance)',
+    legalNotice: 'Devolution Trust Network — Data Subject Access Archive (NDPR/GDPR Article 15/20 Compliance)',
     profile: user,
     evidence: db.getEvidenceByUserId(userId),
     relationships: db.getRelationshipsForUser(userId),

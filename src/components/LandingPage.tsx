@@ -129,7 +129,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       a: 'Any counterparty on a Trust Receipt or documented relationship can formally flag a dispute. Disputes are recorded on the ledger, audited with evidence submissions, and reflected in the contextual risk dimensions rather than hidden.',
     },
     {
-      q: 'How can external applications or fintechs integrate with Aegis Trust?',
+      q: 'How can external applications or fintechs integrate with Devolution Trust?',
       a: 'We are architecting a portable trust API where authorized partners, marketplaces, and compliance providers can request user-consented trust attestations, verify credential authenticity, and query dual-signed receipts via scoped OAuth tokens.',
     },
   ];
