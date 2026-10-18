@@ -401,14 +401,18 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+        <div className="flex flex-col items-stretch sm:items-end gap-1.5 shrink-0">
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-xs transition-colors"
+            className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
           >
-            <Plus className="w-4 h-4" />
-            <span>Request Commitment</span>
+            <Plus className="w-4 h-4 text-white" />
+            <span>Create New Trust Pact</span>
           </button>
+          <div className="text-[11px] font-semibold text-emerald-800 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 border border-emerald-200">
+            <Eye className="w-3.5 h-3.5 text-emerald-600" />
+            <span>{totalPublicImpressions.toLocaleString()} Live Public Impressions</span>
+          </div>
         </div>
       </div>
 
