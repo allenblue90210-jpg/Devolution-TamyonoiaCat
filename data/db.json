@@ -1079,5 +1079,241 @@
       "impressions": 1890,
       "witnessCount": 240
     }
-  }
+  },
+  "rememberRecords": [
+    {
+      "id": "REM-8901",
+      "authorId": "usr_sarah_002",
+      "authorName": "Sarah Adesina",
+      "authorAvatar": "/src/assets/images/avatar_sarah_1792334645228.jpg",
+      "targetId": "usr_allen_001",
+      "targetName": "Allen Okoro (Aegis Systems Ltd)",
+      "targetAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+      "title": "High-Availability FinTech Gateway Contract Execution & SLA Reliability",
+      "description": "Documenting the verified execution of the 180-day mission-critical transaction settlement protocol. All high-security cryptographic requirements were met with 100% on-time milestone delivery and zero data loss.",
+      "tags": [
+        "Business",
+        "Contract",
+        "Reliability"
+      ],
+      "incidentDate": "2026-08-15",
+      "evidenceItems": [
+        {
+          "name": "cloudworks_aegis_master_services_agreement.pdf",
+          "type": "Dual-Signed Service Contract",
+          "size": "1.8 MB",
+          "date": "2026-02-10",
+          "notes": "Executed contract with explicit 99.99% uptime and penalty clauses."
+        },
+        {
+          "name": "third_party_telemetry_audit_log.csv",
+          "type": "Independent Performance Audit",
+          "size": "640 KB",
+          "date": "2026-08-14",
+          "notes": "Neutral Datacenter monitoring logs confirming zero packet drop."
+        }
+      ],
+      "attachedReviewer": {
+        "userId": "usr_fatima_003",
+        "name": "Fatima Bello",
+        "avatarUrl": "/src/assets/images/avatar_fatima_1792334658112.jpg",
+        "headline": "Chief Operating Officer & Independent Infrastructure Auditor",
+        "qualificationNote": "Appointed as neutral technical escrow reviewer with direct cryptographic access to server logs and latency metrics.",
+        "status": "verified_corroborated",
+        "verdictComment": "I independently examined the telemetry audit logs and settlement reconciliation ledger. The SLA was fully honored with 99.998% uptime. Contractual obligations verified.",
+        "reviewedAt": "2026-08-16T14:20:00.000Z",
+        "ratingScore": 5
+      },
+      "corroborations": [
+        {
+          "id": "cor_001",
+          "authorId": "usr_emeka_005",
+          "authorName": "Emeka Okafor, Esq.",
+          "authorAvatar": "",
+          "verdict": "corroborated",
+          "note": "Confirmed completion of contractual warranty period with zero outstanding claims.",
+          "evidenceName": "escrow_release_clearance.pdf",
+          "createdAt": "2026-08-17T10:00:00.000Z"
+        }
+      ],
+      "severityOrImpact": "Exemplary Positive",
+      "veracityScore": 98,
+      "status": "verified",
+      "isPublic": true,
+      "createdAt": "2026-08-16T09:00:00.000Z"
+    },
+    {
+      "id": "REM-7724",
+      "authorId": "usr_allen_001",
+      "authorName": "Allen Okoro",
+      "authorAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+      "targetName": "Apex Continental Hardware Ltd (Unregistered Shell)",
+      "title": "Counterfeit Corporate Identity & Wire Redirection Fraud Attempt",
+      "description": "Vendor submitted forged CAC incorporation documentation and altered banking routing details to intercept a $24,500 enterprise rack server procurement tranche. Fraud detected during mandatory liveness and registry lookup.",
+      "tags": [
+        "Crime",
+        "Fraud",
+        "Contract"
+      ],
+      "incidentDate": "2026-06-22",
+      "evidenceItems": [
+        {
+          "name": "police_special_fraud_unit_complaint.pdf",
+          "type": "Law Enforcement First Information Report (FIR)",
+          "size": "2.4 MB",
+          "date": "2026-06-24",
+          "notes": "Official complaint filed with the Federal CID Special Fraud Unit."
+        },
+        {
+          "name": "cac_registry_nonexistence_certification.pdf",
+          "type": "Corporate Affairs Commission Registry Extract",
+          "size": "420 KB",
+          "date": "2026-06-23",
+          "notes": "Official CAC search certificate showing fake RC registration number."
+        },
+        {
+          "name": "altered_proforma_invoice_forensics.png",
+          "type": "Forensic PDF Analysis",
+          "size": "1.1 MB",
+          "date": "2026-06-22",
+          "notes": "Digital forensic layer breakdown showing spliced beneficiary details."
+        }
+      ],
+      "attachedReviewer": {
+        "userId": "usr_sarah_002",
+        "name": "Sarah Adesina",
+        "avatarUrl": "/src/assets/images/avatar_sarah_1792334645228.jpg",
+        "headline": "Lead Cloud Security & Enterprise Risk Auditor",
+        "qualificationNote": "Reviewed banking routing signatures and cross-referenced public key infrastructure for supplier procurement.",
+        "status": "verified_corroborated",
+        "verdictComment": "Examined the altered PDF invoices and police documentation. The registration RC-881923 was confirmed nonexistent in the CAC national database. Critical fraud alert corroborated.",
+        "reviewedAt": "2026-06-25T11:45:00.000Z",
+        "ratingScore": 1
+      },
+      "corroborations": [
+        {
+          "id": "cor_002",
+          "authorId": "usr_emeka_005",
+          "authorName": "Emeka Okafor, Esq.",
+          "verdict": "corroborated",
+          "note": "Verified with CAC registry officers directly. Subscribed company name is an unauthorized clone.",
+          "evidenceName": "cac_certified_search_dossier.pdf",
+          "createdAt": "2026-06-26T16:00:00.000Z"
+        }
+      ],
+      "severityOrImpact": "High Critical",
+      "veracityScore": 99,
+      "status": "verified",
+      "isPublic": true,
+      "createdAt": "2026-06-25T08:30:00.000Z"
+    },
+    {
+      "id": "REM-6218",
+      "authorId": "usr_fatima_003",
+      "authorName": "Fatima Bello",
+      "authorAvatar": "/src/assets/images/avatar_fatima_1792334658112.jpg",
+      "targetId": "usr_allen_001",
+      "targetName": "Allen Okoro",
+      "targetAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+      "title": "Commercial Office Tenancy Settlement & Security Deposit Clearance",
+      "description": "Tenancy exit and asset handover conducted in impeccable good faith. Property returned in pristine condition with zero damage, all estate dues and electricity tariffs fully cleared prior to walkthrough.",
+      "tags": [
+        "Business",
+        "Contract",
+        "Reliability"
+      ],
+      "incidentDate": "2026-09-04",
+      "evidenceItems": [
+        {
+          "name": "lekki_facility_handover_inspection_protocol.pdf",
+          "type": "Dual-Signed Inspection Certificate",
+          "size": "890 KB",
+          "date": "2026-09-04",
+          "notes": "Formal joint inspection protocol signed by facility engineer and tenant."
+        },
+        {
+          "name": "bank_clearance_deposit_refund.pdf",
+          "type": "Bank Transfer Payment Advice",
+          "size": "310 KB",
+          "date": "2026-09-06",
+          "notes": "Full N5,000,000 caution deposit refunded within 48 hours."
+        }
+      ],
+      "attachedReviewer": {
+        "userId": "usr_sarah_002",
+        "name": "Sarah Adesina",
+        "avatarUrl": "/src/assets/images/avatar_sarah_1792334645228.jpg",
+        "headline": "Co-Tenant & Operational Witness",
+        "qualificationNote": "Present at joint facility walkthrough and verified condition of technical cabling and premises.",
+        "status": "verified_corroborated",
+        "verdictComment": "Personally attended the handover walkthrough on September 4. Premises inspection passed on first pass with zero remedial items.",
+        "reviewedAt": "2026-09-07T09:15:00.000Z",
+        "ratingScore": 5
+      },
+      "corroborations": [],
+      "severityOrImpact": "Exemplary Positive",
+      "veracityScore": 95,
+      "status": "verified",
+      "isPublic": true,
+      "createdAt": "2026-09-06T15:00:00.000Z"
+    },
+    {
+      "id": "REM-5402",
+      "authorId": "usr_sarah_002",
+      "authorName": "Sarah Adesina",
+      "authorAvatar": "/src/assets/images/avatar_sarah_1792334645228.jpg",
+      "targetName": "OmniFreight Express Hub Ltd",
+      "title": "Supply Chain Waybill Tampering & Disputed Optical Transceiver Delivery",
+      "description": "Commercial shipment of 40 optical transceivers marked as delivered with forged digital signature. Delivery vehicle telematics and receiving warehouse security logs prove driver never entered industrial park.",
+      "tags": [
+        "Crime",
+        "Fraud",
+        "Contract",
+        "Business"
+      ],
+      "incidentDate": "2026-07-29",
+      "evidenceItems": [
+        {
+          "name": "cctv_gate_entry_audit_log.pdf",
+          "type": "Security Gate License Plate Recognition Log",
+          "size": "1.2 MB",
+          "date": "2026-07-29",
+          "notes": "Automated ANPR gate log confirming delivery truck never crossed entry barrier."
+        },
+        {
+          "name": "forged_waybill_signature_comparison.pdf",
+          "type": "Document Forensic Comparison",
+          "size": "780 KB",
+          "date": "2026-07-30",
+          "notes": "Side-by-side signature analysis showing fabricated receiving clerk name."
+        }
+      ],
+      "attachedReviewer": {
+        "userId": "usr_allen_001",
+        "name": "Allen Okoro",
+        "avatarUrl": "/src/assets/images/avatar_founder_1792334631930.jpg",
+        "headline": "Principal Systems Architect & Warehouse IT Lead",
+        "qualificationNote": "Oversees the facility access control database, IoT dock sensors, and cryptographic sign-in ledger.",
+        "status": "verified_corroborated",
+        "verdictComment": "IoT dock weight sensors and biometric turnstile logs confirm no deliveries were processed on dock bay 4 during the timestamped window.",
+        "reviewedAt": "2026-08-01T10:30:00.000Z",
+        "ratingScore": 1
+      },
+      "corroborations": [
+        {
+          "id": "cor_003",
+          "authorId": "usr_fatima_003",
+          "authorName": "Fatima Bello",
+          "verdict": "corroborated",
+          "note": "Horizon Logistics dispatch records show the carrier flagged an internal route deviation on that date.",
+          "createdAt": "2026-08-02T13:40:00.000Z"
+        }
+      ],
+      "severityOrImpact": "High Critical",
+      "veracityScore": 97,
+      "status": "verified",
+      "isPublic": true,
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ]
 }
