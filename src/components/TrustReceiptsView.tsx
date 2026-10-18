@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TrustReceipt, ReceiptStatus, User } from '../types/trust.js';
+import { api } from '../services/api.js';
 import {
   Receipt,
   CheckCircle2,
@@ -17,6 +18,9 @@ import {
   Globe,
   Lock,
   Tag,
+  Star,
+  MessageSquare,
+  ThumbsUp,
 } from 'lucide-react';
 
 interface TrustReceiptsViewProps {
@@ -38,9 +42,23 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
   onDisputeReceipt,
   onBack,
 }) => {
+  const [localReceipts, setLocalReceipts] = useState<TrustReceipt[]>(receipts);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedReceipt, setSelectedReceipt] = useState<TrustReceipt | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
+
+  // Receipt Rating Modal State
+  const [showRateModal, setShowRateModal] = useState(false);
+  const [ratingReceipt, setRatingReceipt] = useState<TrustReceipt | null>(null);
+  const [rateScore, setRateScore] = useState<number>(5);
+  const [rateBadge, setRateBadge] = useState<string>('Full Fulfillment Verified');
+  const [rateComment, setRateComment] = useState<string>('');
+  const [submittingRating, setSubmittingRating] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLocalReceipts(receipts);
+  }, [receipts]);
 
   // Form states for create
   const [counterpartyName, setCounterpartyName] = useState('');
