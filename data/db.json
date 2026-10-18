@@ -803,6 +803,17 @@
           "text": "Handover progress logged for High-Precision Spectral Sensor Kit Custody & Return. Pledged delivery on schedule.",
           "ratingPercent": 100,
           "createdAt": "2026-10-18T21:59:43.238Z"
+        },
+        {
+          "id": "pcmt_1792360820175_myck",
+          "commitmentId": "TC-9482",
+          "authorId": "usr_allen_001",
+          "authorName": "Allen Okoro",
+          "authorAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+          "authorRole": "Requester",
+          "text": "Test verification comment: lens zero-calibrated and attested.",
+          "ratingPercent": 100,
+          "createdAt": "2026-10-18T22:00:20.175Z"
         }
       ]
     },
