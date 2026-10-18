@@ -951,6 +951,26 @@ class Database {
         if (!parsed.commitments || parsed.commitments.length === 0) {
           parsed.commitments = getInitialCommitments();
           updated = true;
+        } else {
+          const initialMap = new Map(getInitialCommitments().map((c) => [c.id, c]));
+          for (const c of parsed.commitments) {
+            if (!c.comments || c.comments.length === 0) {
+              const initC = initialMap.get(c.id);
+              if (initC && initC.comments) {
+                c.comments = initC.comments;
+                updated = true;
+              } else if (!c.comments) {
+                c.comments = [];
+                updated = true;
+              }
+            }
+            if (c.ratingPercent === undefined || c.ratingPercent === null) {
+              const initC = initialMap.get(c.id);
+              c.ratingPercent = initC?.ratingPercent ?? 100;
+              c.ratingBadge = initC?.ratingBadge ?? '100% Exemplary Good Faith';
+              updated = true;
+            }
+          }
         }
         if (!parsed.goodFaithRatings || parsed.goodFaithRatings.length === 0) {
           parsed.goodFaithRatings = getInitialGoodFaithRatings();
@@ -1288,6 +1308,24 @@ class Database {
     if (changed) {
       this.persist();
     }
+  }
+
+  public addCommitmentComment(commitmentId: string, comment: PactComment): TrustCommitment | null {
+    const commitment = this.data.commitments.find((c) => c.id === commitmentId);
+    if (!commitment) return null;
+    if (!commitment.comments) commitment.comments = [];
+    commitment.comments.push(comment);
+    this.persist();
+    return commitment;
+  }
+
+  public rateCommitment(commitmentId: string, ratingPercent: number, ratingBadge?: string): TrustCommitment | null {
+    const commitment = this.data.commitments.find((c) => c.id === commitmentId);
+    if (!commitment) return null;
+    commitment.ratingPercent = ratingPercent;
+    if (ratingBadge) commitment.ratingBadge = ratingBadge;
+    this.persist();
+    return commitment;
   }
 
   // Good Faith Community Ratings & Comments
