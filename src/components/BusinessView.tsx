@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api.js';
 import { BusinessEntity, User } from '../types/trust.js';
-import { Building2, ShieldCheck, Users, Plus, Check, CheckCircle2, Clock, X, Lock } from 'lucide-react';
+import { Building2, ShieldCheck, Users, Plus, Check, CheckCircle2, Clock, X, Lock, ArrowLeft } from 'lucide-react';
 
 interface BusinessViewProps {
   user: User;
   onNavigateTab: (tab: string) => void;
+  onBack?: () => void;
 }
 
-export const BusinessView: React.FC<BusinessViewProps> = ({ user, onNavigateTab }) => {
+export const BusinessView: React.FC<BusinessViewProps> = ({ user, onNavigateTab, onBack }) => {
   const [business, setBusiness] = useState<BusinessEntity | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -56,6 +57,18 @@ export const BusinessView: React.FC<BusinessViewProps> = ({ user, onNavigateTab 
   if (!business) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-16 text-center space-y-4">
+        <div className="flex justify-start mb-4">
+          <button
+            onClick={() => {
+              if (onBack) onBack();
+              else onNavigateTab('dashboard');
+            }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg shadow-2xs hover:border-slate-300 transition-all cursor-pointer group"
+          >
+            <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:-translate-x-0.5 transition-transform" />
+            <span>Back to Dashboard</span>
+          </button>
+        </div>
         <Building2 className="w-12 h-12 text-slate-300 mx-auto" />
         <h2 className="text-lg font-bold text-slate-900">No Business Entity Registered</h2>
         <p className="text-xs text-slate-500">
@@ -72,7 +85,21 @@ export const BusinessView: React.FC<BusinessViewProps> = ({ user, onNavigateTab 
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      {/* Top Back Navigation Bar */}
+      <div>
+        <button
+          onClick={() => {
+            if (onBack) onBack();
+            else onNavigateTab('dashboard');
+          }}
+          className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg shadow-2xs hover:border-slate-300 transition-all cursor-pointer group"
+          title="Back to Dashboard"
+        >
+          <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:-translate-x-0.5 transition-transform" />
+          <span>Back to Dashboard</span>
+        </button>
+      </div>
       {/* Header Banner */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xs">
         <div className="flex items-center gap-4">
