@@ -821,6 +821,98 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
           </div>
         </div>
       )}
+
+      {/* Rate Trust Receipt Modal */}
+      {showRateModal && ratingReceipt && (
+        <div className="fixed inset-0 z-50 overflow-y-auto p-4 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center">
+          <div className="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl p-6 space-y-4 my-auto">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
+                <h3 className="text-base font-bold text-slate-900">
+                  Rate Trust Receipt #{ratingReceipt.id}
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowRateModal(false)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="text-xs bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1">
+              <div className="font-bold text-slate-900">{ratingReceipt.title}</div>
+              <div className="text-slate-600">Counterparty: {ratingReceipt.counterpartyName}</div>
+            </div>
+
+            <form onSubmit={handleSubmitRating} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-bold text-slate-800 mb-1">Rating Score</label>
+                <div className="flex items-center gap-2">
+                  {[5, 4, 3, 2, 1].map((s) => (
+                    <button
+                      type="button"
+                      key={s}
+                      onClick={() => setRateScore(s)}
+                      className={`flex-1 py-2 text-xs font-mono font-bold rounded-lg border transition-colors cursor-pointer ${
+                        rateScore === s
+                          ? 'bg-amber-500 text-white border-amber-500 shadow-2xs'
+                          : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
+                      }`}
+                    >
+                      {s} ★
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-800 mb-1">Rating Badge</label>
+                <select
+                  value={rateBadge}
+                  onChange={(e) => setRateBadge(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 bg-white"
+                >
+                  <option value="Full Fulfillment Verified">Full Fulfillment Verified</option>
+                  <option value="Prompt Reliability">Prompt Reliability</option>
+                  <option value="Exceptional Milestone Delivery">Exceptional Milestone Delivery</option>
+                  <option value="Settled with Minor Caveats">Settled with Minor Caveats</option>
+                  <option value="Disputed Delivery Conditions">Disputed Delivery Conditions</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-800 mb-1">Review Commentary</label>
+                <textarea
+                  rows={3}
+                  placeholder="Detail your firsthand experience with this transaction, deliverable quality, and honor."
+                  value={rateComment}
+                  onChange={(e) => setRateComment(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowRateModal(false)}
+                  className="px-4 py-2 font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingRating}
+                  className="px-4 py-2 font-semibold text-white bg-amber-600 hover:bg-amber-700 disabled:opacity-50 rounded-lg shadow-2xs cursor-pointer"
+                >
+                  {submittingRating ? 'Recording...' : 'Submit Rating'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
