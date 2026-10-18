@@ -709,8 +709,14 @@ export const PublicLedgerScreen: React.FC<PublicLedgerScreenProps> = ({
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                       <div className="space-y-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
-                            {commitment.category}
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                            commitment.category === 'Other'
+                              ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                              : 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                          }`}>
+                            {commitment.category === 'Other' && commitment.otherCategoryDetails
+                              ? `Other: ${commitment.otherCategoryDetails}`
+                              : commitment.category}
                           </span>
                           {commitment.isPublic ? (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -909,8 +915,14 @@ export const PublicLedgerScreen: React.FC<PublicLedgerScreenProps> = ({
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                     <div className="space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
-                          {receipt.interactionCategory}
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                          receipt.interactionCategory === 'Other'
+                            ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                            : 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                        }`}>
+                          {receipt.interactionCategory === 'Other' && receipt.otherCategoryDetails
+                            ? `Other: ${receipt.otherCategoryDetails}`
+                            : receipt.interactionCategory}
                         </span>
                         {receipt.isPublic ? (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200">
