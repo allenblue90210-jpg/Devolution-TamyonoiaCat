@@ -30,6 +30,32 @@ const DB_FILE = path.resolve(process.cwd(), 'data', 'db.json');
 function getInitialCommitments(): TrustCommitment[] {
   return [
     {
+      id: 'TC-9482',
+      title: 'High-Precision Spectral Sensor Kit Custody & Return',
+      description: 'Custody loan pact: Field spectrometer rig and optical sensors loaned to User B (Sarah) for cleanroom mineral testing. Pledged to be returned with zero scratch calibration by deadline.',
+      category: 'Other',
+      otherCategoryDetails: 'Specialty Research Equipment Custody & Calibration Pact',
+      requesterId: 'usr_allen_001',
+      requesterName: 'Allen Okoro',
+      requesterAvatar: '/src/assets/images/avatar_founder_1792334631930.jpg',
+      committerId: 'usr_sarah_002',
+      committerName: 'Sarah Adesina',
+      committerAvatar: '/src/assets/images/avatar_sarah_1792334645228.jpg',
+      deadline: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+      committerPledgeNote: "Sensors will be returned cleaned, zero-calibrated, and in Pelican hardcase by 2:00 AM.",
+      status: 'active',
+      trustRewardPoints: 35,
+      penaltyRateDailyPercent: 30,
+      penaltyCurrentDeductionPercent: 0,
+      isOverdue: false,
+      daysOverdue: 0,
+      checkedOutByCommitterAt: null,
+      checkedOutByRequesterAt: null,
+      linkedReceiptId: null,
+      isPublic: true,
+      createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+    },
+    {
       id: 'TC-8012',
       title: 'Mercedes-Benz C300 Return & Handover',
       description: 'Vehicle loaner agreement: User A (Allen) loaning Mercedes C300 to User B (Sarah) for regional tech summit transit. Promised to be returned and parked at Lekki Phase 1 secure garage by 2:00 AM.',
@@ -481,6 +507,33 @@ function getInitialData(): DatabaseSchema {
   ];
 
   const receipts: TrustReceipt[] = [
+    {
+      id: 'TR-95412',
+      creatorId: 'usr_allen_001',
+      creatorName: 'Allen Okoro',
+      counterpartyName: 'Fatima Bello (Horizon Global Freight)',
+      counterpartyContact: '+234 809 112 4000',
+      counterpartyUserId: 'usr_fatima_003',
+      interactionCategory: 'Other',
+      otherCategoryDetails: 'Proprietary Logistics Algorithm IP & Code Escrow Transfer',
+      title: 'Proprietary Route Optimization IP Transfer & Custody Sign-Off',
+      description: 'Bilateral transfer of proprietary multimodal maritime route optimization intellectual property, secure container repository keys, and clean custody release.',
+      transactionValue: '₦ 8,500,000 NGN',
+      status: 'completed',
+      completionConditions: 'Full cryptographic SHA-256 tarball verification, GPG keys exchange, and mutual executive attestation on open ledger.',
+      isFulfillmentConfirmed: true,
+      evidenceAttachments: [
+        { name: 'ip_assignment_and_escrow_release.pdf', date: '2026-03-12', size: '420 KB' },
+      ],
+      history: [
+        { timestamp: '2026-03-10T10:00:00.000Z', actor: 'Allen Okoro', event: 'Escrow Transfer Terms Defined' },
+        { timestamp: '2026-03-11T14:30:00.000Z', actor: 'Fatima Bello', event: 'Cryptographic Deliverable Verified' },
+        { timestamp: '2026-03-12T16:00:00.000Z', actor: 'Allen Okoro & Fatima Bello', event: 'Dual-Signed Mutual Completion & Trust Receipt Finalized' },
+      ],
+      isPublic: true,
+      createdAt: '2026-03-10T10:00:00.000Z',
+      completedAt: '2026-03-12T16:00:00.000Z',
+    },
     {
       id: 'TR-90214',
       creatorId: 'usr_allen_001',
