@@ -259,6 +259,22 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
     }
   };
 
+  // Record Public Impression / Witness
+  const handleRecordImpression = async (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    try {
+      const res = await api.recordCommitmentImpression(id, 'witness');
+      setCommitments((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, ...res.commitment, hasWitnessed: true } : c))
+      );
+      setToastMessage(res.message);
+      setTimeout(() => setToastMessage(null), 3500);
+      if (onRefreshData) onRefreshData();
+    } catch (err: any) {
+      console.error('Failed to record impression:', err);
+    }
+  };
+
   // Helpers for commitment countdown
   const getCountdown = (deadlineIso: string, status: string) => {
     const diff = new Date(deadlineIso).getTime() - currentTime;
