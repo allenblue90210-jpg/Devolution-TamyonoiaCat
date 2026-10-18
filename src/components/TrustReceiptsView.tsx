@@ -13,6 +13,7 @@ import {
   ExternalLink,
   Shield,
   HelpCircle,
+  ArrowLeft,
 } from 'lucide-react';
 
 interface TrustReceiptsViewProps {
@@ -22,6 +23,7 @@ interface TrustReceiptsViewProps {
   onConfirmReceipt: (id: string) => Promise<void>;
   onCompleteReceipt: (id: string) => Promise<void>;
   onDisputeReceipt: (id: string, reason: string, description: string) => Promise<void>;
+  onBack?: () => void;
 }
 
 export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
@@ -31,6 +33,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
   onConfirmReceipt,
   onCompleteReceipt,
   onDisputeReceipt,
+  onBack,
 }) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedReceipt, setSelectedReceipt] = useState<TrustReceipt | null>(null);
