@@ -162,6 +162,7 @@ export const Navigation: React.FC<NavigationProps> = ({
     { id: 'directory', label: 'Directory', icon: Compass },
     { id: 'reputation', label: 'Reputation Engine', icon: Sparkles },
     { id: 'remember', label: 'Remember', icon: Bookmark },
+    ...(currentUser ? [{ id: `profile-${currentUser.username}`, label: 'My Profile', icon: UserIcon }] : []),
   ];
 
   return (
