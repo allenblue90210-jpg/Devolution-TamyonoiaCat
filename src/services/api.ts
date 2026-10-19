@@ -18,7 +18,7 @@ import {
   RememberCorroboration,
 } from '../types/trust.js';
 
-let currentSessionUserId = localStorage.getItem('aegis_session_user_id') || 'usr_allen_001';
+let currentSessionUserId = localStorage.getItem('aegis_session_user_id') || '';
 
 export function setSessionUserId(id: string) {
   currentSessionUserId = id;
@@ -100,10 +100,10 @@ export const api = {
     clearSessionUserId();
     return request('/api/auth/logout', { method: 'POST' });
   },
-  async signIn(login: string, targetUserId?: string): Promise<{ user: User; message: string }> {
+  async signIn(login: string, password?: string, targetUserId?: string): Promise<{ user: User; message: string }> {
     const res = await request<{ user: User; message: string }>('/api/auth/signin', {
       method: 'POST',
-      body: JSON.stringify({ login, targetUserId }),
+      body: JSON.stringify({ login, password, targetUserId }),
     });
     setSessionUserId(res.user.id);
     return res;
