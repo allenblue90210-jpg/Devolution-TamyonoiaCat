@@ -34,24 +34,61 @@ export function getSessionUserId(): string {
   return currentSessionUserId;
 }
 
-async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+async function request<T>(endpoint: string, options: RequestInit = {}, retries = 2): Promise<T> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'x-user-id': currentSessionUserId,
     ...(options.headers as Record<string, string>),
   };
 
-  const res = await fetch(endpoint, {
-    ...options,
-    headers,
-  });
+  try {
+    const res = await fetch(endpoint, {
+      ...options,
+      headers,
+    });
 
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({ error: 'Network response was not ok' }));
-    throw new Error(errorData.error || `HTTP error ${res.status}`);
+    const contentType = res.headers.get('content-type') || '';
+    const rawText = await res.text();
+
+    // Check if the response is HTML (happens when dev server or proxy returns index.html)
+    const isHtml =
+      contentType.includes('text/html') ||
+      rawText.trim().startsWith('<!doctype') ||
+      rawText.trim().startsWith('<html');
+
+    if (isHtml) {
+      if (retries > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 400));
+        return request<T>(endpoint, options, retries - 1);
+      }
+      throw new Error(`Server returned HTML instead of JSON for ${endpoint}. Backend service may still be warming up.`);
+    }
+
+    let parsedData: any = {};
+    if (rawText.trim()) {
+      try {
+        parsedData = JSON.parse(rawText);
+      } catch {
+        if (retries > 0) {
+          await new Promise((resolve) => setTimeout(resolve, 400));
+          return request<T>(endpoint, options, retries - 1);
+        }
+        throw new Error(`Invalid JSON response from ${endpoint}: ${rawText.slice(0, 100)}`);
+      }
+    }
+
+    if (!res.ok) {
+      throw new Error(parsedData?.error || `HTTP error ${res.status}`);
+    }
+
+    return parsedData as T;
+  } catch (err: any) {
+    if (retries > 0 && (err.name === 'TypeError' || err.message?.includes('fetch') || err.message?.includes('HTML instead of JSON'))) {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      return request<T>(endpoint, options, retries - 1);
+    }
+    throw err;
   }
-
-  return res.json();
 }
 
 export const api = {

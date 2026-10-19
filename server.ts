@@ -2036,6 +2036,11 @@ app.post('/api/git/pull', async (_req: Request, res: Response) => {
 async function startServer() {
   await initGitConfig();
 
+  // API 404 Guard: Ensure unmatched /api routes return JSON 404, preventing fall-through to Vite SPA HTML
+  app.all('/api/*', (req: Request, res: Response) => {
+    res.status(404).json({ error: `API route ${req.method} ${req.path} not found` });
+  });
+
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
