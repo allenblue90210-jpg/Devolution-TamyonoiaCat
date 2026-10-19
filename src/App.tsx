@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { api, setSessionUserId } from './services/api.js';
+import { api, setSessionUserId, clearSessionUserId } from './services/api.js';
+import { ShieldCheck, LogIn } from 'lucide-react';
 import {
   User,
   EvidenceItem,
@@ -156,6 +157,24 @@ export default function App() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLogout = async () => {
+    setLoading(true);
+    try {
+      await api.logout();
+    } catch {
+      clearSessionUserId();
+    }
+    setCurrentUser(null);
+    setEvidence([]);
+    setRelationships([]);
+    setReceipts([]);
+    setReferences([]);
+    setNotifications([]);
+    setReputation(null);
+    handleSelectTab('landing');
+    setLoading(false);
   };
 
   // Evidence Actions
