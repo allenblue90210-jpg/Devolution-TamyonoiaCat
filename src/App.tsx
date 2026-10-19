@@ -10,6 +10,7 @@ import {
   InAppNotification,
   ReputationBreakdown,
   RelationshipCategory,
+  UserSummary,
 } from './types/trust.js';
 import { Navigation } from './components/Navigation.js';
 import { LandingPage } from './components/LandingPage.js';
@@ -33,9 +34,7 @@ import { SupabaseModal } from './components/SupabaseModal.js';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [availableUsers, setAvailableUsers] = useState<
-    Array<{ id: string; username: string; fullName: string; accountType: string; avatarUrl: string }>
-  >([]);
+  const [availableUsers, setAvailableUsers] = useState<UserSummary[]>([]);
   const [currentTab, setCurrentTab] = useState<string>('landing');
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -331,6 +330,7 @@ export default function App() {
             onOpenNewReceiptModal={() => handleSelectTab('receipts')}
             onOpenPublicLedger={() => handleSelectTab('public-ledger')}
             onOpenAvatarUpload={() => setShowAvatarModal(true)}
+            onRefreshData={refreshData}
           />
         ) : (
           <LandingPage
