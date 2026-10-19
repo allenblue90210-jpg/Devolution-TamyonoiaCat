@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { api } from '../services/api.js';
 import { User, AccountType } from '../types/trust.js';
-import { ShieldCheck, X, CheckCircle2, AlertCircle, Building2, User as UserIcon, LogOut } from 'lucide-react';
+import { ShieldCheck, X, CheckCircle2, AlertCircle, Building2, User as UserIcon, LogOut, Eye, EyeOff, Key, Database } from 'lucide-react';
 
 interface AuthModalProps {
   onClose: () => void;
@@ -20,6 +20,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 }) => {
   const [mode, setMode] = useState<'signin' | 'signup' | 'reset'>('signin');
   const [login, setLogin] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -39,7 +41,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setLoading(true);
     setError(null);
     try {
-      const res = await api.signIn(login);
+      const res = await api.signIn(login, password);
       onSuccess(res.user);
       onClose();
     } catch (err: any) {
@@ -66,6 +68,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName || !username || !email) return;
+    if (password && password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -73,6 +79,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         fullName,
         username,
         email,
+        password,
         accountType,
         businessName: accountType === 'business' ? businessName : undefined,
         category,
