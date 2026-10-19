@@ -54,18 +54,57 @@ function saveStoredConfig(url: string, key: string) {
   }
 }
 
+function isRealSupabaseUrl(url?: string | null): boolean {
+  if (!url) return false;
+  const cleaned = url.trim();
+  if (
+    cleaned === '001' ||
+    cleaned === 'MY_SUPABASE_URL' ||
+    cleaned.includes('YOUR_PROJECT_ID') ||
+    cleaned.length < 12
+  ) {
+    return false;
+  }
+  return cleaned.startsWith('http://') || cleaned.startsWith('https://');
+}
+
+function isRealSupabaseKey(key?: string | null): boolean {
+  if (!key) return false;
+  const cleaned = key.trim();
+  if (
+    cleaned === '001' ||
+    cleaned === 'MY_SUPABASE_KEY' ||
+    cleaned === 'sb_secret_YOUR_KEY' ||
+    cleaned.length < 15
+  ) {
+    return false;
+  }
+  return true;
+}
+
 export function getResolvedSupabaseConfig(): { url: string; key: string } {
   const stored = loadStoredConfig();
   const token = loadStoredToken();
-  const url = (process.env.SUPABASE_URL || stored.url || '').trim();
-  const key = (
+
+  const envUrl = process.env.SUPABASE_URL?.trim();
+  const url = (isRealSupabaseUrl(envUrl) ? envUrl : (isRealSupabaseUrl(stored.url) ? stored.url : '')) || '';
+
+  const envKey = (
     process.env.SUPABASE_SECRET_KEY ||
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.SUPABASE_KEY ||
-    token ||
-    stored.key ||
-    ''
-  ).trim();
+    process.env.SUPABASE_KEY
+  )?.trim();
+
+  const key = (
+    isRealSupabaseKey(envKey)
+      ? envKey
+      : isRealSupabaseKey(token)
+      ? token
+      : isRealSupabaseKey(stored.key)
+      ? stored.key
+      : ''
+  ) || '';
+
   return { url, key };
 }
 
@@ -104,9 +143,47 @@ export function getSupabaseClient(): SupabaseClient | null {
 export function updateSupabaseConfig(newUrl: string, newKey?: string) {
   cachedClient = null;
   const current = getResolvedSupabaseConfig();
-  const finalKey = (newKey && newKey.trim()) ? newKey.trim() : current.key || '';
+  const finalKey = (newKey && newKey.trim() && isRealSupabaseKey(newKey)) ? newKey.trim() : current.key || '';
   saveStoredConfig(newUrl.trim(), finalKey);
+  lastSyncStatus = 'unconfigured';
+  lastSyncMessage = null;
   return getSupabaseStatus();
+}
+
+export async function syncUserToSupabase(user: any): Promise<boolean> {
+  const client = getSupabaseClient();
+  if (!client) return false;
+
+  try {
+    // 1. Try to upsert into devolution_users table
+    const { error: userErr } = await client
+      .from('devolution_users')
+      .upsert({
+        id: user.id,
+        username: user.username,
+        full_name: user.fullName,
+        email: user.email || null,
+        phone: user.phone || null,
+        headline: user.headline || null,
+        bio: user.bio || null,
+        category: user.category || 'other',
+        account_type: user.accountType || 'personal',
+        city: user.city || null,
+        country: user.country || 'Nigeria',
+        reputation_score: user.reputationScore || 600,
+        is_verified: user.identityStatus === 'verified',
+        privacy_settings: user.privacySettings || {},
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'id' });
+
+    if (userErr && userErr.code !== '42P01') {
+      console.warn('[Supabase Sync User Warning]:', userErr.message);
+    }
+    return true;
+  } catch (err: any) {
+    console.warn('[Supabase Sync User Notice]:', err.message);
+    return false;
+  }
 }
 
 export async function testSupabaseConnection(): Promise<{
