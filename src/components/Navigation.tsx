@@ -459,56 +459,100 @@ export const Navigation: React.FC<NavigationProps> = ({
               <div className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-1.5 p-1 sm:p-1.5 rounded-lg border border-slate-200 hover:border-slate-300 bg-white text-xs font-medium text-slate-800 transition-colors cursor-pointer"
-                  title="User Profile Menu"
+                  className={`flex items-center gap-2 p-1 sm:px-3 sm:py-1.5 rounded-xl border-2 transition-all cursor-pointer shadow-xs ${
+                    showUserMenu
+                      ? 'bg-indigo-50 border-indigo-500 ring-2 ring-indigo-200'
+                      : 'bg-white hover:bg-indigo-50/70 border-indigo-300 hover:border-indigo-500'
+                  }`}
+                  title="Your Profile & Account Menu"
+                  aria-label="User Profile and Account Menu"
                 >
-                  {currentUser.avatarUrl ? (
-                    <img
-                      src={currentUser.avatarUrl}
-                      alt={currentUser.fullName}
-                      referrerPolicy="no-referrer"
-                      className="w-6 h-6 rounded-full object-cover"
+                  <div className="relative shrink-0">
+                    {currentUser.avatarUrl ? (
+                      <img
+                        src={currentUser.avatarUrl}
+                        alt={currentUser.fullName}
+                        referrerPolicy="no-referrer"
+                        className="w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500/20 border border-white shadow-2xs"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs ring-2 ring-indigo-500/20 shadow-2xs">
+                        {currentUser.fullName.charAt(0)}
+                      </div>
+                    )}
+                    <span
+                      className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"
+                      title="Verified Identity"
                     />
-                  ) : (
-                    <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">
-                      {currentUser.fullName.charAt(0)}
-                    </div>
-                  )}
-                  <span className="hidden sm:inline font-semibold max-w-[110px] truncate">{currentUser.fullName}</span>
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                  </div>
+
+                  {/* Profile label & Name - Clearly visible across all screen sizes */}
+                  <div className="flex flex-col text-left leading-tight shrink-0">
+                    <span className="font-bold text-slate-900 text-xs max-w-[90px] sm:max-w-[130px] truncate">
+                      {currentUser.fullName}
+                    </span>
+                    <span className="text-[10px] font-bold text-indigo-700 tracking-wide flex items-center gap-1">
+                      <span>Profile</span>
+                      <span className="hidden sm:inline text-slate-300">·</span>
+                      <span className="hidden sm:inline text-slate-500 font-mono font-normal">@{currentUser.username}</span>
+                    </span>
+                  </div>
+
+                  <ChevronDown
+                    className={`w-4 h-4 text-indigo-600 shrink-0 transition-transform duration-200 ${
+                      showUserMenu ? 'rotate-180 text-indigo-800' : ''
+                    }`}
+                  />
                 </button>
 
                 {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg border border-slate-200 shadow-xl py-2 z-50">
-                    <div className="px-4 py-2 border-b border-slate-100">
-                      <div className="text-xs font-bold text-slate-900">{currentUser.fullName}</div>
-                      <div className="text-[11px] text-slate-500 font-mono">@{currentUser.username}</div>
-                      <div className="mt-1 flex items-center gap-1.5 text-[11px] text-slate-600">
-                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>{currentUser.identityStatus === 'verified' ? 'Identity Attested' : 'Unverified'}</span>
-                        <span aria-hidden="true">·</span>
-                        <span className="capitalize">{currentUser.accountType}</span>
+                  <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl border border-slate-200 shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+                    <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 rounded-t-xl">
+                      <div className="flex items-center gap-3">
+                        {currentUser.avatarUrl ? (
+                          <img
+                            src={currentUser.avatarUrl}
+                            alt={currentUser.fullName}
+                            className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-sm">
+                            {currentUser.fullName.charAt(0)}
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs font-bold text-slate-900 truncate">{currentUser.fullName}</div>
+                          <div className="text-[11px] text-slate-500 font-mono truncate">@{currentUser.username}</div>
+                          <div className="mt-0.5 flex items-center gap-1.5 text-[10px] text-emerald-700 font-semibold">
+                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            <span>{currentUser.identityStatus === 'verified' ? 'Identity Attested' : 'Unverified'}</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="py-1">
+                    <div className="p-2">
                       <button
                         onClick={() => {
                           setShowUserMenu(false);
                           onSelectTab(`profile-${currentUser.username}`);
                         }}
-                        className="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2 cursor-pointer"
+                        className="w-full text-left p-2.5 mb-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-xs flex items-center justify-between cursor-pointer group"
                       >
-                        <UserIcon className="w-3.5 h-3.5 text-slate-400" />
-                        <span>View My Public Profile</span>
+                        <div className="flex items-center gap-2">
+                          <UserIcon className="w-4 h-4 text-indigo-200 group-hover:text-white" />
+                          <span>View My Public Profile</span>
+                        </div>
+                        <ExternalLink className="w-3.5 h-3.5 text-indigo-200 group-hover:text-white" />
                       </button>
+
                       {currentUser.accountType === 'business' && (
                         <button
                           onClick={() => {
                             setShowUserMenu(false);
                             onSelectTab('business');
                           }}
-                          className="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2 cursor-pointer"
+                          className="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 rounded-lg transition-colors flex items-center gap-2 cursor-pointer font-medium"
                         >
                           <Building2 className="w-3.5 h-3.5 text-slate-400" />
                           <span>Business Entity Dashboard</span>
@@ -519,6 +563,12 @@ export const Navigation: React.FC<NavigationProps> = ({
                           setShowUserMenu(false);
                           onSelectTab('settings');
                         }}
+                        className="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 rounded-lg transition-colors flex items-center gap-2 cursor-pointer font-medium"
+                      >
+                        <Settings className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Privacy & Data Settings</span>
+                      </button>
+                    </div>
                         className="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2 cursor-pointer"
                       >
                         <Settings className="w-3.5 h-3.5 text-slate-400" />
