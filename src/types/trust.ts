@@ -239,6 +239,7 @@ export interface User {
   witnessCount?: number;
   goodFaithRating?: number;
   ratingsCount?: number;
+  passwordHash?: string;
   createdAt: string;
 }
 
