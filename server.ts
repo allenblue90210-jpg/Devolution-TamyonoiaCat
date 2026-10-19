@@ -15,6 +15,9 @@ import {
   pullFromSupabase,
   getResolvedSupabaseConfig,
   syncUserToSupabase,
+  supabaseAuthSignIn,
+  supabaseAuthSignUp,
+  supabaseAuthSendOtp,
 } from './server/supabase.js';
 import {
   User,
