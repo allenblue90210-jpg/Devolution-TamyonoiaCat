@@ -280,9 +280,8 @@ export default function App() {
       return (
         <PublicProfileView
           username={username}
-          currentUser={currentUser}
-          onBack={handleBack}
           onNavigateTab={handleSelectTab}
+          onBack={handleBack}
         />
       );
     }
@@ -292,13 +291,12 @@ export default function App() {
       const token = currentTab.replace('invite-', '');
       return (
         <AcceptInviteView
-          inviteToken={token}
-          currentUser={currentUser}
-          onInviteAccepted={() => {
+          token={token}
+          onBack={handleBack}
+          onCompleted={() => {
             refreshData();
             handleSelectTab('relationships');
           }}
-          onBack={handleBack}
         />
       );
     }
