@@ -122,7 +122,8 @@
         "showLocationCityOnly": true,
         "allowDirectVerificationRequests": true
       },
-      "createdAt": "2026-10-19T12:38:46.573Z"
+      "createdAt": "2026-10-19T12:38:46.573Z",
+      "passwordHash": "1880c0255fe729d7cc0d2cfc4644f98cb6a3225dd0c4216bc07bb4b5b0fc92f1"
     },
     {
       "id": "usr_1792419058259_ehg5",
