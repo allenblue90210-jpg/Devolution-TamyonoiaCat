@@ -513,7 +513,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
             <div className="flex items-center justify-between">
               <span className="text-slate-500">Secret Key:</span>
               <span className="font-mono text-slate-800 text-[11px] bg-slate-200/70 px-2 py-0.5 rounded">
-                {supabaseStatus?.key || 'sb_secret_C10_...55lW'}
+                {supabaseStatus?.key ? 'Configured (Active)' : 'Not configured'}
               </span>
             </div>
 
@@ -521,7 +521,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
               <span className="text-slate-500">Key Type:</span>
               <span className="font-semibold text-emerald-700 flex items-center gap-1">
                 <Check className="w-3.5 h-3.5" />
-                Supabase Secret API Key (sb_secret_*)
+                Supabase Secret API Key (Service Role)
               </span>
             </div>
 

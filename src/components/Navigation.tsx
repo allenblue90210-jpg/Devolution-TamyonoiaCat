@@ -416,7 +416,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                       <div className="flex justify-between items-center text-[11px]">
                         <span className="text-slate-400">Secret Key:</span>
                         <span className="font-mono text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">
-                          {supabaseStatus?.key || 'sb_secret_C10_...55lW'}
+                          {supabaseStatus?.key ? 'Configured (Active)' : 'Not configured'}
                         </span>
                       </div>
                       <div className="flex justify-between items-center text-[11px]">
