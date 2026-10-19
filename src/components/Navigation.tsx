@@ -485,12 +485,12 @@ export const Navigation: React.FC<NavigationProps> = ({
               </div>
             )}
 
-            {/* 5. Active User Profile Menu */}
+            {/* 4. Active User Profile Menu */}
             {currentUser ? (
-              <div className="relative">
+              <div className="relative shrink-0">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className={`flex items-center gap-2 p-1 sm:px-3 sm:py-1.5 rounded-xl border-2 transition-all cursor-pointer shadow-xs ${
+                  className={`flex items-center gap-1.5 sm:gap-2 p-1 sm:px-2.5 sm:py-1 rounded-xl border-2 transition-all cursor-pointer shadow-xs shrink-0 ${
                     showUserMenu
                       ? 'bg-indigo-50 border-indigo-500 ring-2 ring-indigo-200'
                       : 'bg-white hover:bg-indigo-50/70 border-indigo-300 hover:border-indigo-500'
@@ -504,175 +504,171 @@ export const Navigation: React.FC<NavigationProps> = ({
                         src={currentUser.avatarUrl}
                         alt={currentUser.fullName}
                         referrerPolicy="no-referrer"
-                        className="w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500/20 border border-white shadow-2xs"
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover ring-2 ring-indigo-500/20 border border-white shadow-2xs shrink-0"
                       />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs ring-2 ring-indigo-500/20 shadow-2xs">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs ring-2 ring-indigo-500/20 shadow-2xs shrink-0">
                         {currentUser.fullName.charAt(0)}
                       </div>
                     )}
                     <span
-                      className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"
+                      className="absolute -bottom-0.5 -right-0.5 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"
                       title="Verified Identity"
                     />
                   </div>
 
-                  {/* Profile label & Name - Clearly visible across all screen sizes */}
-                  <div className="flex flex-col text-left leading-tight shrink-0">
-                    <span className="font-bold text-slate-900 text-xs max-w-[90px] sm:max-w-[130px] truncate">
+                  {/* Profile label & Name - clearly visible, never wraps or pushes width */}
+                  <div className="hidden sm:flex flex-col text-left leading-tight shrink-0">
+                    <span className="font-bold text-slate-900 text-xs max-w-[80px] md:max-w-[110px] truncate">
                       {currentUser.fullName}
                     </span>
                     <span className="text-[10px] font-bold text-indigo-700 tracking-wide flex items-center gap-1">
                       <span>Profile</span>
-                      <span className="hidden sm:inline text-slate-300">·</span>
-                      <span className="hidden sm:inline text-slate-500 font-mono font-normal">@{currentUser.username}</span>
+                      <span className="text-slate-300">·</span>
+                      <span className="text-slate-500 font-mono font-normal">@{currentUser.username}</span>
                     </span>
                   </div>
 
                   <ChevronDown
-                    className={`w-4 h-4 text-indigo-600 shrink-0 transition-transform duration-200 ${
+                    className={`w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-600 shrink-0 transition-transform duration-200 ${
                       showUserMenu ? 'rotate-180 text-indigo-800' : ''
                     }`}
                   />
                 </button>
 
                 {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl border border-slate-200 shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
-                    <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 rounded-t-xl">
-                      <div className="flex items-center gap-3">
-                        {currentUser.avatarUrl ? (
-                          <img
-                            src={currentUser.avatarUrl}
-                            alt={currentUser.fullName}
-                            className="w-10 h-10 rounded-full object-cover border border-slate-200"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-sm">
-                            {currentUser.fullName.charAt(0)}
-                          </div>
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <div className="text-xs font-bold text-slate-900 truncate">{currentUser.fullName}</div>
-                          <div className="text-[11px] text-slate-500 font-mono truncate">@{currentUser.username}</div>
-                          <div className="mt-0.5 flex items-center gap-1.5 text-[10px] text-emerald-700 font-semibold">
-                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                            <span>{currentUser.identityStatus === 'verified' ? 'Identity Attested' : 'Unverified'}</span>
+                  <>
+                    <div
+                      className="fixed inset-0 z-40 bg-slate-900/10 backdrop-blur-[0.5px]"
+                      onClick={() => setShowUserMenu(false)}
+                      aria-hidden="true"
+                    />
+                    <div className="absolute right-0 mt-2 w-72 max-w-[calc(100vw-1.5rem)] bg-white rounded-xl border border-slate-200 shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+                      <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 rounded-t-xl">
+                        <div className="flex items-center gap-3">
+                          {currentUser.avatarUrl ? (
+                            <img
+                              src={currentUser.avatarUrl}
+                              alt={currentUser.fullName}
+                              className="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-sm shrink-0">
+                              {currentUser.fullName.charAt(0)}
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <div className="text-xs font-bold text-slate-900 truncate">{currentUser.fullName}</div>
+                            <div className="text-[11px] text-slate-500 font-mono truncate">@{currentUser.username}</div>
+                            <div className="mt-0.5 flex items-center gap-1.5 text-[10px] text-emerald-700 font-semibold">
+                              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                              <span>{currentUser.identityStatus === 'verified' ? 'Identity Attested' : 'Unverified'}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="p-2">
-                      <button
-                        onClick={() => {
-                          setShowUserMenu(false);
-                          onSelectTab(`profile-${currentUser.username}`);
-                        }}
-                        className="w-full text-left p-2.5 mb-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-xs flex items-center justify-between cursor-pointer group"
-                      >
-                        <div className="flex items-center gap-2">
-                          <UserIcon className="w-4 h-4 text-indigo-200 group-hover:text-white" />
-                          <span>View My Public Profile</span>
-                        </div>
-                        <ExternalLink className="w-3.5 h-3.5 text-indigo-200 group-hover:text-white" />
-                      </button>
-
-                      {currentUser.accountType === 'business' && (
+                      <div className="p-2">
                         <button
                           onClick={() => {
                             setShowUserMenu(false);
-                            onSelectTab('business');
+                            onSelectTab(`profile-${currentUser.username}`);
+                          }}
+                          className="w-full text-left p-2.5 mb-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-xs flex items-center justify-between cursor-pointer group"
+                        >
+                          <div className="flex items-center gap-2">
+                            <UserIcon className="w-4 h-4 text-indigo-200 group-hover:text-white" />
+                            <span>View My Public Profile</span>
+                          </div>
+                          <ExternalLink className="w-3.5 h-3.5 text-indigo-200 group-hover:text-white" />
+                        </button>
+
+                        {currentUser.accountType === 'business' && (
+                          <button
+                            onClick={() => {
+                              setShowUserMenu(false);
+                              onSelectTab('business');
+                            }}
+                            className="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 rounded-lg transition-colors flex items-center gap-2 cursor-pointer font-medium"
+                          >
+                            <Building2 className="w-3.5 h-3.5 text-slate-400" />
+                            <span>Business Entity Dashboard</span>
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            setShowUserMenu(false);
+                            onSelectTab('settings');
                           }}
                           className="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 rounded-lg transition-colors flex items-center gap-2 cursor-pointer font-medium"
                         >
-                          <Building2 className="w-3.5 h-3.5 text-slate-400" />
-                          <span>Business Entity Dashboard</span>
+                          <Settings className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Privacy & Data Settings</span>
                         </button>
-                      )}
-                      <button
-                        onClick={() => {
-                          setShowUserMenu(false);
-                          onSelectTab('settings');
-                        }}
-                        className="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 rounded-lg transition-colors flex items-center gap-2 cursor-pointer font-medium"
-                      >
-                        <Settings className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Privacy & Data Settings</span>
-                      </button>
-                    </div>
-
-                    {/* Switch Demo Profile helper */}
-                    <div className="border-t border-slate-100 pt-2 pb-1 px-4">
-                      <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">
-                        Switch Active Persona (Sandbox)
                       </div>
-                      <div className="space-y-1">
-                        {availableUsers.map((u) => (
-                          <button
-                            key={u.id}
-                            onClick={() => {
-                              onSwitchUser(u.id);
-                              setShowUserMenu(false);
-                            }}
-                            className={`w-full flex items-center justify-between text-left px-2 py-1.5 rounded text-xs transition-colors cursor-pointer ${
-                              u.id === currentUser.id
-                                ? 'bg-indigo-50 text-indigo-700 font-medium'
-                                : 'text-slate-600 hover:bg-slate-50'
-                            }`}
-                          >
-                            <span className="truncate">{u.fullName}</span>
-                            {u.id === currentUser.id && <Check className="w-3.5 h-3.5 text-indigo-600 shrink-0" />}
-                          </button>
-                        ))}
+
+                      {/* Switch Demo Profile helper */}
+                      <div className="border-t border-slate-100 pt-2 pb-1 px-4">
+                        <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">
+                          Switch Active Persona (Sandbox)
+                        </div>
+                        <div className="space-y-1">
+                          {availableUsers.map((u) => (
+                            <button
+                              key={u.id}
+                              onClick={() => {
+                                onSwitchUser(u.id);
+                                setShowUserMenu(false);
+                              }}
+                              className={`w-full flex items-center justify-between text-left px-2 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                                u.id === currentUser.id
+                                  ? 'bg-indigo-50 text-indigo-700 font-medium'
+                                  : 'text-slate-600 hover:bg-slate-50'
+                              }`}
+                            >
+                              <span className="truncate">{u.fullName}</span>
+                              {u.id === currentUser.id && <Check className="w-3.5 h-3.5 text-indigo-600 shrink-0" />}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="border-t border-slate-100 pt-1 mt-1 space-y-0.5">
-                      <button
-                        onClick={() => {
-                          setShowUserMenu(false);
-                          onOpenAuth();
-                        }}
-                        className="w-full flex items-center gap-2 px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
-                      >
-                        <UserCheck className="w-3.5 h-3.5 text-indigo-600" />
-                        <span>Switch Account / Sign In</span>
-                      </button>
-
-                      {onLogout && (
+                      <div className="border-t border-slate-100 pt-1 mt-1 space-y-0.5">
                         <button
                           onClick={() => {
                             setShowUserMenu(false);
-                            onLogout();
+                            onOpenAuth();
                           }}
-                          className="w-full flex items-center gap-2 px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer border-t border-slate-100"
+                          className="w-full flex items-center gap-2 px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
                         >
-                          <LogOut className="w-3.5 h-3.5 text-red-500" />
-                          <span>Log Out</span>
+                          <UserCheck className="w-3.5 h-3.5 text-indigo-600" />
+                          <span>Switch Account / Sign In</span>
                         </button>
-                      )}
+
+                        {onLogout && (
+                          <button
+                            onClick={() => {
+                              setShowUserMenu(false);
+                              onLogout();
+                            }}
+                            className="w-full flex items-center gap-2 px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer border-t border-slate-100"
+                          >
+                            <LogOut className="w-3.5 h-3.5 text-red-500" />
+                            <span>Log Out</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  </>
                 )}
               </div>
             ) : (
               <button
                 onClick={onOpenAuth}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap shrink-0 shadow-xs cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap shrink-0 shadow-xs cursor-pointer"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>Sign In</span>
-              </button>
-            )}
-
-            {currentUser && onLogout && (
-              <button
-                onClick={onLogout}
-                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:border-red-200 hover:bg-red-50 text-slate-600 hover:text-red-600 text-xs font-medium transition-colors cursor-pointer"
-                title="Log Out of active session"
-              >
-                <LogOut className="w-3.5 h-3.5 text-slate-400 group-hover:text-red-500" />
-                <span className="hidden xl:inline">Log Out</span>
               </button>
             )}
           </div>
