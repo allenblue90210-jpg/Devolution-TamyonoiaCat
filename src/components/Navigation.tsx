@@ -30,6 +30,7 @@ import {
   Database,
   Camera,
 } from 'lucide-react';
+import tanmiLogo from '../assets/images/tanmi.png';
 
 interface NavigationProps {
   currentUser: User | null;
@@ -173,17 +174,18 @@ export const Navigation: React.FC<NavigationProps> = ({
     else onSelectTab('dashboard');
   };
 
-  // Complete navigation links with clean, distinct Lucide icons - Remember placed beside Reputation
+  // Clean, prioritized primary navigation links
   const primaryNavLinks = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'commitments', label: 'Commitments', icon: Clock },
-    { id: 'evidence', label: 'Evidence', icon: ShieldCheck },
+    { id: 'profile', label: 'Profile', icon: UserIcon },
+    { id: 'commitments', label: 'Pacts', icon: Clock },
     { id: 'relationships', label: 'Verification', icon: Users },
     { id: 'receipts', label: 'Receipts', icon: Receipt },
     { id: 'public-ledger', label: 'Ledger', icon: Globe },
   ];
 
   const moreNavLinks = [
+    { id: 'evidence', label: 'Evidence', icon: ShieldCheck },
     { id: 'directory', label: 'Directory', icon: Compass },
     { id: 'reputation', label: 'Reputation', icon: Sparkles },
     { id: 'remember', label: 'Remember', icon: Bookmark },
@@ -196,11 +198,13 @@ export const Navigation: React.FC<NavigationProps> = ({
           {/* Zone 1: Brand Wordmark */}
           <button
             onClick={() => onSelectTab('landing')}
-            className="text-lg font-bold tracking-tight text-slate-900 hover:text-indigo-600 transition-colors whitespace-nowrap shrink-0 flex items-center gap-2 cursor-pointer"
+            className="text-lg font-bold tracking-tight text-slate-900 hover:text-indigo-600 transition-colors whitespace-nowrap shrink-0 flex items-center gap-2.5 cursor-pointer group"
           >
-            <span className="w-7 h-7 rounded-md bg-indigo-600 flex items-center justify-center text-white text-sm font-bold shadow-xs">
-              D
-            </span>
+            <img
+              src={tanmiLogo}
+              alt="Tanmi Logo"
+              className="w-10 h-10 sm:w-11 sm:h-11 object-contain group-hover:scale-105 transition-transform shrink-0"
+            />
             <span className="font-extrabold tracking-tight hidden min-[400px]:inline">Devolution</span>
           </button>
 
@@ -208,13 +212,21 @@ export const Navigation: React.FC<NavigationProps> = ({
           <nav className="hidden lg:flex items-center gap-1 text-xs font-medium text-slate-600">
             {primaryNavLinks.map((link) => {
               const Icon = link.icon;
-              const isActive = currentTab === link.id;
+              const isActive =
+                currentTab === link.id ||
+                (link.id === 'profile' && (currentTab === 'profile' || currentTab.startsWith('profile-')));
               return (
                 <button
                   key={link.id}
                   onClick={() => {
                     if (link.id === 'public-ledger') {
                       onOpenPublicLedger?.();
+                    } else if (link.id === 'profile') {
+                      if (currentUser) {
+                        onSelectTab(`profile-${currentUser.username}`);
+                      } else {
+                        onOpenAuth();
+                      }
                     } else {
                       onSelectTab(link.id);
                     }
@@ -277,9 +289,9 @@ export const Navigation: React.FC<NavigationProps> = ({
           </nav>
 
           {/* Zone 3: Action Icons Cluster */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             {/* 1. GitHub Continuous Sync Icon */}
-            <div className="relative shrink-0">
+            <div className="relative shrink-0 hidden md:block">
               <button
                 onClick={() => setShowGitMenu(!showGitMenu)}
                 className="flex items-center justify-center p-2 rounded-lg border border-slate-200 hover:border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer relative"
@@ -378,7 +390,7 @@ export const Navigation: React.FC<NavigationProps> = ({
             </div>
 
             {/* Supabase Cloud Backend Icon */}
-            <div className="relative shrink-0">
+            <div className="relative shrink-0 hidden md:block">
               <button
                 onClick={() => setShowSupabaseMenu(!showSupabaseMenu)}
                 className="flex items-center justify-center p-2 rounded-lg border border-slate-200 hover:border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer relative"
@@ -473,7 +485,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                 if (onOpenPublicLedger) onOpenPublicLedger();
                 else onSelectTab('public-ledger');
               }}
-              className={`relative px-2.5 py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer group shadow-2xs shrink-0 ${
+              className={`relative px-2 py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer group shadow-2xs shrink-0 ${
                 currentTab === 'public-ledger'
                   ? 'text-indigo-700 bg-indigo-100 border border-indigo-300'
                   : 'text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80'
@@ -482,7 +494,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               aria-label="World Screen - Verified People & Public Ledger"
             >
               <Globe className="w-4 h-4 text-indigo-600 group-hover:scale-110 transition-transform" />
-              <span className="hidden sm:inline text-xs font-bold text-indigo-900">People & Ledger</span>
+              <span className="hidden xl:inline text-xs font-bold text-indigo-900">People & Ledger</span>
               <span className="absolute -top-1 -right-1 flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
@@ -622,7 +634,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               <div className="relative shrink-0">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className={`flex items-center gap-1.5 sm:gap-2 p-1 sm:px-2.5 sm:py-1 rounded-xl border-2 transition-all cursor-pointer shadow-xs shrink-0 ${
+                  className={`flex items-center gap-1.5 sm:gap-2 px-2 py-1 sm:px-2.5 sm:py-1 rounded-xl border-2 transition-all cursor-pointer shadow-xs shrink-0 ${
                     showUserMenu
                       ? 'bg-indigo-50 border-indigo-500 ring-2 ring-indigo-200'
                       : 'bg-white hover:bg-indigo-50/70 border-indigo-300 hover:border-indigo-500'
@@ -650,14 +662,14 @@ export const Navigation: React.FC<NavigationProps> = ({
                   </div>
 
                   {/* Profile label & Name - clearly visible, never wraps or pushes width */}
-                  <div className="hidden sm:flex flex-col text-left leading-tight shrink-0">
-                    <span className="font-bold text-slate-900 text-xs max-w-[80px] md:max-w-[110px] truncate">
+                  <div className="flex flex-col text-left leading-tight shrink-0">
+                    <span className="font-bold text-slate-900 text-xs max-w-[70px] sm:max-w-[110px] truncate">
                       {currentUser.fullName}
                     </span>
                     <span className="text-[10px] font-bold text-indigo-700 tracking-wide flex items-center gap-1">
                       <span>Profile</span>
-                      <span className="text-slate-300">·</span>
-                      <span className="text-slate-500 font-mono font-normal">@{currentUser.username}</span>
+                      <span className="text-slate-300 hidden sm:inline">·</span>
+                      <span className="text-slate-500 font-mono font-normal hidden sm:inline">@{currentUser.username}</span>
                     </span>
                   </div>
 
@@ -838,15 +850,29 @@ export const Navigation: React.FC<NavigationProps> = ({
       >
         <button
           onClick={() => onSelectTab('dashboard')}
-          className="flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
+          className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
         >
           <LayoutDashboard className={`w-4 h-4 ${currentTab === 'dashboard' ? 'text-indigo-600' : 'text-slate-400'}`} />
           <span className="text-[10px] text-slate-500 font-normal">Home</span>
         </button>
 
         <button
+          onClick={() => {
+            if (currentUser) {
+              onSelectTab(`profile-${currentUser.username}`);
+            } else {
+              onOpenAuth();
+            }
+          }}
+          className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
+        >
+          <UserIcon className={`w-4 h-4 ${currentTab === 'profile' || currentTab.startsWith('profile-') ? 'text-indigo-600' : 'text-slate-400'}`} />
+          <span className="text-[10px] text-slate-500 font-bold text-indigo-600">Profile</span>
+        </button>
+
+        <button
           onClick={() => onSelectTab('commitments')}
-          className="flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
+          className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
         >
           <Clock className={`w-4 h-4 ${currentTab === 'commitments' ? 'text-indigo-600' : 'text-slate-400'}`} />
           <span className="text-[10px] text-slate-500 font-normal">Pacts</span>
@@ -854,7 +880,7 @@ export const Navigation: React.FC<NavigationProps> = ({
 
         <button
           onClick={() => onSelectTab('receipts')}
-          className="flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
+          className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
         >
           <Receipt className={`w-4 h-4 ${currentTab === 'receipts' ? 'text-indigo-600' : 'text-slate-400'}`} />
           <span className="text-[10px] text-slate-500 font-normal">Receipts</span>
@@ -862,7 +888,7 @@ export const Navigation: React.FC<NavigationProps> = ({
 
         <button
           onClick={() => onSelectTab('reputation')}
-          className="flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
+          className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
         >
           <ShieldCheck className={`w-4 h-4 ${currentTab === 'reputation' ? 'text-indigo-600' : 'text-slate-400'}`} />
           <span className="text-[10px] text-slate-500 font-normal">Reputation</span>

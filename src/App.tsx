@@ -284,9 +284,11 @@ export default function App() {
         </div>
       );
     }
-    // Check for dynamic public profile route: profile-{username}
-    if (currentTab.startsWith('profile-')) {
-      const username = currentTab.replace('profile-', '');
+    // Check for profile route: profile or dynamic profile-{username}
+    if (currentTab === 'profile' || currentTab.startsWith('profile-')) {
+      const username = currentTab.startsWith('profile-')
+        ? currentTab.replace('profile-', '')
+        : (currentUser?.username || 'allenkinetic006');
       return (
         <PublicProfileView
           username={username}

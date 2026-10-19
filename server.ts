@@ -2308,28 +2308,31 @@ async function performGitSync(customMessage?: string) {
     }
 
     // 3. Check if local is ahead of remote and needs pushing
-    try {
-      const { stdout: unpushedCountOut } = await execAsync('git rev-list origin/main..HEAD --count');
-      const localAhead = parseInt(unpushedCountOut.trim(), 10) || 0;
-      if (localAhead > 0) {
-        console.log(`[Git Sync] Pushing ${localAhead} commit(s) to remote GitHub repository...`);
-        try {
-          await execAsync('git push origin main');
-          console.log('[Git Sync] Successfully pushed to origin/main');
-        } catch (firstPushErr: any) {
-          console.log('[Git Sync] First push attempt had conflict or remote update, reconciling...');
+    const hasGitHubToken = Boolean(getResolvedGitHubToken());
+    if (hasGitHubToken) {
+      try {
+        const { stdout: unpushedCountOut } = await execAsync('git rev-list origin/main..HEAD --count');
+        const localAhead = parseInt(unpushedCountOut.trim(), 10) || 0;
+        if (localAhead > 0) {
+          console.log(`[Git Sync] Pushing ${localAhead} commit(s) to remote GitHub repository...`);
           try {
-            await execAsync('git fetch origin main');
-            await execAsync('git pull origin main --no-edit');
             await execAsync('git push origin main');
-            console.log('[Git Sync] Successfully reconciled and pushed to origin/main');
-          } catch (retryErr: any) {
-            console.warn('[Git Sync Notice]: Sync reconciliation completed with notice:', retryErr.message);
+            console.log('[Git Sync] Successfully pushed to origin/main');
+          } catch (firstPushErr: any) {
+            console.log('[Git Sync] First push attempt had conflict or remote update, reconciling...');
+            try {
+              await execAsync('git fetch origin main');
+              await execAsync('git pull origin main --no-edit');
+              await execAsync('git push origin main');
+              console.log('[Git Sync] Successfully reconciled and pushed to origin/main');
+            } catch (retryErr: any) {
+              console.warn('[Git Sync Notice]: Sync reconciliation completed with notice:', retryErr.message);
+            }
           }
         }
+      } catch (checkErr: any) {
+        console.warn('[Git Sync Notice]:', checkErr.message);
       }
-    } catch (checkErr: any) {
-      console.warn('[Git Sync Notice]:', checkErr.message);
     }
 
     lastSyncTime = new Date().toISOString();
@@ -2358,6 +2361,8 @@ async function performGitSync(customMessage?: string) {
 
 let syncDebounceTimer: NodeJS.Timeout | null = null;
 export function triggerGitSyncDebounced(reason = 'data updated') {
+  const hasGitHubToken = Boolean(getResolvedGitHubToken());
+  if (!hasGitHubToken) return;
   if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
   syncDebounceTimer = setTimeout(async () => {
     try {
@@ -2384,21 +2389,11 @@ export function triggerSupabaseSyncDebounced(reason = 'data updated') {
   }, 5000);
 }
 
-// Automatically sync and push when database data changes
+// Automatically sync to Supabase when database data changes (if configured)
 db.onSave(() => {
-  triggerGitSyncDebounced('database state updated');
   triggerSupabaseSyncDebounced('database state updated');
 });
 
-// Continuous background sync every 30 seconds:
-// Automatically polls GitHub remote for updates and pushes any local changes
-setInterval(async () => {
-  try {
-    await performGitSync('chore(sync): continuous auto-sync updates');
-  } catch {
-    // Continuous quiet background polling notice
-  }
-}, 30000);
 
 app.get('/api/git/status', async (_req: Request, res: Response) => {
   const status = await getGitRepoStatus();
@@ -2504,7 +2499,19 @@ async function startServer() {
 
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        watch: {
+          ignored: [
+            '**/data/**',
+            '**/data/db.json',
+            '**/.git/**',
+            '**/server/**',
+            '**/*.log',
+            '**/.env*',
+          ],
+        },
+      },
       appType: 'spa',
     });
     app.use(vite.middlewares);
