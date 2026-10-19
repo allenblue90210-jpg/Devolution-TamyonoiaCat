@@ -569,12 +569,6 @@ export const Navigation: React.FC<NavigationProps> = ({
                         <span>Privacy & Data Settings</span>
                       </button>
                     </div>
-                        className="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2 cursor-pointer"
-                      >
-                        <Settings className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Privacy & Data Settings</span>
-                      </button>
-                    </div>
 
                     {/* Switch Demo Profile helper */}
                     <div className="border-t border-slate-100 pt-2 pb-1 px-4">
@@ -690,6 +684,38 @@ export const Navigation: React.FC<NavigationProps> = ({
           <ShieldCheck className={`w-4 h-4 ${currentTab === 'reputation' ? 'text-indigo-600' : 'text-slate-400'}`} />
           <span className="text-[10px] text-slate-500 font-normal">Reputation</span>
         </button>
+
+        {currentUser ? (
+          <button
+            onClick={() => onSelectTab(`profile-${currentUser.username}`)}
+            className={`flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent] ${
+              currentTab === `profile-${currentUser.username}` ? 'text-indigo-600 font-bold' : 'text-slate-500 font-normal'
+            }`}
+          >
+            <div className="relative">
+              {currentUser.avatarUrl ? (
+                <img
+                  src={currentUser.avatarUrl}
+                  alt=""
+                  className={`w-4 h-4 rounded-full object-cover ring-2 ${
+                    currentTab === `profile-${currentUser.username}` ? 'ring-indigo-600' : 'ring-slate-300'
+                  }`}
+                />
+              ) : (
+                <UserIcon className={`w-4 h-4 ${currentTab === `profile-${currentUser.username}` ? 'text-indigo-600' : 'text-slate-400'}`} />
+              )}
+            </div>
+            <span className="text-[10px]">Profile</span>
+          </button>
+        ) : (
+          <button
+            onClick={onOpenAuth}
+            className="flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
+          >
+            <UserIcon className="w-4 h-4 text-slate-400" />
+            <span className="text-[10px] text-slate-500 font-normal">Sign In</span>
+          </button>
+        )}
       </nav>
     </>
   );
