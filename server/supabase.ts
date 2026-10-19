@@ -485,6 +485,8 @@ export async function syncToSupabase(stateData: any): Promise<{
     let syncedUsersCount = 0;
     if (stateData.users?.length) {
       syncedUsersCount = await syncAllUsersToSupabase(stateData.users);
+      // 3. Mirror users into Supabase Auth (auth.users)
+      syncAllUsersToSupabaseAuth(stateData.users).catch(() => {});
     }
 
     lastSyncTimestamp = now;

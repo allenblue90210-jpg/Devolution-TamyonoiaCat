@@ -17,6 +17,8 @@ import {
   syncUserToSupabase,
   syncAllUsersToSupabase,
   pullRegisteredUsersFromSupabase,
+  createSupabaseAuthUser,
+  syncAllUsersToSupabaseAuth,
   supabaseAuthSignIn,
   supabaseAuthSignUp,
   supabaseAuthSendOtp,
@@ -371,7 +373,17 @@ app.post('/api/auth/signup', async (req: Request, res: Response) => {
     createdAt: new Date().toISOString(),
   });
 
-  // Directly sync real user into Supabase if connected
+  // 1. Directly create in Supabase Auth (auth.users)
+  createSupabaseAuthUser({
+    email,
+    password,
+    fullName,
+    username,
+    accountType,
+    phone,
+  }).catch((err: any) => console.warn('[Supabase Auth User Create Notice]:', err.message));
+
+  // 2. Directly sync real user into Supabase table (public.devolution_users)
   try {
     await syncUserToSupabase(newUser);
   } catch (syncErr: any) {
