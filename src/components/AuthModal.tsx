@@ -41,7 +41,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setLoading(true);
     setError(null);
     try {
-      const res = await api.signIn(login, password);
+      let res;
+      if (login.includes('@')) {
+        res = await api.loginWithSupabaseEmail(login, password);
+      } else {
+        res = await api.signIn(login, password);
+      }
       onSuccess(res.user);
       onClose();
     } catch (err: any) {
@@ -192,11 +197,49 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         )}
 
+        {/* Real Assigned User Quick-Access Button */}
+        {mode === 'signin' && (
+          <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 font-bold text-emerald-900">
+                <Database className="w-4 h-4 text-emerald-600" />
+                <span>Real User Account: allenkinetic004@gmail.com</span>
+              </div>
+              <span className="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-emerald-200">
+                Verified Real Email
+              </span>
+            </div>
+            <p className="text-[11px] text-emerald-700 leading-tight">
+              Assigned directly to your real verified profile, cryptographic trust ledger, and live Supabase Cloud synchronization.
+            </p>
+            <button
+              type="button"
+              onClick={async () => {
+                setLoading(true);
+                setError(null);
+                try {
+                  const res = await api.assignRealUser('allenkinetic004@gmail.com');
+                  onSuccess(res.user);
+                  onClose();
+                } catch (err: any) {
+                  setError(err.message || 'Failed to switch to real user.');
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              className="w-full py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Assign & Sign In as Real User (allenkinetic004@gmail.com)</span>
+            </button>
+          </div>
+        )}
+
         {/* Quick Sandbox Persona Switcher */}
         {mode === 'signin' && (
           <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2 text-xs">
             <span className="font-semibold text-slate-700 block text-[11px] uppercase tracking-wider">
-              Quick Test Personas (Sandbox Instant Login)
+              Quick Test Personas (Sandbox Switcher)
             </span>
             <div className="grid grid-cols-1 gap-1.5">
               {availableUsers.map((u) => (
