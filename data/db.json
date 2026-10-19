@@ -939,6 +939,15 @@
   "disputes": [],
   "notifications": [
     {
+      "id": "notif_1792423779392",
+      "userId": "usr_allen_001",
+      "type": "receipt_action",
+      "title": "New Commitment Request Received",
+      "message": "wolf created a commitment pact: 'Commitment '. Sign your pledge and confirmed delivery time.",
+      "isRead": false,
+      "createdAt": "2026-10-19T15:29:39.392Z"
+    },
+    {
       "id": "notif_1792423308617",
       "userId": "usr_1792423308615_lq64",
       "type": "evidence_status",
@@ -1058,6 +1067,31 @@
     }
   },
   "commitments": [
+    {
+      "id": "TC-3464",
+      "title": "Commitment ",
+      "description": "loan will be handled ",
+      "category": "Vehicle & Transportation",
+      "requesterId": "usr_1792423308615_lq64",
+      "requesterName": "wolf",
+      "requesterAvatar": "",
+      "committerId": "usr_allen_001",
+      "committerName": "Allen Okoro",
+      "committerAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+      "deadline": "2026-10-20T09:00:00.000Z",
+      "status": "pending_acceptance",
+      "trustRewardPoints": 25,
+      "penaltyRateDailyPercent": 30,
+      "penaltyCurrentDeductionPercent": 0,
+      "isOverdue": false,
+      "daysOverdue": 0,
+      "isPublic": true,
+      "impressions": 1,
+      "witnessCount": 0,
+      "positiveImpressions": 0,
+      "hasWitnessed": false,
+      "createdAt": "2026-10-19T15:29:39.390Z"
+    },
     {
       "id": "TC-4351",
       "title": "Payback by October 23rd, 2026",
