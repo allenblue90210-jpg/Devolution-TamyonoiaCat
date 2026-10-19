@@ -369,6 +369,37 @@
         "allowDirectVerificationRequests": true
       },
       "createdAt": "2026-10-19T15:21:48.615Z"
+    },
+    {
+      "id": "usr_1792423916435_j4wn",
+      "email": "allendharak9@gmail.com",
+      "username": "allendharak9",
+      "fullName": "Allendharak9",
+      "accountType": "personal",
+      "avatarUrl": "",
+      "headline": "Verified Real User",
+      "bio": "",
+      "category": "Independent Professional",
+      "country": "Nigeria",
+      "city": "Lagos",
+      "phone": "",
+      "phoneVerified": false,
+      "emailVerified": true,
+      "identityStatus": "verified",
+      "identityMethod": "Verified Real Email",
+      "identityVerifiedAt": "2026-10-19T15:31:56.435Z",
+      "businessVerificationStatus": "unverified",
+      "passwordHash": "1880c0255fe729d7cc0d2cfc4644f98cb6a3225dd0c4216bc07bb4b5b0fc92f1",
+      "privacySettings": {
+        "showRelationshipCounts": true,
+        "showCategoryBreakdown": true,
+        "showPublicEndorsers": true,
+        "showTrustReceipts": true,
+        "showCredentials": true,
+        "showLocationCityOnly": true,
+        "allowDirectVerificationRequests": true
+      },
+      "createdAt": "2026-10-19T15:31:56.435Z"
     }
   ],
   "evidence": [
