@@ -34,6 +34,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resetSentMessage, setResetSentMessage] = useState<string | null>(null);
+  const [showDemoPersonas, setShowDemoPersonas] = useState(false);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -347,7 +347,7 @@ app.post('/api/auth/signup', async (req: Request, res: Response) => {
 
     // 2. Auto-link pending trust receipts
     db.getState().receipts.forEach((rcp) => {
-      if (rcp.status === 'pending' || rcp.status === 'draft') {
+      if (rcp.status === 'pending' || rcp.status === 'confirmed') {
         const contact = (rcp.counterpartyContact || '').toLowerCase().trim();
         if (
           (email && contact === email.toLowerCase().trim()) ||
