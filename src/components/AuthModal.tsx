@@ -60,7 +60,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setLoading(true);
     setError(null);
     try {
-      const res = await api.signIn('', userId);
+      const res = await api.switchUser(userId);
       onSuccess(res.user);
       onClose();
     } catch (err: any) {

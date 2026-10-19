@@ -163,7 +163,7 @@ export default function App() {
     setLoading(true);
     try {
       setSessionUserId(userId);
-      await api.signIn('', userId);
+      await api.switchUser(userId);
       await refreshData();
     } finally {
       setLoading(false);
