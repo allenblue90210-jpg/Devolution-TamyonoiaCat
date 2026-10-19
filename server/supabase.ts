@@ -183,6 +183,43 @@ export async function syncUserToSupabase(user: any): Promise<boolean> {
   }
 }
 
+export async function syncAllUsersToSupabase(users: any[]): Promise<number> {
+  const client = getSupabaseClient();
+  if (!client || !users || !Array.isArray(users)) return 0;
+
+  let synced = 0;
+  for (const u of users) {
+    try {
+      const ok = await syncUserToSupabase(u);
+      if (ok) synced++;
+    } catch {
+      // Continue syncing remaining users
+    }
+  }
+  return synced;
+}
+
+export async function pullRegisteredUsersFromSupabase(): Promise<any[]> {
+  const client = getSupabaseClient();
+  if (!client) return [];
+
+  try {
+    const { data, error } = await client
+      .from('devolution_users')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.warn('[Supabase Pull Users Notice]:', error.message);
+      return [];
+    }
+    return data || [];
+  } catch (err: any) {
+    console.warn('[Supabase Pull Users Error]:', err.message);
+    return [];
+  }
+}
+
 export async function supabaseAuthSignIn(email: string, password: string): Promise<{
   success: boolean;
   user?: any;
@@ -363,9 +400,15 @@ export async function syncToSupabase(stateData: any): Promise<{
       throw new Error(`State upsert error: ${stateErr.message}`);
     }
 
+    // 2. Also ensure all registered users are individually synced to devolution_users table
+    let syncedUsersCount = 0;
+    if (stateData.users?.length) {
+      syncedUsersCount = await syncAllUsersToSupabase(stateData.users);
+    }
+
     lastSyncTimestamp = now;
     lastSyncStatus = 'connected';
-    lastSyncMessage = `Synchronized ${stateData.users?.length || 0} users, ${stateData.receipts?.length || 0} receipts, and ${stateData.commitments?.length || 0} commitments with Supabase.`;
+    lastSyncMessage = `Synchronized ${syncedUsersCount || stateData.users?.length || 0} users, ${stateData.receipts?.length || 0} receipts, and ${stateData.commitments?.length || 0} commitments with Supabase.`;
 
     return {
       success: true,
