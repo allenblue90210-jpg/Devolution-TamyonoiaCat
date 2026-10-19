@@ -1,4 +1,5 @@
 import React from 'react';
+import { api } from '../services/api.js';
 import {
   User,
   EvidenceItem,
@@ -45,6 +46,7 @@ interface DashboardProps {
   onOpenNewReceiptModal: () => void;
   onOpenPublicLedger?: () => void;
   onOpenAvatarUpload?: () => void;
+  onRefreshData?: () => Promise<void>;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
@@ -61,8 +63,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenNewReceiptModal,
   onOpenPublicLedger,
   onOpenAvatarUpload,
+  onRefreshData,
 }) => {
   const [copiedLink, setCopiedLink] = React.useState(false);
+  const [verifyingIdentity, setVerifyingIdentity] = React.useState(false);
+  const [verifyMessage, setVerifyMessage] = React.useState<string | null>(null);
 
   const confirmedRelationships = relationships.filter((r) => r.status === 'confirmed');
   const pendingRelationships = relationships.filter((r) => r.status === 'pending');
