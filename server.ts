@@ -7,6 +7,14 @@ import { promisify } from 'util';
 import { db } from './server/db.js';
 import { calculateReputation } from './server/reputation.js';
 import {
+  getSupabaseStatus,
+  updateSupabaseConfig,
+  testSupabaseConnection,
+  syncToSupabase,
+  pullFromSupabase,
+  getResolvedSupabaseConfig,
+} from './server/supabase.js';
+import {
   User,
   EvidenceItem,
   RelationshipInvite,
@@ -1994,9 +2002,26 @@ export function triggerGitSyncDebounced(reason = 'data updated') {
   }, 4000);
 }
 
+let supabaseDebounceTimer: NodeJS.Timeout | null = null;
+export function triggerSupabaseSyncDebounced(reason = 'data updated') {
+  if (supabaseDebounceTimer) clearTimeout(supabaseDebounceTimer);
+  supabaseDebounceTimer = setTimeout(async () => {
+    try {
+      const cfg = getResolvedSupabaseConfig();
+      if (cfg.url && cfg.key) {
+        await syncToSupabase(db.getState());
+        console.log(`[Supabase Auto-Sync] Synced state to Supabase (${reason})`);
+      }
+    } catch (err: any) {
+      console.warn('[Supabase auto-sync notice]:', err.message);
+    }
+  }, 5000);
+}
+
 // Automatically sync and push when database data changes
 db.onSave(() => {
   triggerGitSyncDebounced('database state updated');
+  triggerSupabaseSyncDebounced('database state updated');
 });
 
 // Continuous background sync every 30 seconds:
@@ -2030,6 +2055,76 @@ app.post('/api/git/pull', async (_req: Request, res: Response) => {
     res.json({ success: true, ...result });
   } catch (err: any) {
     res.status(500).json({ error: err.message || 'Failed to pull updates from repository' });
+  }
+});
+
+// Supabase Cloud Backend Endpoints
+app.get('/api/supabase/status', async (_req: Request, res: Response) => {
+  try {
+    const status = await getSupabaseStatus();
+    res.json(status);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to get Supabase status' });
+  }
+});
+
+app.post('/api/supabase/config', async (req: Request, res: Response) => {
+  try {
+    const { url, key } = req.body || {};
+    if (!url || typeof url !== 'string') {
+      return res.status(400).json({ error: 'Valid Supabase project URL is required (e.g. https://your-project.supabase.co)' });
+    }
+    const status = await updateSupabaseConfig(url, key);
+    res.json({ success: true, ...status });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to update Supabase configuration' });
+  }
+});
+
+app.post('/api/supabase/test', async (_req: Request, res: Response) => {
+  try {
+    const result = await testSupabaseConnection();
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to test Supabase connection' });
+  }
+});
+
+app.post('/api/supabase/sync', async (_req: Request, res: Response) => {
+  try {
+    const currentState = db.getState();
+    const result = await syncToSupabase(currentState);
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to sync to Supabase' });
+  }
+});
+
+app.post('/api/supabase/pull', async (_req: Request, res: Response) => {
+  try {
+    const result = await pullFromSupabase();
+    if (result.success && result.data) {
+      db.replaceState(result.data);
+      res.json({ success: true, message: result.message });
+    } else {
+      res.status(400).json({ success: false, message: result.message });
+    }
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to pull from Supabase' });
+  }
+});
+
+app.get('/api/supabase/schema', (_req: Request, res: Response) => {
+  try {
+    const schemaPath = path.resolve(process.cwd(), 'supabase', 'schema.sql');
+    if (fs.existsSync(schemaPath)) {
+      const sql = fs.readFileSync(schemaPath, 'utf-8');
+      res.type('text/plain').send(sql);
+    } else {
+      res.status(404).send('-- Schema file not found');
+    }
+  } catch (err: any) {
+    res.status(500).send(`-- Error reading schema: ${err.message}`);
   }
 });
 

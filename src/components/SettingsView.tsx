@@ -1,7 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { User, UserPrivacySettings } from '../types/trust.js';
 import { api } from '../services/api.js';
-import { ShieldCheck, Download, Trash2, Check, Lock, Save, AlertCircle, GitBranch, RefreshCw, ExternalLink, CheckCircle2, ArrowLeft } from 'lucide-react';
+import {
+  ShieldCheck,
+  Download,
+  Trash2,
+  Check,
+  Lock,
+  Save,
+  AlertCircle,
+  GitBranch,
+  RefreshCw,
+  ExternalLink,
+  CheckCircle2,
+  ArrowLeft,
+  Database,
+  Copy,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 
 interface SettingsViewProps {
   user: User;
@@ -26,6 +43,16 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
   const [gitMessage, setGitMessage] = useState<string | null>(null);
   const [customCommit, setCustomCommit] = useState('');
 
+  // Supabase Cloud Backend State
+  const [supabaseStatus, setSupabaseStatus] = useState<any>(null);
+  const [supabaseUrlInput, setSupabaseUrlInput] = useState('');
+  const [supabaseKeyInput, setSupabaseKeyInput] = useState('');
+  const [supabaseLoading, setSupabaseLoading] = useState(false);
+  const [supabaseMessage, setSupabaseMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [showSqlSchema, setShowSqlSchema] = useState(false);
+  const [sqlSchema, setSqlSchema] = useState('');
+  const [copiedSql, setCopiedSql] = useState(false);
+
   const loadGitStatus = async () => {
     try {
       const status = await api.getGitStatus();
@@ -35,9 +62,120 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
     }
   };
 
+  const loadSupabaseStatus = async () => {
+    try {
+      const status = await api.getSupabaseStatus();
+      setSupabaseStatus(status);
+      if (status?.url && !supabaseUrlInput) {
+        setSupabaseUrlInput(status.url);
+      }
+    } catch {
+      // background fetch
+    }
+  };
+
   useEffect(() => {
     loadGitStatus();
+    loadSupabaseStatus();
   }, []);
+
+  const handleSaveSupabaseConfig = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!supabaseUrlInput.trim()) {
+      setSupabaseMessage({ text: 'Please provide a valid Supabase Project URL (e.g. https://your-project.supabase.co)', type: 'error' });
+      return;
+    }
+    setSupabaseLoading(true);
+    setSupabaseMessage(null);
+    try {
+      const res = await api.configureSupabase(supabaseUrlInput.trim(), supabaseKeyInput.trim() || undefined);
+      setSupabaseStatus(res);
+      setSupabaseMessage({ text: 'Supabase configuration saved! Testing connection...', type: 'info' });
+      const testRes = await api.testSupabase();
+      if (testRes.success) {
+        setSupabaseMessage({ text: testRes.message, type: 'success' });
+        await api.syncToSupabase();
+        const updated = await api.getSupabaseStatus();
+        setSupabaseStatus(updated);
+      } else {
+        setSupabaseMessage({ text: testRes.message, type: 'error' });
+      }
+    } catch (err: any) {
+      setSupabaseMessage({ text: err.message || 'Failed to configure Supabase', type: 'error' });
+    } finally {
+      setSupabaseLoading(false);
+    }
+  };
+
+  const handleTestSupabaseConnection = async () => {
+    setSupabaseLoading(true);
+    setSupabaseMessage(null);
+    try {
+      const res = await api.testSupabase();
+      setSupabaseMessage({ text: res.message, type: res.success ? 'success' : 'error' });
+      const updated = await api.getSupabaseStatus();
+      setSupabaseStatus(updated);
+    } catch (err: any) {
+      setSupabaseMessage({ text: err.message || 'Connection test failed', type: 'error' });
+    } finally {
+      setSupabaseLoading(false);
+    }
+  };
+
+  const handleSyncToSupabase = async () => {
+    setSupabaseLoading(true);
+    setSupabaseMessage(null);
+    try {
+      const res = await api.syncToSupabase();
+      if (res.success) {
+        setSupabaseMessage({ text: res.message, type: 'success' });
+        const updated = await api.getSupabaseStatus();
+        setSupabaseStatus(updated);
+      } else {
+        setSupabaseMessage({ text: res.message, type: 'error' });
+      }
+    } catch (err: any) {
+      setSupabaseMessage({ text: err.message || 'Failed to push to Supabase', type: 'error' });
+    } finally {
+      setSupabaseLoading(false);
+    }
+  };
+
+  const handlePullFromSupabase = async () => {
+    setSupabaseLoading(true);
+    setSupabaseMessage(null);
+    try {
+      const res = await api.pullFromSupabase();
+      if (res.success) {
+        setSupabaseMessage({ text: `${res.message} Reloading application...`, type: 'success' });
+        setTimeout(() => window.location.reload(), 1500);
+      } else {
+        setSupabaseMessage({ text: res.message, type: 'error' });
+      }
+    } catch (err: any) {
+      setSupabaseMessage({ text: err.message || 'Failed to pull from Supabase', type: 'error' });
+    } finally {
+      setSupabaseLoading(false);
+    }
+  };
+
+  const handleToggleSqlSchema = async () => {
+    if (!showSqlSchema && !sqlSchema) {
+      try {
+        const schema = await api.getSupabaseSchema();
+        setSqlSchema(schema);
+      } catch {
+        // ignore
+      }
+    }
+    setShowSqlSchema(!showSqlSchema);
+  };
+
+  const handleCopySql = () => {
+    navigator.clipboard.writeText(sqlSchema);
+    setCopiedSql(true);
+    setTimeout(() => setCopiedSql(false), 2500);
+  };
 
   const handleSyncNow = async () => {
     setGitSyncing(true);
@@ -325,6 +463,220 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
             <span>Request Account Erasure</span>
           </button>
         </div>
+      </div>
+
+      {/* Supabase Cloud Backend Card */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-5 shadow-xs text-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100">
+              <Database className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-bold text-slate-900">Supabase Cloud Backend (PostgreSQL)</h2>
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                  Dual-Sync Ready
+                </span>
+              </div>
+              <p className="text-slate-500 text-[11px]">
+                Scalable relational database with automated snapshot persistence, live tables, and Row Level Security.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            {supabaseStatus?.status === 'connected' ? (
+              <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5 shrink-0">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                Supabase Connected
+              </span>
+            ) : supabaseStatus?.configured ? (
+              <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1.5 shrink-0">
+                <RefreshCw className="w-3 h-3 animate-spin" />
+                Configured & Ready
+              </span>
+            ) : (
+              <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1.5 shrink-0">
+                <AlertCircle className="w-3 h-3 text-amber-500" />
+                Enter Project URL
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Configuration Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+          <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 space-y-2.5">
+            <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Credential Status</div>
+            
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">Secret Key:</span>
+              <span className="font-mono text-slate-800 text-[11px] bg-slate-200/70 px-2 py-0.5 rounded">
+                {supabaseStatus?.key || 'sb_secret_C10_...55lW'}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">Key Type:</span>
+              <span className="font-semibold text-emerald-700 flex items-center gap-1">
+                <Check className="w-3.5 h-3.5" />
+                Supabase Secret API Key (sb_secret_*)
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">Auto-Replication:</span>
+              <span className="text-slate-700 font-medium">Automatic on database change</span>
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 space-y-2.5">
+            <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Synchronization State</div>
+            
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">Last Synced:</span>
+              <span className="text-slate-800 font-medium">
+                {supabaseStatus?.lastSyncTime
+                  ? new Date(supabaseStatus.lastSyncTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+                  : 'Pending first sync'}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">Schema Compatibility:</span>
+              <span className="font-semibold text-slate-700 flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                PostgreSQL + JSONB Ready
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">Local Ledger:</span>
+              <span className="font-mono text-slate-800">data/db.json &rarr; public.devolution_state</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Project URL Form */}
+        <form onSubmit={handleSaveSupabaseConfig} className="p-3.5 rounded-lg bg-emerald-50/40 border border-emerald-200/80 space-y-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <label className="font-semibold text-slate-800 text-xs">
+              Supabase Project URL:
+            </label>
+            <span className="text-[11px] text-slate-500">
+              Found in Supabase Dashboard &gt; Project Settings &gt; API
+            </span>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center gap-2">
+            <input
+              type="url"
+              value={supabaseUrlInput}
+              onChange={(e) => setSupabaseUrlInput(e.target.value)}
+              placeholder="https://YOUR_PROJECT_REF.supabase.co"
+              className="flex-1 w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono"
+            />
+            <button
+              type="submit"
+              disabled={supabaseLoading}
+              className="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg flex items-center justify-center gap-1.5 shrink-0 shadow-2xs disabled:opacity-50 transition-colors cursor-pointer"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>{supabaseLoading ? 'Connecting...' : 'Save & Connect URL'}</span>
+            </button>
+          </div>
+        </form>
+
+        {supabaseMessage && (
+          <div
+            className={`p-3 rounded-lg border text-xs flex items-center gap-2 ${
+              supabaseMessage.type === 'success'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                : supabaseMessage.type === 'error'
+                ? 'bg-rose-50 border-rose-200 text-rose-900'
+                : 'bg-indigo-50 border-indigo-200 text-indigo-900'
+            }`}
+          >
+            {supabaseMessage.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            ) : supabaseMessage.type === 'error' ? (
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            ) : (
+              <RefreshCw className="w-4 h-4 text-indigo-600 animate-spin shrink-0" />
+            )}
+            <span className="flex-1">{supabaseMessage.text}</span>
+          </div>
+        )}
+
+        {/* Action Controls */}
+        <div className="pt-1 flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            onClick={handleTestSupabaseConnection}
+            disabled={supabaseLoading || !supabaseUrlInput}
+            className="px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg flex items-center gap-1.5 disabled:opacity-40 transition-colors cursor-pointer"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${supabaseLoading ? 'animate-spin' : ''}`} />
+            <span>Test Connection</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleSyncToSupabase}
+            disabled={supabaseLoading || !supabaseUrlInput}
+            className="px-3.5 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg flex items-center gap-1.5 shadow-2xs disabled:opacity-40 transition-colors cursor-pointer"
+          >
+            <Database className="w-3.5 h-3.5" />
+            <span>Push Local Ledger to Supabase</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handlePullFromSupabase}
+            disabled={supabaseLoading || !supabaseUrlInput}
+            className="px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg flex items-center gap-1.5 disabled:opacity-40 transition-colors cursor-pointer"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Pull from Supabase</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleToggleSqlSchema}
+            className="px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer ml-auto"
+          >
+            <Copy className="w-3.5 h-3.5 text-slate-500" />
+            <span>{showSqlSchema ? 'Hide SQL Schema' : 'View / Copy SQL Migration'}</span>
+            {showSqlSchema ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+          </button>
+        </div>
+
+        {/* Expandable SQL Migration Panel */}
+        {showSqlSchema && (
+          <div className="p-4 rounded-xl bg-slate-900 text-slate-100 space-y-3 border border-slate-800">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="font-semibold text-xs text-emerald-400">Supabase SQL Schema (supabase/schema.sql)</span>
+                <p className="text-[11px] text-slate-400">
+                  Run this script once in your Supabase Dashboard &gt; SQL Editor to bootstrap the state table and RLS policies.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleCopySql}
+                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-[11px] flex items-center gap-1.5 cursor-pointer transition-colors"
+              >
+                {copiedSql ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedSql ? 'Copied to Clipboard!' : 'Copy SQL Script'}</span>
+              </button>
+            </div>
+
+            <pre className="p-3 bg-slate-950 rounded-lg text-[11px] font-mono overflow-x-auto max-h-64 border border-slate-800 text-slate-300">
+              {sqlSchema || '-- Loading SQL schema...'}
+            </pre>
+          </div>
+        )}
       </div>
 
       {/* GitHub Continuous Repository Sync Card */}

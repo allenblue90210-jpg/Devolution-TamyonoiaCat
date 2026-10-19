@@ -604,5 +604,62 @@ export const api = {
       body: JSON.stringify({ verdict, note, evidenceName }),
     });
   },
+
+  // Supabase Cloud Backend Management
+  async getSupabaseStatus(): Promise<{
+    url: string;
+    key: string;
+    configured: boolean;
+    status: 'connected' | 'unconfigured' | 'error' | 'syncing';
+    lastSyncTime: string | null;
+    lastMessage: string | null;
+    testResult?: { success: boolean; message: string; hasStateTable?: boolean };
+  }> {
+    return request('/api/supabase/status');
+  },
+  async configureSupabase(url: string, key?: string): Promise<{
+    success: boolean;
+    url: string;
+    key: string;
+    configured: boolean;
+    status: 'connected' | 'unconfigured' | 'error' | 'syncing';
+    lastSyncTime: string | null;
+    lastMessage: string | null;
+  }> {
+    return request('/api/supabase/config', {
+      method: 'POST',
+      body: JSON.stringify({ url, key }),
+    });
+  },
+  async testSupabase(): Promise<{
+    success: boolean;
+    message: string;
+    hasStateTable?: boolean;
+  }> {
+    return request('/api/supabase/test', {
+      method: 'POST',
+    });
+  },
+  async syncToSupabase(): Promise<{
+    success: boolean;
+    message: string;
+    syncedAt?: string;
+  }> {
+    return request('/api/supabase/sync', {
+      method: 'POST',
+    });
+  },
+  async pullFromSupabase(): Promise<{
+    success: boolean;
+    message: string;
+  }> {
+    return request('/api/supabase/pull', {
+      method: 'POST',
+    });
+  },
+  async getSupabaseSchema(): Promise<string> {
+    const res = await fetch('/api/supabase/schema');
+    return res.text();
+  },
 };
 

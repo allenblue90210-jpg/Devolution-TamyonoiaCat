@@ -1266,6 +1266,15 @@ class Database {
     return this.data;
   }
 
+  public replaceState(newState: Partial<DatabaseSchema>): DatabaseSchema {
+    this.data = {
+      ...this.data,
+      ...newState,
+    };
+    this.save(this.data);
+    return this.data;
+  }
+
   // User queries
   public getUserById(id: string): User | undefined {
     return this.data.users.find((u) => u.id === id);
