@@ -122,6 +122,12 @@ export const api = {
       body: JSON.stringify(updates),
     });
   },
+  async uploadAvatar(avatarUrl: string): Promise<{ success: boolean; user: User; message: string }> {
+    return request('/api/user/upload-avatar', {
+      method: 'POST',
+      body: JSON.stringify({ avatarUrl }),
+    });
+  },
   async resetPassword(email: string): Promise<{ message: string }> {
     return request('/api/auth/reset-password', {
       method: 'POST',
