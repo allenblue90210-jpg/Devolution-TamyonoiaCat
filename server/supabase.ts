@@ -176,13 +176,83 @@ export async function syncUserToSupabase(user: any): Promise<boolean> {
         updated_at: new Date().toISOString(),
       }, { onConflict: 'id' });
 
-    if (userErr && userErr.code !== '42P01') {
-      console.warn('[Supabase Sync User Warning]:', userErr.message);
-    }
     return true;
   } catch (err: any) {
     console.warn('[Supabase Sync User Notice]:', err.message);
     return false;
+  }
+}
+
+export async function supabaseAuthSignIn(email: string, password: string): Promise<{
+  success: boolean;
+  user?: any;
+  session?: any;
+  error?: string;
+}> {
+  const client = getSupabaseClient();
+  if (!client) {
+    return { success: false, error: 'Supabase client not configured yet' };
+  }
+  try {
+    const { data, error } = await client.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true, user: data.user, session: data.session };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export async function supabaseAuthSignUp(email: string, password: string, metadata: any): Promise<{
+  success: boolean;
+  user?: any;
+  session?: any;
+  error?: string;
+}> {
+  const client = getSupabaseClient();
+  if (!client) {
+    return { success: false, error: 'Supabase client not configured yet' };
+  }
+  try {
+    const { data, error } = await client.auth.signUp({
+      email,
+      password,
+      options: {
+        data: metadata,
+      },
+    });
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true, user: data.user, session: data.session };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export async function supabaseAuthSendOtp(email: string): Promise<{
+  success: boolean;
+  error?: string;
+  message?: string;
+}> {
+  const client = getSupabaseClient();
+  if (!client) {
+    return { success: false, error: 'Supabase client not configured yet' };
+  }
+  try {
+    const { error } = await client.auth.signInWithOtp({
+      email,
+    });
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true, message: `Magic authentication link dispatched to ${email}` };
+  } catch (err: any) {
+    return { success: false, error: err.message };
   }
 }
 
