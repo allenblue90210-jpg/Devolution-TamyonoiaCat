@@ -243,6 +243,18 @@ export interface User {
   createdAt: string;
 }
 
+export interface UserSummary {
+  id: string;
+  username: string;
+  fullName: string;
+  accountType: string;
+  avatarUrl: string;
+  email?: string;
+  identityStatus?: string;
+  isReal?: boolean;
+  createdAt?: string;
+}
+
 export interface EvidenceItem {
   id: string;
   userId: string;

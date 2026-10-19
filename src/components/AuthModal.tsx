@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { api } from '../services/api.js';
-import { User, AccountType } from '../types/trust.js';
-import { ShieldCheck, X, CheckCircle2, AlertCircle, Building2, User as UserIcon, LogOut, Eye, EyeOff, Key, Database } from 'lucide-react';
+import { User, AccountType, UserSummary } from '../types/trust.js';
+import { ShieldCheck, X, CheckCircle2, AlertCircle, Building2, User as UserIcon, LogOut, Eye, EyeOff, Key, Database, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface AuthModalProps {
   onClose: () => void;
   onSuccess: (user: User) => void;
-  availableUsers: Array<{ id: string; username: string; fullName: string; accountType: string; avatarUrl: string }>;
+  availableUsers: UserSummary[];
   currentUser?: User | null;
   onLogout?: () => void;
 }
