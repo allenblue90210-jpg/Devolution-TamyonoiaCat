@@ -100,10 +100,32 @@ export const api = {
     clearSessionUserId();
     return request('/api/auth/logout', { method: 'POST' });
   },
-  async signIn(login: string, password?: string, targetUserId?: string): Promise<{ user: User; message: string }> {
+  async switchUser(userId: string): Promise<{ user: User; message: string }> {
     const res = await request<{ user: User; message: string }>('/api/auth/signin', {
       method: 'POST',
-      body: JSON.stringify({ login, password, targetUserId }),
+      body: JSON.stringify({ targetUserId: userId }),
+    });
+    setSessionUserId(res.user.id);
+    return res;
+  },
+  async signIn(login: string, passwordOrTargetUserId?: string, targetUserId?: string): Promise<{ user: User; message: string }> {
+    let resolvedPassword = '';
+    let resolvedTargetUserId = targetUserId;
+
+    // Overloaded call: signIn('', 'usr_xxx')
+    if (passwordOrTargetUserId && (!targetUserId && (!login || passwordOrTargetUserId.startsWith('usr_')))) {
+      resolvedTargetUserId = passwordOrTargetUserId;
+    } else {
+      resolvedPassword = passwordOrTargetUserId || '';
+    }
+
+    const res = await request<{ user: User; message: string }>('/api/auth/signin', {
+      method: 'POST',
+      body: JSON.stringify({
+        login: login || undefined,
+        password: resolvedPassword || undefined,
+        targetUserId: resolvedTargetUserId,
+      }),
     });
     setSessionUserId(res.user.id);
     return res;
