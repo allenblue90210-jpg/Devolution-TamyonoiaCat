@@ -338,6 +338,37 @@
         "allowDirectVerificationRequests": true
       },
       "createdAt": "2026-10-19T15:01:24.800Z"
+    },
+    {
+      "id": "usr_1792423308615_lq64",
+      "email": "allenblack530@gmail.com",
+      "username": "kai",
+      "fullName": "wolf",
+      "accountType": "personal",
+      "avatarUrl": "",
+      "headline": "Software Engineering",
+      "bio": "",
+      "category": "Software Engineering",
+      "country": "Nigeria",
+      "city": "Lagos",
+      "phone": "+234 ",
+      "phoneVerified": false,
+      "emailVerified": false,
+      "identityStatus": "unverified",
+      "identityMethod": "None submitted",
+      "identityVerifiedAt": null,
+      "businessVerificationStatus": "unverified",
+      "passwordHash": "1880c0255fe729d7cc0d2cfc4644f98cb6a3225dd0c4216bc07bb4b5b0fc92f1",
+      "privacySettings": {
+        "showRelationshipCounts": true,
+        "showCategoryBreakdown": true,
+        "showPublicEndorsers": true,
+        "showTrustReceipts": true,
+        "showCredentials": true,
+        "showLocationCityOnly": true,
+        "allowDirectVerificationRequests": true
+      },
+      "createdAt": "2026-10-19T15:21:48.615Z"
     }
   ],
   "evidence": [
@@ -907,6 +938,16 @@
   ],
   "disputes": [],
   "notifications": [
+    {
+      "id": "notif_1792423308617",
+      "userId": "usr_1792423308615_lq64",
+      "type": "evidence_status",
+      "title": "Welcome to Devolution Trust Platform",
+      "message": "Your cryptographic trust ledger is active and synchronized with Supabase PostgreSQL. Complete identity attestation and establish bilateral trust receipts to grow your verifiable score.",
+      "link": "/dashboard",
+      "isRead": false,
+      "createdAt": "2026-10-19T15:21:48.617Z"
+    },
     {
       "id": "notif_1792420107486",
       "userId": "usr_allen_001",
