@@ -462,6 +462,7 @@ export default function App() {
               refreshData();
             }}
             onBack={handleBack}
+            onOpenAvatarUpload={() => setShowAvatarModal(true)}
           />
         ) : (
           renderSignInPrompt('Settings', 'Configure privacy thresholds, profile attributes, and verification options.')
@@ -491,6 +492,7 @@ export default function App() {
         availableUsers={availableUsers}
         onOpenSearch={() => setShowSearchModal(true)}
         onOpenPublicLedger={() => handleSelectTab('public-ledger')}
+        onOpenAvatarUpload={() => setShowAvatarModal(true)}
       />
 
       <main className="flex-1 pb-16">{renderContent()}</main>
@@ -532,6 +534,17 @@ export default function App() {
           currentMethod={currentUser.identityMethod}
           onClose={() => setShowIdentityModal(false)}
           onSuccess={() => {
+            refreshData();
+          }}
+        />
+      )}
+
+      {showAvatarModal && currentUser && (
+        <AvatarUploadModal
+          user={currentUser}
+          onClose={() => setShowAvatarModal(false)}
+          onSuccess={(updated) => {
+            setCurrentUser(updated);
             refreshData();
           }}
         />
