@@ -872,12 +872,12 @@
       "committerAvatar": "/src/assets/images/avatar_sarah_1792334645228.jpg",
       "deadline": "2026-10-19T09:15:43.602Z",
       "committerPledgeNote": "I'll bring it by 2am, parked safely in the designated bay with full fuel tank and keys handed to security.",
-      "status": "active",
+      "status": "overdue",
       "trustRewardPoints": 25,
       "penaltyRateDailyPercent": 30,
-      "penaltyCurrentDeductionPercent": 0,
-      "isOverdue": false,
-      "daysOverdue": 0,
+      "penaltyCurrentDeductionPercent": 30,
+      "isOverdue": true,
+      "daysOverdue": 1,
       "checkedOutByCommitterAt": null,
       "checkedOutByRequesterAt": null,
       "linkedReceiptId": null,
@@ -1052,7 +1052,7 @@
   ],
   "impressions": {
     "network": {
-      "impressions": 4898,
+      "impressions": 4895,
       "witnessCount": 560
     },
     "usr_allen_001": {
@@ -1064,7 +1064,7 @@
       "witnessCount": 310
     },
     "usr_sarah_002": {
-      "impressions": 1382,
+      "impressions": 1381,
       "witnessCount": 195
     },
     "sarah_adesina": {
