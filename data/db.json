@@ -214,6 +214,37 @@
         "allowDirectVerificationRequests": true
       },
       "createdAt": "2026-10-19T14:21:46.090Z"
+    },
+    {
+      "id": "usr_1792419823535_1kb3",
+      "email": "allenkinetic002@gmail.com",
+      "username": "linkawaken",
+      "fullName": "TEMU LInk ",
+      "accountType": "personal",
+      "avatarUrl": "",
+      "headline": "Software Engineering",
+      "bio": "",
+      "category": "Software Engineering",
+      "country": "Nigeria",
+      "city": "Lagos",
+      "phone": "+234 ",
+      "phoneVerified": false,
+      "emailVerified": false,
+      "identityStatus": "unverified",
+      "identityMethod": "None submitted",
+      "identityVerifiedAt": null,
+      "businessVerificationStatus": "unverified",
+      "passwordHash": "1880c0255fe729d7cc0d2cfc4644f98cb6a3225dd0c4216bc07bb4b5b0fc92f1",
+      "privacySettings": {
+        "showRelationshipCounts": true,
+        "showCategoryBreakdown": true,
+        "showPublicEndorsers": true,
+        "showTrustReceipts": true,
+        "showCredentials": true,
+        "showLocationCityOnly": true,
+        "allowDirectVerificationRequests": true
+      },
+      "createdAt": "2026-10-19T14:23:43.535Z"
     }
   ],
   "evidence": [
