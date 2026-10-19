@@ -22,6 +22,7 @@ import {
   MessageSquare,
   ThumbsUp,
 } from 'lucide-react';
+import { formatTransactionCurrency, CURRENCY_OPTIONS } from '../utils/currency.js';
 
 interface TrustReceiptsViewProps {
   user: User;
@@ -67,6 +68,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
   const [otherCategoryDetails, setOtherCategoryDetails] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [currencySign, setCurrencySign] = useState('₦');
   const [transactionValue, setTransactionValue] = useState('');
   const [completionConditions, setCompletionConditions] = useState('');
   const [isPublic, setIsPublic] = useState(true);
