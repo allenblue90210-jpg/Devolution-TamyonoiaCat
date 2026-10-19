@@ -18,15 +18,17 @@ import {
   Copy,
   ChevronDown,
   ChevronUp,
+  Camera,
 } from 'lucide-react';
 
 interface SettingsViewProps {
   user: User;
   onProfileUpdated: (updatedUser: User) => void;
   onBack?: () => void;
+  onOpenAvatarUpload?: () => void;
 }
 
-export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdated, onBack }) => {
+export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdated, onBack, onOpenAvatarUpload }) => {
   const [headline, setHeadline] = useState(user.headline);
   const [bio, setBio] = useState(user.bio);
   const [category, setCategory] = useState(user.category);
@@ -282,8 +284,37 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
 
       <form onSubmit={handleSave} className="space-y-8">
         {/* Profile Details Card */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4 shadow-xs">
+        <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-5 shadow-xs">
           <h2 className="text-sm font-bold text-slate-900">Public Profile Details</h2>
+
+          {/* Profile Picture Uploader Section */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-indigo-100 bg-slate-200 shrink-0 shadow-xs flex items-center justify-center">
+                {user.avatarUrl ? (
+                  <img src={user.avatarUrl} alt={user.fullName} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="font-bold text-indigo-700 text-lg">{user.fullName.slice(0, 2).toUpperCase()}</span>
+                )}
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900 text-xs">Profile Picture</h3>
+                <p className="text-[11px] text-slate-500">
+                  Visible across your bilateral commitments, verified receipts, and public ledger profile.
+                </p>
+              </div>
+            </div>
+            {onOpenAvatarUpload && (
+              <button
+                type="button"
+                onClick={onOpenAvatarUpload}
+                className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg flex items-center justify-center gap-1.5 shrink-0 transition-colors cursor-pointer shadow-2xs"
+              >
+                <Camera className="w-3.5 h-3.5" />
+                <span>Upload / Change Photo</span>
+              </button>
+            )}
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             <div>
