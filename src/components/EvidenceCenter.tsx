@@ -28,8 +28,6 @@ interface EvidenceCenterProps {
   onAddEvidence: (data: Partial<EvidenceItem>) => Promise<void>;
   onToggleVisibility: (id: string, currentPublic: boolean) => Promise<void>;
   onDeleteEvidence: (id: string) => Promise<void>;
-  onOpenPhoneModal: () => void;
-  onOpenIdentityModal: () => void;
   onBack?: () => void;
 }
 
@@ -39,8 +37,6 @@ export const EvidenceCenter: React.FC<EvidenceCenterProps> = ({
   onAddEvidence,
   onToggleVisibility,
   onDeleteEvidence,
-  onOpenPhoneModal,
-  onOpenIdentityModal,
   onBack,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');

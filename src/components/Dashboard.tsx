@@ -414,94 +414,89 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-      {/* Verification Status Card & Action Bar */}
+      {/* Account Standing & Network Status */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <div className="text-sm font-bold text-slate-900">Core Verification Endpoints</div>
-          <span className="text-xs text-slate-500">Cryptographically Attested</span>
+          <div className="text-sm font-bold text-slate-900">Account Standing & Network Status</div>
+          <span className="text-xs text-slate-500">Verified Peer Ledger</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-          {/* Identity Endpoint */}
+          {/* Relationships Standing */}
           <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 flex flex-col justify-between space-y-3">
             <div>
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-slate-900">Identity Attestation</span>
-                {user.identityStatus === 'verified' ? (
-                  <span className="text-emerald-700 font-medium flex items-center gap-1">
-                    <Check className="w-3.5 h-3.5" />
-                    <span>Verified</span>
-                  </span>
-                ) : (
-                  <span className="text-amber-700 font-medium">Pending</span>
-                )}
+                <span className="font-semibold text-slate-900">Social Verification</span>
+                <span className="text-emerald-700 font-medium flex items-center gap-1">
+                  <Check className="w-3.5 h-3.5" />
+                  <span>{confirmedRelationships.length} Confirmed</span>
+                </span>
               </div>
               <p className="text-slate-500 text-[11px] mt-1">
-                {user.identityMethod || 'Government-issued ID check with biometric liveness'}
+                {confirmedEndorsements.length} peer endorsement{confirmedEndorsements.length === 1 ? '' : 's'} on record.
               </p>
             </div>
-            {user.identityStatus !== 'verified' && (
-              <button
-                onClick={onOpenIdentityModal}
-                className="w-full py-1.5 bg-indigo-600 text-white rounded text-xs font-semibold hover:bg-indigo-700"
-              >
-                Initiate Identity Check
-              </button>
-            )}
+            <button
+              onClick={onOpenInviteModal}
+              className="w-full py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded text-xs font-semibold transition-colors"
+            >
+              Invite Contact
+            </button>
           </div>
 
-          {/* Phone Endpoint */}
+          {/* Trust Receipts Standing */}
           <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 flex flex-col justify-between space-y-3">
             <div>
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-slate-900">Phone Endpoint Control</span>
-                {user.phoneVerified ? (
-                  <span className="text-emerald-700 font-medium flex items-center gap-1">
-                    <Check className="w-3.5 h-3.5" />
-                    <span>Verified</span>
-                  </span>
-                ) : (
-                  <span className="text-amber-700 font-medium">Unverified</span>
-                )}
+                <span className="font-semibold text-slate-900">Fulfilled Commitments</span>
+                <span className="text-emerald-700 font-medium flex items-center gap-1">
+                  <Check className="w-3.5 h-3.5" />
+                  <span>{completedReceipts.length} Fulfilled</span>
+                </span>
               </div>
-              <p className="text-slate-500 text-[11px] mt-1 font-mono">
-                {user.phone ? user.phone : 'No phone linked'}
+              <p className="text-slate-500 text-[11px] mt-1">
+                {pendingReceipts.length} in progress or awaiting dual signature.
               </p>
             </div>
-            {!user.phoneVerified && (
-              <button
-                onClick={onOpenPhoneModal}
-                className="w-full py-1.5 bg-indigo-600 text-white rounded text-xs font-semibold hover:bg-indigo-700"
-              >
-                Verify Phone via OTP
-              </button>
-            )}
+            <button
+              onClick={onOpenNewReceiptModal}
+              className="w-full py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded text-xs font-semibold transition-colors"
+            >
+              Issue Receipt
+            </button>
           </div>
 
-          {/* Business Endpoint */}
+          {/* Business Entity Standing */}
           <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 flex flex-col justify-between space-y-3">
             <div>
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-slate-900">CAC Business Registry</span>
+                <span className="font-semibold text-slate-900">Business Registry</span>
                 {user.businessVerificationStatus === 'verified' ? (
                   <span className="text-emerald-700 font-medium flex items-center gap-1">
                     <Check className="w-3.5 h-3.5" />
                     <span>Active Standing</span>
                   </span>
                 ) : (
-                  <span className="text-slate-500">Not Applicable</span>
+                  <span className="text-slate-500">Personal Account</span>
                 )}
               </div>
               <p className="text-slate-500 text-[11px] mt-1">
-                {user.businessName ? `${user.businessName} (${user.businessRegNumber || 'RC Pending'})` : 'Personal Account'}
+                {user.businessName ? `${user.businessName} (${user.businessRegNumber || 'RC Pending'})` : 'Independent Member'}
               </p>
             </div>
-            {user.accountType === 'business' && (
+            {user.accountType === 'business' ? (
               <button
                 onClick={() => onNavigateTab('business')}
                 className="w-full py-1.5 bg-slate-200 text-slate-800 rounded text-xs font-semibold hover:bg-slate-300"
               >
                 Manage Entity
+              </button>
+            ) : (
+              <button
+                onClick={onOpenAddEvidence}
+                className="w-full py-1.5 bg-slate-200 text-slate-800 rounded text-xs font-semibold hover:bg-slate-300"
+              >
+                Attach Credentials
               </button>
             )}
           </div>
