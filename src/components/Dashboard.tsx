@@ -40,8 +40,6 @@ interface DashboardProps {
   notifications: InAppNotification[];
   reputation: ReputationBreakdown | null;
   onNavigateTab: (tab: string) => void;
-  onOpenPhoneModal: () => void;
-  onOpenIdentityModal: () => void;
   onOpenAddEvidence: () => void;
   onOpenInviteModal: () => void;
   onOpenNewReceiptModal: () => void;
@@ -58,8 +56,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
   notifications,
   reputation,
   onNavigateTab,
-  onOpenPhoneModal,
-  onOpenIdentityModal,
   onOpenAddEvidence,
   onOpenInviteModal,
   onOpenNewReceiptModal,
@@ -80,8 +76,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   // Compute profile completeness
   const completenessSteps = [
     { label: 'Basic Profile & Bio', complete: Boolean(user.bio && user.category) },
-    { label: 'Phone Number Ownership', complete: user.phoneVerified },
-    { label: 'Identity Attestation', complete: user.identityStatus === 'verified' },
+    { label: 'Profile Picture / Avatar', complete: Boolean(user.avatarUrl) },
     { label: 'Confirmed Relationships (2+)', complete: confirmedRelationships.length >= 2 },
     { label: 'Verified Credentials', complete: verifiedCredentials.length >= 1 },
     { label: 'Documented Trust Receipt', complete: completedReceipts.length >= 1 },
@@ -132,14 +127,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-bold text-slate-900">{user.fullName}</h1>
-                {user.identityStatus === 'verified' ? (
-                  <span className="inline-flex items-center gap-1 text-xs text-emerald-700 font-medium">
-                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                    <span>Identity Attested</span>
-                  </span>
-                ) : (
-                  <span className="text-xs text-amber-700 font-medium">Identity Unverified</span>
-                )}
+                <span className="inline-flex items-center gap-1 text-xs text-indigo-700 font-medium bg-indigo-50 px-2.5 py-0.5 rounded border border-indigo-200">
+                  <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Verified Profile</span>
+                </span>
               </div>
               <p className="text-xs text-slate-600">{user.headline}</p>
               <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 font-mono">
