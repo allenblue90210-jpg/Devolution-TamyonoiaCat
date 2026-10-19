@@ -15,6 +15,8 @@ import {
   pullFromSupabase,
   getResolvedSupabaseConfig,
   syncUserToSupabase,
+  syncAllUsersToSupabase,
+  pullRegisteredUsersFromSupabase,
   supabaseAuthSignIn,
   supabaseAuthSignUp,
   supabaseAuthSendOtp,
