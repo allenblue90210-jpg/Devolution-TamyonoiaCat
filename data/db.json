@@ -153,6 +153,67 @@
         "allowDirectVerificationRequests": true
       },
       "createdAt": "2026-10-19T14:10:58.259Z"
+    },
+    {
+      "id": "usr_allen_004",
+      "email": "allenkinetic004@gmail.com",
+      "username": "allenkinetic004",
+      "fullName": "Allen Kinetic",
+      "accountType": "personal",
+      "avatarUrl": "/src/assets/images/avatar_founder_1792334631930.jpg",
+      "headline": "Devolution Network Architect & Verified Trustee",
+      "bio": "Verified digital reputation and evidence-based relationship anchor on Devolution network.",
+      "category": "Software Engineering",
+      "country": "Nigeria",
+      "city": "Lagos",
+      "phone": "+234 803 000 0004",
+      "phoneVerified": true,
+      "emailVerified": true,
+      "identityStatus": "verified",
+      "identityMethod": "Government ID & Biometric Verification",
+      "identityVerifiedAt": "2026-10-19T14:21:36.868Z",
+      "businessVerificationStatus": "unverified",
+      "privacySettings": {
+        "showRelationshipCounts": true,
+        "showCategoryBreakdown": true,
+        "showPublicEndorsers": true,
+        "showTrustReceipts": true,
+        "showCredentials": true,
+        "showLocationCityOnly": true,
+        "allowDirectVerificationRequests": true
+      },
+      "createdAt": "2026-10-19T14:21:36.868Z"
+    },
+    {
+      "id": "usr_1792419706090_6uj2",
+      "email": "testrealuser@example.com",
+      "username": "testrealuser",
+      "fullName": "Test Real User",
+      "accountType": "personal",
+      "avatarUrl": "",
+      "headline": "Technology",
+      "bio": "",
+      "category": "Technology",
+      "country": "Nigeria",
+      "city": "Lagos",
+      "phone": "+234 800 123 4567",
+      "phoneVerified": false,
+      "emailVerified": false,
+      "identityStatus": "unverified",
+      "identityMethod": "None submitted",
+      "identityVerifiedAt": null,
+      "businessVerificationStatus": "unverified",
+      "passwordHash": "a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea",
+      "privacySettings": {
+        "showRelationshipCounts": true,
+        "showCategoryBreakdown": true,
+        "showPublicEndorsers": true,
+        "showTrustReceipts": true,
+        "showCredentials": true,
+        "showLocationCityOnly": true,
+        "allowDirectVerificationRequests": true
+      },
+      "createdAt": "2026-10-19T14:21:46.090Z"
     }
   ],
   "evidence": [

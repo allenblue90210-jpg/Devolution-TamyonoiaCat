@@ -487,6 +487,7 @@ export default function App() {
         onOpenSearch={() => setShowSearchModal(true)}
         onOpenPublicLedger={() => handleSelectTab('public-ledger')}
         onOpenAvatarUpload={() => setShowAvatarModal(true)}
+        onOpenSupabaseModal={() => setShowSupabaseModal(true)}
       />
 
       <main className="flex-1 pb-16">{renderContent()}</main>
@@ -519,6 +520,15 @@ export default function App() {
           onClose={() => setShowAvatarModal(false)}
           onSuccess={(updated) => {
             setCurrentUser(updated);
+            refreshData();
+          }}
+        />
+      )}
+
+      {showSupabaseModal && (
+        <SupabaseModal
+          onClose={() => setShowSupabaseModal(false)}
+          onSuccess={() => {
             refreshData();
           }}
         />
