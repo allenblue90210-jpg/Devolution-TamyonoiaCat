@@ -294,12 +294,17 @@ export async function testSupabaseConnection(): Promise<{
       .limit(1);
 
     if (error) {
-      // Check if table does not exist yet (code 42P01 in postgres)
-      if (error.code === '42P01' || error.message?.includes('relation "devolution_state" does not exist')) {
+      // Check if table does not exist yet (code 42P01 in postgres or PGRST205 in postgrest)
+      if (
+        error.code === '42P01' ||
+        error.code === 'PGRST205' ||
+        error.message?.includes('devolution_state') ||
+        error.message?.includes('schema cache')
+      ) {
         return {
           success: true,
           hasStateTable: false,
-          message: 'Connected to Supabase! The "devolution_state" table has not been created yet. Run the provided schema in Supabase SQL Editor.',
+          message: 'Connected to Supabase! The tables are ready to be created. Please run the provided schema in your Supabase SQL Editor.',
         };
       }
       return {
