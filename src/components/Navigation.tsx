@@ -810,6 +810,25 @@ export const Navigation: React.FC<NavigationProps> = ({
         </button>
 
         <button
+          onClick={() => {
+            if (onOpenPublicLedger) onOpenPublicLedger();
+            else onSelectTab('public-ledger');
+          }}
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold py-1 px-2.5 rounded-lg transition-colors cursor-pointer relative select-none outline-none [-webkit-tap-highlight-color:transparent] ${
+            currentTab === 'public-ledger'
+              ? 'text-indigo-700 bg-indigo-100 border border-indigo-300'
+              : 'text-indigo-700 bg-indigo-50 border border-indigo-200/80 hover:bg-indigo-100'
+          }`}
+          title="World Screen: Browse People & Public Ledger"
+        >
+          <span className="relative">
+            <Globe className="w-4 h-4 text-indigo-600" />
+            <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-indigo-600 rounded-full" />
+          </span>
+          <span className="text-[10px] font-bold text-indigo-700">Ledger</span>
+        </button>
+
+        <button
           onClick={() => onSelectTab('receipts')}
           className="flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
         >
