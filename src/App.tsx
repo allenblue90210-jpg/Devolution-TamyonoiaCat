@@ -25,8 +25,6 @@ import { RememberView } from './components/RememberView.js';
 import { DirectoryView } from './components/DirectoryView.js';
 import { BusinessView } from './components/BusinessView.js';
 import { SettingsView } from './components/SettingsView.js';
-import { PhoneVerificationModal } from './components/PhoneVerificationModal.js';
-import { IdentityVerificationModal } from './components/IdentityVerificationModal.js';
 import { AuthModal } from './components/AuthModal.js';
 import { PeopleSearchModal } from './components/PeopleSearchModal.js';
 import { PublicLedgerScreen } from './components/PublicLedgerScreen.js';
@@ -50,8 +48,6 @@ export default function App() {
 
   // Modals
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
-  const [showPhoneModal, setShowPhoneModal] = useState<boolean>(false);
-  const [showIdentityModal, setShowIdentityModal] = useState<boolean>(false);
   const [showSearchModal, setShowSearchModal] = useState<boolean>(false);
   const [showAvatarModal, setShowAvatarModal] = useState<boolean>(false);
 
@@ -328,8 +324,6 @@ export default function App() {
             notifications={notifications}
             reputation={reputation}
             onNavigateTab={handleSelectTab}
-            onOpenPhoneModal={() => setShowPhoneModal(true)}
-            onOpenIdentityModal={() => setShowIdentityModal(true)}
             onOpenAddEvidence={() => handleSelectTab('evidence')}
             onOpenInviteModal={() => handleSelectTab('relationships')}
             onOpenNewReceiptModal={() => handleSelectTab('receipts')}
@@ -363,8 +357,6 @@ export default function App() {
             onAddEvidence={handleAddEvidence}
             onToggleVisibility={handleToggleEvidenceVisibility}
             onDeleteEvidence={handleDeleteEvidence}
-            onOpenPhoneModal={() => setShowPhoneModal(true)}
-            onOpenIdentityModal={() => setShowIdentityModal(true)}
             onBack={handleBack}
           />
         ) : (
@@ -516,26 +508,6 @@ export default function App() {
           availableUsers={availableUsers}
           currentUser={currentUser}
           onLogout={handleLogout}
-        />
-      )}
-
-      {showPhoneModal && currentUser && (
-        <PhoneVerificationModal
-          initialPhone={currentUser.phone}
-          onClose={() => setShowPhoneModal(false)}
-          onSuccess={() => {
-            refreshData();
-          }}
-        />
-      )}
-
-      {showIdentityModal && currentUser && (
-        <IdentityVerificationModal
-          currentMethod={currentUser.identityMethod}
-          onClose={() => setShowIdentityModal(false)}
-          onSuccess={() => {
-            refreshData();
-          }}
         />
       )}
 
