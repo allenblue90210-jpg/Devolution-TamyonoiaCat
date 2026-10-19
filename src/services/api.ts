@@ -241,6 +241,12 @@ export const api = {
       body: JSON.stringify({ method, documentNumber }),
     });
   },
+  async quickVerifyIdentity(method?: string): Promise<{ success: boolean; user: User; message: string }> {
+    return request('/api/users/quick-verify', {
+      method: 'POST',
+      body: JSON.stringify({ method }),
+    });
+  },
 
   // Relationships
   async getRelationships(): Promise<{ relationships: RelationshipInvite[] }> {
