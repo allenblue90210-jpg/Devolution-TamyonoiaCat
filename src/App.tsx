@@ -238,74 +238,6 @@ export default function App() {
     refreshData();
   };
 
-  // Render view router based on currentTab
-  const renderContent = () => {
-    if (loading && !currentUser) {
-      return (
-        <div className="min-h-[70vh] flex items-center justify-center text-xs text-slate-500">
-          Initializing secure cryptographic trust ledger...
-        </div>
-      );
-    }
-
-    // Dynamic Route 1: Public Profile View (`profile-[username]`)
-    if (currentTab.startsWith('profile-')) {
-      const username = currentTab.replace('profile-', '');
-      return (
-        <PublicProfileView
-          username={username}
-          onNavigateTab={handleSelectTab}
-          onBack={handleBack}
-        />
-      );
-    }
-
-    // Dynamic Route 2: Accept Relationship Invite (`invite-[token]`)
-    if (currentTab.startsWith('invite-')) {
-      const token = currentTab.replace('invite-', '');
-      return (
-        <AcceptInviteView
-          token={token}
-          onBack={handleBack}
-          onCompleted={() => {
-            refreshData();
-            handleSelectTab('relationships');
-          }}
-        />
-      );
-    }
-
-    switch (currentTab) {
-      case 'landing':
-        return (
-          <LandingPage
-            onGetStarted={() => {
-              if (currentUser) handleSelectTab('dashboard');
-              else setShowAuthModal(true);
-            }}
-            onExploreProfile={(username) => handleSelectTab(`profile-${username}`)}
-            onNavigateTab={handleSelectTab}
-          />
-        );
-
-      case 'dashboard':
-        return currentUser ? (
-          <Dashboard
-            user={currentUser}
-            evidence={evidence}
-            relationships={relationships}
-            receipts={receipts}
-            references={references}
-            notifications={notifications}
-            reputation={reputation}
-            onNavigateTab={handleSelectTab}
-            onOpenPhoneModal={() => setShowPhoneModal(true)}
-            onOpenIdentityModal={() => setShowIdentityModal(true)}
-            onOpenAddEvidence={() => handleSelectTab('evidence')}
-            onOpenInviteModal={() => handleSelectTab('relationships')}
-            onOpenNewReceiptModal={() => handleSelectTab('receipts')}
-            onOpenPublicLedger={() => handleSelectTab('public-ledger')}
-          />
   const renderSignInPrompt = (tabName: string, description: string) => (
     <div className="max-w-md mx-auto my-16 p-8 bg-white rounded-2xl border border-slate-200 shadow-xs text-center space-y-4">
       <div className="w-12 h-12 mx-auto rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
@@ -333,7 +265,15 @@ export default function App() {
     </div>
   );
 
+  // Render view router based on currentTab
   const renderContent = () => {
+    if (loading && !currentUser && currentTab !== 'landing' && currentTab !== 'public-ledger' && currentTab !== 'directory') {
+      return (
+        <div className="min-h-[70vh] flex items-center justify-center text-xs text-slate-500">
+          Initializing secure cryptographic trust ledger...
+        </div>
+      );
+    }
     // Check for dynamic public profile route: profile-{username}
     if (currentTab.startsWith('profile-')) {
       const username = currentTab.replace('profile-', '');
