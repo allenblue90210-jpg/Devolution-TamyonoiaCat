@@ -30,6 +30,7 @@ import { IdentityVerificationModal } from './components/IdentityVerificationModa
 import { AuthModal } from './components/AuthModal.js';
 import { PeopleSearchModal } from './components/PeopleSearchModal.js';
 import { PublicLedgerScreen } from './components/PublicLedgerScreen.js';
+import { AvatarUploadModal } from './components/AvatarUploadModal.js';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -52,6 +53,7 @@ export default function App() {
   const [showPhoneModal, setShowPhoneModal] = useState<boolean>(false);
   const [showIdentityModal, setShowIdentityModal] = useState<boolean>(false);
   const [showSearchModal, setShowSearchModal] = useState<boolean>(false);
+  const [showAvatarModal, setShowAvatarModal] = useState<boolean>(false);
 
   const [tabHistory, setTabHistory] = useState<string[]>([]);
 
@@ -291,8 +293,10 @@ export default function App() {
       return (
         <PublicProfileView
           username={username}
+          currentUser={currentUser}
           onNavigateTab={handleSelectTab}
           onBack={handleBack}
+          onOpenAvatarUpload={() => setShowAvatarModal(true)}
         />
       );
     }
@@ -330,6 +334,7 @@ export default function App() {
             onOpenInviteModal={() => handleSelectTab('relationships')}
             onOpenNewReceiptModal={() => handleSelectTab('receipts')}
             onOpenPublicLedger={() => handleSelectTab('public-ledger')}
+            onOpenAvatarUpload={() => setShowAvatarModal(true)}
           />
         ) : (
           <LandingPage
