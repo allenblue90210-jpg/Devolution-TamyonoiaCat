@@ -118,8 +118,10 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !counterpartyName || !completionConditions) return;
-    setSubmitting(true);
+    const formattedValue = transactionValue.trim()
+      ? formatTransactionCurrency(transactionValue, currencySign)
+      : undefined;
+
     try {
       await onCreateReceipt({
         counterpartyName,
@@ -128,7 +130,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
         otherCategoryDetails: interactionCategory === 'Other' ? otherCategoryDetails : undefined,
         title,
         description,
-        transactionValue,
+        transactionValue: formattedValue,
         completionConditions,
         isPublic,
         evidenceAttachments: [
