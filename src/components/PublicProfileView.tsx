@@ -24,18 +24,23 @@ import {
   Flame,
   TrendingUp,
   ArrowLeft,
+  Camera,
 } from 'lucide-react';
 
 interface PublicProfileViewProps {
   username: string;
+  currentUser?: User | null;
   onNavigateTab: (tab: string) => void;
   onBack?: () => void;
+  onOpenAvatarUpload?: () => void;
 }
 
 export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
   username,
+  currentUser,
   onNavigateTab,
   onBack,
+  onOpenAvatarUpload,
 }) => {
   const [data, setData] = useState<{
     user: User;
@@ -153,18 +158,46 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
       <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            {user.avatarUrl ? (
-              <img
-                src={user.avatarUrl}
-                alt={user.fullName}
-                referrerPolicy="no-referrer"
-                className="w-20 h-20 rounded-full object-cover border border-slate-200"
-              />
-            ) : (
-              <div className="w-20 h-20 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-2xl border border-slate-200">
-                {user.fullName.charAt(0)}
-              </div>
-            )}
+            {/* User Avatar with Quick Upload Trigger for own profile */}
+            <div
+              onClick={() => {
+                if (currentUser?.username === user.username && onOpenAvatarUpload) {
+                  onOpenAvatarUpload();
+                }
+              }}
+              className={`relative group shrink-0 ${
+                currentUser?.username === user.username ? 'cursor-pointer' : ''
+              }`}
+              title={
+                currentUser?.username === user.username
+                  ? 'Click to change or create profile picture'
+                  : user.fullName
+              }
+            >
+              {user.avatarUrl ? (
+                <img
+                  src={user.avatarUrl}
+                  alt={user.fullName}
+                  referrerPolicy="no-referrer"
+                  className="w-20 h-20 rounded-full object-cover border-2 border-slate-200 group-hover:scale-105 transition-transform"
+                />
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-2xl border-2 border-white shadow-xs">
+                  {user.fullName.charAt(0)}
+                </div>
+              )}
+              {currentUser?.username === user.username && onOpenAvatarUpload && (
+                <>
+                  <div className="absolute inset-0 bg-slate-900/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                    <Camera className="w-5 h-5 drop-shadow" />
+                  </div>
+                  <span className="absolute bottom-0 right-0 p-1.5 rounded-full bg-indigo-600 text-white ring-2 ring-white shadow-xs group-hover:bg-indigo-700 transition-colors">
+                    <Camera className="w-3.5 h-3.5" />
+                  </span>
+                </>
+              )}
+            </div>
+
             <div className="space-y-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-bold text-slate-900">{user.fullName}</h1>
@@ -194,9 +227,19 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
 
           {/* Action buttons */}
           <div className="flex items-center gap-2 shrink-0">
+            {currentUser?.username === user.username && onOpenAvatarUpload && (
+              <button
+                onClick={onOpenAvatarUpload}
+                className="px-3 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                title="Create or upload your profile picture"
+              >
+                <Camera className="w-3.5 h-3.5" />
+                <span>Upload / Change Photo</span>
+              </button>
+            )}
             <button
               onClick={handleCopyLink}
-              className="p-2 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+              className="p-2 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
               title="Copy Profile URL"
             >
               {copiedLink ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
