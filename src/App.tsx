@@ -29,6 +29,7 @@ import { AuthModal } from './components/AuthModal.js';
 import { PeopleSearchModal } from './components/PeopleSearchModal.js';
 import { PublicLedgerScreen } from './components/PublicLedgerScreen.js';
 import { AvatarUploadModal } from './components/AvatarUploadModal.js';
+import { SupabaseModal } from './components/SupabaseModal.js';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -50,6 +51,7 @@ export default function App() {
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [showSearchModal, setShowSearchModal] = useState<boolean>(false);
   const [showAvatarModal, setShowAvatarModal] = useState<boolean>(false);
+  const [showSupabaseModal, setShowSupabaseModal] = useState<boolean>(false);
 
   const [tabHistory, setTabHistory] = useState<string[]>([]);
 

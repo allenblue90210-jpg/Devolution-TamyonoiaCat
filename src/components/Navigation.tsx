@@ -43,6 +43,7 @@ interface NavigationProps {
   onOpenSearch?: () => void;
   onOpenPublicLedger?: () => void;
   onOpenAvatarUpload?: () => void;
+  onOpenSupabaseModal?: () => void;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
@@ -57,6 +58,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   onOpenSearch,
   onOpenPublicLedger,
   onOpenAvatarUpload,
+  onOpenSupabaseModal,
 }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -434,16 +436,30 @@ export const Navigation: React.FC<NavigationProps> = ({
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-slate-100 space-y-2">
+                    <div className="pt-2 border-t border-slate-100 space-y-1.5">
+                      <button
+                        onClick={() => {
+                          setShowSupabaseMenu(false);
+                          if (onOpenSupabaseModal) {
+                            onOpenSupabaseModal();
+                          } else {
+                            onSelectTab('settings');
+                          }
+                        }}
+                        className="w-full py-2 px-3 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                      >
+                        <Database className="w-3.5 h-3.5" />
+                        <span>{supabaseStatus?.status === 'connected' ? 'Configure Supabase & Sync' : 'Activate Supabase Backend'}</span>
+                      </button>
                       <button
                         onClick={() => {
                           setShowSupabaseMenu(false);
                           onSelectTab('settings');
                         }}
-                        className="w-full py-2 px-3 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                        className="w-full py-1.5 px-3 text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-lg flex items-center justify-center gap-1 transition-colors cursor-pointer"
                       >
-                        <Settings className="w-3.5 h-3.5" />
-                        <span>Manage Supabase & Schema in Settings</span>
+                        <Settings className="w-3 h-3 text-slate-500" />
+                        <span>View SQL Schema in Settings</span>
                       </button>
                     </div>
                   </div>
