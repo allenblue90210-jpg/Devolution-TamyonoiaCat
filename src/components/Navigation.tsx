@@ -753,29 +753,39 @@ export const Navigation: React.FC<NavigationProps> = ({
                         </button>
                       </div>
 
-                      {/* Switch Demo Profile helper */}
+                      {/* Switch Profile / Persona helper */}
                       <div className="border-t border-slate-100 pt-2 pb-1 px-4">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">
-                          Switch Active Persona (Sandbox)
+                        <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">
+                          <span>Switch Active User ({availableUsers.length})</span>
                         </div>
-                        <div className="space-y-1">
-                          {availableUsers.map((u) => (
-                            <button
-                              key={u.id}
-                              onClick={() => {
-                                onSwitchUser(u.id);
-                                setShowUserMenu(false);
-                              }}
-                              className={`w-full flex items-center justify-between text-left px-2 py-1.5 rounded text-xs transition-colors cursor-pointer ${
-                                u.id === currentUser.id
-                                  ? 'bg-indigo-50 text-indigo-700 font-medium'
-                                  : 'text-slate-600 hover:bg-slate-50'
-                              }`}
-                            >
-                              <span className="truncate">{u.fullName}</span>
-                              {u.id === currentUser.id && <Check className="w-3.5 h-3.5 text-indigo-600 shrink-0" />}
-                            </button>
-                          ))}
+                        <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
+                          {availableUsers.map((u: any) => {
+                            const isReal = u.isReal || u.id.startsWith('usr_17') || u.id.includes('allen_006') || u.id.includes('allen_004');
+                            return (
+                              <button
+                                key={u.id}
+                                onClick={() => {
+                                  onSwitchUser(u.id);
+                                  setShowUserMenu(false);
+                                }}
+                                className={`w-full flex items-center justify-between text-left px-2 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                                  u.id === currentUser.id
+                                    ? 'bg-indigo-50 text-indigo-700 font-bold'
+                                    : 'text-slate-600 hover:bg-slate-50'
+                                }`}
+                              >
+                                <div className="truncate flex items-center gap-1.5">
+                                  <span className="truncate">{u.fullName}</span>
+                                  {isReal && (
+                                    <span className="text-[9px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1 rounded shrink-0">
+                                      Real
+                                    </span>
+                                  )}
+                                </div>
+                                {u.id === currentUser.id && <Check className="w-3.5 h-3.5 text-indigo-600 shrink-0 ml-1.5" />}
+                              </button>
+                            );
+                          })}
                         </div>
                       </div>
 
