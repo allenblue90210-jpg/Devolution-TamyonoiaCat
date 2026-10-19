@@ -149,22 +149,8 @@ export const EvidenceCenter: React.FC<EvidenceCenterProps> = ({
 
         <div className="flex flex-wrap items-center gap-3">
           <button
-            onClick={onOpenPhoneModal}
-            className="px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-1.5"
-          >
-            <Phone className="w-3.5 h-3.5" />
-            <span>Verify Phone (OTP)</span>
-          </button>
-          <button
-            onClick={onOpenIdentityModal}
-            className="px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-1.5"
-          >
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Identity Provider Check</span>
-          </button>
-          <button
             onClick={() => setShowAddModal(true)}
-            className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex items-center gap-1.5 shadow-xs"
+            className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Attach Evidence</span>
