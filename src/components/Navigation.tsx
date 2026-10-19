@@ -57,6 +57,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showGitMenu, setShowGitMenu] = useState(false);
+  const [showMoreNav, setShowMoreNav] = useState(false);
   const [gitStatus, setGitStatus] = useState<any>(null);
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
