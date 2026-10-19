@@ -629,7 +629,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                     )}
                     <span
                       className="absolute -bottom-0.5 -right-0.5 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"
-                      title="Verified Identity"
+                      title="Active Profile"
                     />
                   </div>
 
@@ -678,7 +678,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                             <div className="text-[11px] text-slate-500 font-mono truncate">@{currentUser.username}</div>
                             <div className="mt-0.5 flex items-center gap-1.5 text-[10px] text-emerald-700 font-semibold">
                               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                              <span>{currentUser.identityStatus === 'verified' ? 'Identity Attested' : 'Unverified'}</span>
+                              <span>Verified Account</span>
                             </div>
                           </div>
                         </div>
