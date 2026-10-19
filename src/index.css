@@ -6,10 +6,13 @@
     --font-mono: 'JetBrains Mono', monospace;
   }
 
+  html,
   body {
     font-family: var(--font-sans);
     color: #0f172a;
     background-color: #f8fafc;
+    overflow-x: hidden;
+    max-width: 100vw;
   }
 }
 
