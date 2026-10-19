@@ -271,6 +271,14 @@ export async function testSupabaseConnection(): Promise<{
     };
   }
 
+  const { key } = getResolvedSupabaseConfig();
+  if (!key) {
+    return {
+      success: false,
+      message: `Supabase Project linked (${url}). Please enter your API Key (service_role or anon key) from Supabase Dashboard > Project Settings > API to enable live database sync.`,
+    };
+  }
+
   if (!client) {
     return {
       success: false,
