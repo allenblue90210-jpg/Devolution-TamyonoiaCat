@@ -113,32 +113,43 @@ export default function App() {
   const refreshData = async () => {
     try {
       const [userRes, usersListRes] = await Promise.all([
-        api.getCurrentUser(),
-        api.getUsersList(),
+        api.getCurrentUser().catch((err) => {
+          console.warn('Notice loading current user profile:', err.message);
+          return { user: null };
+        }),
+        api.getUsersList().catch((err) => {
+          console.warn('Notice loading users list:', err.message);
+          return { users: [] };
+        }),
       ]);
 
-      setCurrentUser(userRes.user);
-      setAvailableUsers(usersListRes.users);
+      if (userRes && userRes.user) {
+        setCurrentUser(userRes.user);
+      }
+      if (usersListRes && usersListRes.users) {
+        setAvailableUsers(usersListRes.users);
+      }
 
-      if (userRes.user) {
+      const activeUserId = userRes?.user?.id || currentUser?.id;
+      if (activeUserId) {
         const [eviRes, relRes, recRes, refRes, notifRes, repRes] = await Promise.all([
-          api.getEvidence(),
-          api.getRelationships(),
-          api.getReceipts(),
-          api.getReferences(),
-          api.getNotifications(),
-          api.getReputation(userRes.user.id),
+          api.getEvidence().catch(() => ({ evidence: [] })),
+          api.getRelationships().catch(() => ({ relationships: [] })),
+          api.getReceipts().catch(() => ({ receipts: [] })),
+          api.getReferences().catch(() => ({ references: [] })),
+          api.getNotifications().catch(() => ({ notifications: [] })),
+          api.getReputation(activeUserId).catch(() => ({ breakdown: null })),
         ]);
 
-        setEvidence(eviRes.evidence);
-        setRelationships(relRes.relationships);
-        setReceipts(recRes.receipts);
-        setReferences(refRes.references);
-        setNotifications(notifRes.notifications);
-        setReputation(repRes.breakdown);
+        if (eviRes?.evidence) setEvidence(eviRes.evidence);
+        if (relRes?.relationships) setRelationships(relRes.relationships);
+        if (recRes?.receipts) setReceipts(recRes.receipts);
+        if (refRes?.references) setReferences(refRes.references);
+        if (notifRes?.notifications) setNotifications(notifRes.notifications);
+        if (repRes?.breakdown) setReputation(repRes.breakdown);
       }
     } catch (err) {
-      console.error('Error refreshing platform data:', err);
+      console.warn('Notice refreshing platform data:', err);
     } finally {
       setLoading(false);
     }
