@@ -197,31 +197,7 @@ app.post('/api/auth/signup', async (req: Request, res: Response) => {
   } catch (syncErr: any) {
     console.warn('[Supabase Real User Sync Notice]:', syncErr.message);
   }
-    category: category || 'General Professional',
-    country: country || 'Nigeria',
-    city: city || 'Lagos',
-    phone: phone || '',
-    phoneVerified: false,
-    emailVerified: false,
-    identityStatus: 'unverified',
-    identityMethod: 'None submitted',
-    identityVerifiedAt: null,
-    businessVerificationStatus: accountType === 'business' ? 'unverified' : 'unverified',
-    businessName: businessName || undefined,
-    businessRegNumber: undefined,
-    privacySettings: {
-      showRelationshipCounts: true,
-      showCategoryBreakdown: true,
-      showPublicEndorsers: true,
-      showTrustReceipts: true,
-      showCredentials: true,
-      showLocationCityOnly: true,
-      allowDirectVerificationRequests: true,
-    },
-    createdAt: new Date().toISOString(),
-  };
 
-  db.createUser(newUser);
 
   // If business, create initial business entity
   if (newUser.accountType === 'business' && businessName) {
