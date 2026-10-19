@@ -69,6 +69,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [verifyingIdentity, setVerifyingIdentity] = React.useState(false);
   const [verifyMessage, setVerifyMessage] = React.useState<string | null>(null);
 
+  const handleQuickVerifyIdentity = async () => {
+    setVerifyingIdentity(true);
+    setVerifyMessage(null);
+    try {
+      const res = await api.quickVerifyIdentity();
+      setVerifyMessage(res.message || 'Identity successfully attested (+25 Trust Points)!');
+      if (onRefreshData) {
+        await onRefreshData();
+      }
+    } catch (err: any) {
+      setVerifyMessage(err.message || 'Verification attempt failed.');
+    } finally {
+      setVerifyingIdentity(false);
+    }
+  };
+
   const confirmedRelationships = relationships.filter((r) => r.status === 'confirmed');
   const pendingRelationships = relationships.filter((r) => r.status === 'pending');
   const confirmedEndorsements = confirmedRelationships.filter((r) => r.hasEndorsement);
@@ -211,6 +227,81 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Recently Registered Account Activation Banner */}
+      {(user.identityStatus === 'unverified' || evidence.length === 0 || (reputation?.trustScore ?? 0) < 50) && (
+        <div className="bg-gradient-to-r from-emerald-50 via-teal-50 to-white rounded-xl border border-emerald-200 p-5 shadow-xs space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center shadow-xs shrink-0">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">
+                  New Account Trust Activation
+                </h3>
+                <p className="text-xs text-slate-600">
+                  Your profile is live in the public ledger and synchronized with Supabase. Complete these quick steps to boost your verified score from baseline to 80+:
+                </p>
+              </div>
+            </div>
+
+            {user.identityStatus === 'unverified' && (
+              <button
+                type="button"
+                onClick={handleQuickVerifyIdentity}
+                disabled={verifyingIdentity}
+                className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-lg shadow-xs transition-colors flex items-center justify-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                <span>{verifyingIdentity ? 'Attesting ID...' : 'Attest Real Identity (+25 Pts)'}</span>
+              </button>
+            )}
+          </div>
+
+          {verifyMessage && (
+            <div className="p-2.5 bg-emerald-100/70 border border-emerald-300 text-emerald-900 text-xs rounded-lg font-medium flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+              <span>{verifyMessage}</span>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-xs">
+            <div
+              onClick={() => onNavigateTab('evidence')}
+              className="bg-white p-3 rounded-lg border border-emerald-200/80 hover:border-emerald-400 hover:shadow-2xs transition-all cursor-pointer space-y-1"
+            >
+              <div className="flex items-center justify-between font-semibold text-slate-900 text-xs">
+                <span>1. Attach Credentials</span>
+                <span className="text-[10px] text-emerald-700 font-bold bg-emerald-100 px-1.5 py-0.2 rounded">+20 Pts</span>
+              </div>
+              <p className="text-[11px] text-slate-500">Upload degree, license, or CAC registration proof.</p>
+            </div>
+
+            <div
+              onClick={onOpenInviteModal}
+              className="bg-white p-3 rounded-lg border border-emerald-200/80 hover:border-emerald-400 hover:shadow-2xs transition-all cursor-pointer space-y-1"
+            >
+              <div className="flex items-center justify-between font-semibold text-slate-900 text-xs">
+                <span>2. Confirm Real Relationships</span>
+                <span className="text-[10px] text-emerald-700 font-bold bg-emerald-100 px-1.5 py-0.2 rounded">+20 Pts</span>
+              </div>
+              <p className="text-[11px] text-slate-500">Invite a real colleague, friend, or partner to attest.</p>
+            </div>
+
+            <div
+              onClick={onOpenNewReceiptModal}
+              className="bg-white p-3 rounded-lg border border-emerald-200/80 hover:border-emerald-400 hover:shadow-2xs transition-all cursor-pointer space-y-1"
+            >
+              <div className="flex items-center justify-between font-semibold text-slate-900 text-xs">
+                <span>3. Issue First Trust Receipt</span>
+                <span className="text-[10px] text-emerald-700 font-bold bg-emerald-100 px-1.5 py-0.2 rounded">+15 Pts</span>
+              </div>
+              <p className="text-[11px] text-slate-500">Document a delivery, contract, or completed transaction.</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Trust Score & Time-Locked Commitment Alert Banner */}
       <div
