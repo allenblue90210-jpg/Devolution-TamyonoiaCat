@@ -123,6 +123,36 @@
         "allowDirectVerificationRequests": true
       },
       "createdAt": "2026-10-19T12:38:46.573Z"
+    },
+    {
+      "id": "usr_1792419058259_ehg5",
+      "email": "allenkinetic001@gmail.com",
+      "username": "lola",
+      "fullName": "Lola",
+      "accountType": "personal",
+      "avatarUrl": "",
+      "headline": "Computerist",
+      "bio": "",
+      "category": "Computerist",
+      "country": "Nigeria",
+      "city": "Lagos",
+      "phone": "+234 ",
+      "phoneVerified": false,
+      "emailVerified": false,
+      "identityStatus": "unverified",
+      "identityMethod": "None submitted",
+      "identityVerifiedAt": null,
+      "businessVerificationStatus": "unverified",
+      "privacySettings": {
+        "showRelationshipCounts": true,
+        "showCategoryBreakdown": true,
+        "showPublicEndorsers": true,
+        "showTrustReceipts": true,
+        "showCredentials": true,
+        "showLocationCityOnly": true,
+        "allowDirectVerificationRequests": true
+      },
+      "createdAt": "2026-10-19T14:10:58.259Z"
     }
   ],
   "evidence": [
