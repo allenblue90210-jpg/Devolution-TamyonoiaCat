@@ -129,6 +129,43 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         )}
 
+        {/* Active Session & Log Out Banner */}
+        {currentUser && onLogout && mode === 'signin' && (
+          <div className="p-3 bg-indigo-50/70 border border-indigo-200/80 rounded-xl flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              {currentUser.avatarUrl ? (
+                <img
+                  src={currentUser.avatarUrl}
+                  alt={currentUser.fullName}
+                  className="w-8 h-8 rounded-full object-cover shrink-0"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-xs shrink-0">
+                  {currentUser.fullName.charAt(0)}
+                </div>
+              )}
+              <div className="truncate">
+                <div className="text-[10px] text-indigo-700 font-semibold uppercase tracking-wider">
+                  Active Session:
+                </div>
+                <div className="font-bold text-slate-900 truncate">{currentUser.fullName}</div>
+                <div className="text-[10px] text-slate-500 font-mono">@{currentUser.username}</div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                onLogout();
+                onClose();
+              }}
+              className="px-3 py-1.5 bg-white hover:bg-red-50 text-red-600 hover:text-red-700 border border-red-200 rounded-lg font-semibold text-xs flex items-center gap-1.5 shadow-2xs transition-colors shrink-0 cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5 text-red-500" />
+              <span>Log Out</span>
+            </button>
+          </div>
+        )}
+
         {/* Quick Sandbox Persona Switcher */}
         {mode === 'signin' && (
           <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2 text-xs">
@@ -141,17 +178,43 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   key={u.id}
                   type="button"
                   onClick={() => handleQuickSwitch(u.id)}
-                  className="w-full text-left p-2 rounded bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 transition-colors flex items-center justify-between"
+                  className={`w-full text-left p-2 rounded border transition-colors flex items-center justify-between ${
+                    currentUser?.id === u.id
+                      ? 'bg-indigo-50/80 border-indigo-300 text-indigo-950 font-bold'
+                      : 'bg-white hover:bg-indigo-50 border-slate-200 hover:border-indigo-200'
+                  }`}
                 >
                   <div className="truncate">
                     <span className="font-bold text-slate-900">{u.fullName}</span>
                     <span className="text-slate-500 font-mono text-[11px] ml-1.5">(@{u.username})</span>
+                    {currentUser?.id === u.id && (
+                      <span className="ml-2 text-[10px] font-bold text-indigo-600 bg-indigo-100 px-1.5 py-0.5 rounded">
+                        Active
+                      </span>
+                    )}
                   </div>
                   <span className="text-[10px] text-indigo-700 font-mono capitalize shrink-0 ml-2">
                     {u.accountType}
                   </span>
                 </button>
               ))}
+
+              {currentUser && onLogout && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onLogout();
+                    onClose();
+                  }}
+                  className="w-full text-left p-2 rounded bg-white hover:bg-red-50 border border-dashed border-slate-300 hover:border-red-300 text-slate-600 hover:text-red-700 transition-colors flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <LogOut className="w-3.5 h-3.5 text-slate-400 group-hover:text-red-500" />
+                    <span className="font-semibold text-xs">Log Out (Continue as Guest)</span>
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-mono">Public View</span>
+                </button>
+              )}
             </div>
           </div>
         )}
