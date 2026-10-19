@@ -103,9 +103,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto p-3 sm:p-6 bg-slate-900/60 backdrop-blur-xs flex min-h-full items-center justify-center">
-      <div className="relative bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl p-5 sm:p-6 space-y-5 my-auto max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3.5rem)] overflow-y-auto overscroll-contain animate-in fade-in zoom-in-95 duration-150">
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-[100] overflow-y-auto bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-150"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="relative z-10 bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl p-5 sm:p-6 space-y-5 my-auto max-h-[calc(100vh-2rem)] overflow-y-auto overscroll-contain animate-in zoom-in-95 duration-150">
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div>
             <div className="text-xs font-semibold uppercase tracking-wider text-indigo-700">
@@ -117,7 +132,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               {mode === 'reset' && 'Account Recovery'}
             </h3>
           </div>
-          <button onClick={onClose} className="p-1 rounded text-slate-400 hover:text-slate-700">
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+            aria-label="Close modal"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
