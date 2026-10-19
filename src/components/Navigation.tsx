@@ -448,6 +448,28 @@ export const Navigation: React.FC<NavigationProps> = ({
               )}
             </div>
 
+            {/* Global Ledger / World Screen Icon */}
+            <button
+              onClick={() => {
+                if (onOpenPublicLedger) onOpenPublicLedger();
+                else onSelectTab('public-ledger');
+              }}
+              className={`relative px-2.5 py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer group shadow-2xs shrink-0 ${
+                currentTab === 'public-ledger'
+                  ? 'text-indigo-700 bg-indigo-100 border border-indigo-300'
+                  : 'text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80'
+              }`}
+              title="World Screen: Browse Verified People, Public Commitments & Trust Receipts"
+              aria-label="World Screen - Verified People & Public Ledger"
+            >
+              <Globe className="w-4 h-4 text-indigo-600 group-hover:scale-110 transition-transform" />
+              <span className="hidden sm:inline text-xs font-bold text-indigo-900">People & Ledger</span>
+              <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
+              </span>
+            </button>
+
             {/* 2. Search People Icon */}
             <button
               onClick={onOpenSearch}
