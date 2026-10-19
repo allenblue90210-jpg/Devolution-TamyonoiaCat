@@ -160,12 +160,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
             {onOpenAvatarUpload && (
               <button
                 onClick={onOpenAvatarUpload}
-                className="px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-all flex items-center gap-1.5 shadow-2xs hover:shadow-xs cursor-pointer group"
-                title="Create with camera, generate custom avatar, or upload photo"
+                className="px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-lg transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                title="Upload profile picture"
               >
-                <Camera className="w-3.5 h-3.5 text-indigo-200 group-hover:text-white" />
-                <span>Create & Upload Photo</span>
-                <Sparkles className="w-3 h-3 text-amber-300" />
+                <Camera className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Upload Photo</span>
               </button>
             )}
             <button
