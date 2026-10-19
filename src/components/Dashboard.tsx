@@ -97,22 +97,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* Header Profile Banner */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-start sm:items-center gap-4">
-            {user.avatarUrl ? (
-              <img
-                src={user.avatarUrl}
-                alt={user.fullName}
-                referrerPolicy="no-referrer"
-                className="w-16 h-16 rounded-full object-cover border border-slate-200"
-              />
-            ) : (
-              <div className="w-16 h-16 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-xl border border-slate-200">
-                {user.fullName.charAt(0)}
-              </div>
-            )}
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold text-slate-900">{user.fullName}</h1>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-bold text-slate-900">{user.fullName}</h1>
                 {user.identityStatus === 'verified' ? (
                   <span className="inline-flex items-center gap-1 text-xs text-emerald-700 font-medium">
                     <ShieldCheck className="w-4 h-4 text-emerald-600" />
