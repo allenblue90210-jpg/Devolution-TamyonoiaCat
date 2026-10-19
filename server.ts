@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { db } from './server/db.js';
@@ -13,6 +14,7 @@ import {
   syncToSupabase,
   pullFromSupabase,
   getResolvedSupabaseConfig,
+  syncUserToSupabase,
 } from './server/supabase.js';
 import {
   User,
@@ -38,17 +40,56 @@ const PORT = 3000;
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
-// Session helper: in this full-stack environment, we track active user by header 'x-user-id'
-// or default to the primary seeded user 'usr_allen_001'. If header is 'guest' or 'none', user is logged out.
+// Ensure user for allenkinetic004@gmail.com exists for immediate accessibility
+(function ensurePrimaryUser() {
+  const existing = db.getUserByEmail('allenkinetic004@gmail.com');
+  if (!existing) {
+    const primaryUser: User = {
+      id: 'usr_allen_004',
+      email: 'allenkinetic004@gmail.com',
+      username: 'allenkinetic004',
+      fullName: 'Allen Kinetic',
+      accountType: 'personal',
+      avatarUrl: '/src/assets/images/avatar_founder_1792334631930.jpg',
+      headline: 'Devolution Network Architect & Verified Trustee',
+      bio: 'Verified digital reputation and evidence-based relationship anchor on Devolution network.',
+      category: 'Software Engineering',
+      country: 'Nigeria',
+      city: 'Lagos',
+      phone: '+234 803 000 0004',
+      phoneVerified: true,
+      emailVerified: true,
+      identityStatus: 'verified',
+      identityMethod: 'Government ID & Biometric Verification',
+      identityVerifiedAt: new Date().toISOString(),
+      businessVerificationStatus: 'unverified',
+      privacySettings: {
+        showRelationshipCounts: true,
+        showCategoryBreakdown: true,
+        showPublicEndorsers: true,
+        showTrustReceipts: true,
+        showCredentials: true,
+        showLocationCityOnly: true,
+        allowDirectVerificationRequests: true,
+      },
+      createdAt: new Date().toISOString(),
+    };
+    db.createUser(primaryUser);
+    syncUserToSupabase(primaryUser).catch(() => {});
+  }
+})();
+
+// Session helper: in this full-stack environment, we track active user by header 'x-user-id'.
+// If header is missing or 'guest', the user is unauthenticated so visitors can explore or register fresh.
 function getSessionUserId(req: Request): string {
   const headerUserId = req.headers['x-user-id'] as string;
-  if (headerUserId === 'guest' || headerUserId === 'none' || headerUserId === 'null') {
+  if (!headerUserId || headerUserId === 'guest' || headerUserId === 'none' || headerUserId === 'null') {
     return '';
   }
-  if (headerUserId && db.getUserById(headerUserId)) {
+  if (db.getUserById(headerUserId)) {
     return headerUserId;
   }
-  return headerUserId ? '' : 'usr_allen_001';
+  return '';
 }
 
 /* ==========================================================================
@@ -72,7 +113,7 @@ app.post('/api/auth/logout', (_req: Request, res: Response) => {
 });
 
 app.post('/api/auth/signin', (req: Request, res: Response) => {
-  const { login, targetUserId } = req.body;
+  const { login, password, targetUserId } = req.body;
   if (targetUserId) {
     const user = db.getUserById(targetUserId);
     if (user) return res.json({ user, message: 'Switched session profile' });
@@ -84,11 +125,24 @@ app.post('/api/auth/signin', (req: Request, res: Response) => {
   if (!user) {
     return res.status(401).json({ error: 'Invalid credentials. User not found.' });
   }
+
+  // Password verification
+  if (user.passwordHash && password) {
+    const inputHash = crypto.createHash('sha256').update(password).digest('hex');
+    if (user.passwordHash !== inputHash) {
+      return res.status(401).json({ error: 'Incorrect password. Please try again.' });
+    }
+  } else if (!user.passwordHash && password) {
+    // Set password on first signin for existing/demo accounts
+    const initialHash = crypto.createHash('sha256').update(password).digest('hex');
+    db.updateUser(user.id, { passwordHash: initialHash });
+  }
+
   res.json({ user, message: 'Authentication successful' });
 });
 
-app.post('/api/auth/signup', (req: Request, res: Response) => {
-  const { fullName, username, email, accountType, businessName, category, country, city, phone } = req.body;
+app.post('/api/auth/signup', async (req: Request, res: Response) => {
+  const { fullName, username, email, password, accountType, businessName, category, country, city, phone } = req.body;
   if (!fullName || !username || !email) {
     return res.status(400).json({ error: 'Full name, username, and email are required.' });
   }
@@ -99,6 +153,8 @@ app.post('/api/auth/signup', (req: Request, res: Response) => {
     return res.status(409).json({ error: 'Email address is already registered.' });
   }
 
+  const passwordHash = password ? crypto.createHash('sha256').update(password).digest('hex') : undefined;
+
   const newUser: User = {
     id: `usr_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
     email,
@@ -108,6 +164,39 @@ app.post('/api/auth/signup', (req: Request, res: Response) => {
     avatarUrl: '',
     headline: accountType === 'business' ? `${businessName || fullName} — Verified Business` : `${category || 'Independent Professional'}`,
     bio: '',
+    category: category || 'General Professional',
+    country: country || 'Nigeria',
+    city: city || 'Lagos',
+    phone: phone || '',
+    phoneVerified: false,
+    emailVerified: false,
+    identityStatus: 'unverified',
+    identityMethod: 'None submitted',
+    identityVerifiedAt: null,
+    businessVerificationStatus: accountType === 'business' ? 'unverified' : 'unverified',
+    businessName: businessName || undefined,
+    businessRegNumber: undefined,
+    passwordHash,
+    privacySettings: {
+      showRelationshipCounts: true,
+      showCategoryBreakdown: true,
+      showPublicEndorsers: true,
+      showTrustReceipts: true,
+      showCredentials: true,
+      showLocationCityOnly: true,
+      allowDirectVerificationRequests: true,
+    },
+    createdAt: new Date().toISOString(),
+  };
+
+  db.createUser(newUser);
+
+  // Directly sync real user into Supabase if connected
+  try {
+    await syncUserToSupabase(newUser);
+  } catch (syncErr: any) {
+    console.warn('[Supabase Real User Sync Notice]:', syncErr.message);
+  }
     category: category || 'General Professional',
     country: country || 'Nigeria',
     city: city || 'Lagos',
