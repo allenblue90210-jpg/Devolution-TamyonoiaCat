@@ -93,6 +93,36 @@
         "allowDirectVerificationRequests": true
       },
       "createdAt": "2024-06-01T10:00:00.000Z"
+    },
+    {
+      "id": "usr_1792413526573_1z1j",
+      "email": "manbirdglobal@gmail.com",
+      "username": "allen",
+      "fullName": "Allen",
+      "accountType": "personal",
+      "avatarUrl": "",
+      "headline": "Software Engineering",
+      "bio": "",
+      "category": "Software Engineering",
+      "country": "Nigeria",
+      "city": "Lagos",
+      "phone": "+234 ",
+      "phoneVerified": false,
+      "emailVerified": false,
+      "identityStatus": "unverified",
+      "identityMethod": "None submitted",
+      "identityVerifiedAt": null,
+      "businessVerificationStatus": "unverified",
+      "privacySettings": {
+        "showRelationshipCounts": true,
+        "showCategoryBreakdown": true,
+        "showPublicEndorsers": true,
+        "showTrustReceipts": true,
+        "showCredentials": true,
+        "showLocationCityOnly": true,
+        "allowDirectVerificationRequests": true
+      },
+      "createdAt": "2026-10-19T12:38:46.573Z"
     }
   ],
   "evidence": [
