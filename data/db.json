@@ -246,6 +246,37 @@
         "allowDirectVerificationRequests": true
       },
       "createdAt": "2026-10-19T14:23:43.535Z"
+    },
+    {
+      "id": "usr_1792420513401_xwuy",
+      "email": "allenkinetic005@gmail.com",
+      "username": "tami",
+      "fullName": "TAMIYONOIA",
+      "accountType": "personal",
+      "avatarUrl": "",
+      "headline": "Software Engineering",
+      "bio": "",
+      "category": "Software Engineering",
+      "country": "Nigeria",
+      "city": "Lagos",
+      "phone": "+234 ",
+      "phoneVerified": false,
+      "emailVerified": false,
+      "identityStatus": "unverified",
+      "identityMethod": "None submitted",
+      "identityVerifiedAt": null,
+      "businessVerificationStatus": "unverified",
+      "passwordHash": "1880c0255fe729d7cc0d2cfc4644f98cb6a3225dd0c4216bc07bb4b5b0fc92f1",
+      "privacySettings": {
+        "showRelationshipCounts": true,
+        "showCategoryBreakdown": true,
+        "showPublicEndorsers": true,
+        "showTrustReceipts": true,
+        "showCredentials": true,
+        "showLocationCityOnly": true,
+        "allowDirectVerificationRequests": true
+      },
+      "createdAt": "2026-10-19T14:35:13.401Z"
     }
   ],
   "evidence": [
