@@ -199,6 +199,26 @@ app.post('/api/user/upload-avatar', (req: Request, res: Response) => {
     return res.status(404).json({ error: 'User not found.' });
   }
 
+  // Cross-propagate avatar update to live commitments and activity records
+  const state = db.getState();
+  if (state.commitments) {
+    for (const c of state.commitments) {
+      if (c.requesterId === userId) c.requesterAvatar = avatarUrl;
+      if (c.committerId === userId) c.committerAvatar = avatarUrl;
+    }
+  }
+  if (state.rememberRecords) {
+    for (const r of state.rememberRecords) {
+      if (r.authorId === userId) r.authorAvatar = avatarUrl;
+    }
+  }
+  if (state.goodFaithRatings) {
+    for (const g of state.goodFaithRatings) {
+      if (g.authorId === userId) g.authorAvatar = avatarUrl;
+    }
+  }
+  db.persist();
+
   res.json({ success: true, user: updated, message: 'Profile picture updated successfully.' });
 });
 
