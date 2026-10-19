@@ -551,17 +551,30 @@ export const Navigation: React.FC<NavigationProps> = ({
                       </div>
                     </div>
 
-                    <div className="border-t border-slate-100 pt-1 mt-1">
+                    <div className="border-t border-slate-100 pt-1 mt-1 space-y-0.5">
                       <button
                         onClick={() => {
                           setShowUserMenu(false);
                           onOpenAuth();
                         }}
-                        className="w-full flex items-center gap-2 px-4 py-2 text-xs text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
+                        className="w-full flex items-center gap-2 px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
                       >
-                        <LogOut className="w-3.5 h-3.5" />
+                        <UserCheck className="w-3.5 h-3.5 text-indigo-600" />
                         <span>Switch Account / Sign In</span>
                       </button>
+
+                      {onLogout && (
+                        <button
+                          onClick={() => {
+                            setShowUserMenu(false);
+                            onLogout();
+                          }}
+                          className="w-full flex items-center gap-2 px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer border-t border-slate-100"
+                        >
+                          <LogOut className="w-3.5 h-3.5 text-red-500" />
+                          <span>Log Out</span>
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}
@@ -569,9 +582,21 @@ export const Navigation: React.FC<NavigationProps> = ({
             ) : (
               <button
                 onClick={onOpenAuth}
-                className="px-3.5 py-1.5 text-xs font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap shrink-0 shadow-xs cursor-pointer"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap shrink-0 shadow-xs cursor-pointer"
               >
-                Sign In
+                <LogIn className="w-3.5 h-3.5" />
+                <span>Sign In</span>
+              </button>
+            )}
+
+            {currentUser && onLogout && (
+              <button
+                onClick={onLogout}
+                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:border-red-200 hover:bg-red-50 text-slate-600 hover:text-red-600 text-xs font-medium transition-colors cursor-pointer"
+                title="Log Out of active session"
+              >
+                <LogOut className="w-3.5 h-3.5 text-slate-400 group-hover:text-red-500" />
+                <span className="hidden xl:inline">Log Out</span>
               </button>
             )}
           </div>

@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
 import { api } from '../services/api.js';
 import { User, AccountType } from '../types/trust.js';
-import { ShieldCheck, X, CheckCircle2, AlertCircle, Building2, User as UserIcon } from 'lucide-react';
+import { ShieldCheck, X, CheckCircle2, AlertCircle, Building2, User as UserIcon, LogOut } from 'lucide-react';
 
 interface AuthModalProps {
   onClose: () => void;
   onSuccess: (user: User) => void;
   availableUsers: Array<{ id: string; username: string; fullName: string; accountType: string; avatarUrl: string }>;
+  currentUser?: User | null;
+  onLogout?: () => void;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
   onClose,
   onSuccess,
   availableUsers,
+  currentUser,
+  onLogout,
 }) => {
   const [mode, setMode] = useState<'signin' | 'signup' | 'reset'>('signin');
   const [login, setLogin] = useState('');
