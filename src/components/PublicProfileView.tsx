@@ -204,7 +204,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
                 {user.identityStatus === 'verified' && (
                   <span className="inline-flex items-center gap-1 text-xs text-emerald-700 font-semibold bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-200">
                     <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                    <span>Identity Attested</span>
+                    <span>Verified Member</span>
                   </span>
                 )}
                 {user.businessVerificationStatus === 'verified' && (
