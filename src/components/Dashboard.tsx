@@ -131,15 +131,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
               {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{copiedLink ? 'Link Copied' : 'Share Public Link'}</span>
             </button>
-            {onOpenPublicLedger && (
-              <button
-                onClick={onOpenPublicLedger}
-                className="px-3.5 py-2 text-xs font-semibold text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-all flex items-center gap-1.5 shadow-2xs"
-              >
-                <Globe className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Open Public Ledger</span>
-              </button>
-            )}
             <button
               onClick={() => onNavigateTab(`profile-${user.username}`)}
               className="px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex items-center gap-1.5 shadow-xs"
