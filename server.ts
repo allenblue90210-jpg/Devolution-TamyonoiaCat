@@ -1761,18 +1761,23 @@ let lastSyncMessage: string | null = 'Repository synced';
 let isGitInitializing = false;
 
 function getResolvedGitHubToken(): string | null {
-  let token = process.env.GITHUB_TOKEN?.trim();
-  if (token) return token;
-
   const tokenFile = path.resolve(process.cwd(), '.github_token');
   if (fs.existsSync(tokenFile)) {
     try {
-      token = fs.readFileSync(tokenFile, 'utf-8').trim();
-      if (token) return token;
+      const fileToken = fs.readFileSync(tokenFile, 'utf-8').trim();
+      if (fileToken && (fileToken.startsWith('ghp_') || fileToken.startsWith('github_pat_') || fileToken.length >= 20)) {
+        return fileToken;
+      }
     } catch {
       // ignore
     }
   }
+
+  const envToken = process.env.GITHUB_TOKEN?.trim();
+  if (envToken && (envToken.startsWith('ghp_') || envToken.startsWith('github_pat_') || envToken.length >= 20)) {
+    return envToken;
+  }
+
   return null;
 }
 
