@@ -306,15 +306,88 @@ export default function App() {
             onOpenNewReceiptModal={() => handleSelectTab('receipts')}
             onOpenPublicLedger={() => handleSelectTab('public-ledger')}
           />
+  const renderSignInPrompt = (tabName: string, description: string) => (
+    <div className="max-w-md mx-auto my-16 p-8 bg-white rounded-2xl border border-slate-200 shadow-xs text-center space-y-4">
+      <div className="w-12 h-12 mx-auto rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
+        <ShieldCheck className="w-6 h-6" />
+      </div>
+      <div className="space-y-1">
+        <h3 className="text-base font-bold text-slate-900">Sign in to access {tabName}</h3>
+        <p className="text-xs text-slate-500 leading-relaxed">{description}</p>
+      </div>
+      <div className="pt-2 flex flex-col gap-2">
+        <button
+          onClick={() => setShowAuthModal(true)}
+          className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <LogIn className="w-4 h-4" />
+          <span>Sign In / Select Profile</span>
+        </button>
+        <button
+          onClick={() => handleSelectTab('public-ledger')}
+          className="w-full py-2 px-4 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-medium border border-slate-200 transition-colors cursor-pointer"
+        >
+          Browse Public Ledger as Guest
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderContent = () => {
+    // Check for dynamic public profile route: profile-{username}
+    if (currentTab.startsWith('profile-')) {
+      const username = currentTab.replace('profile-', '');
+      return (
+        <PublicProfileView
+          username={username}
+          currentUser={currentUser}
+          onBack={handleBack}
+          onNavigateTab={handleSelectTab}
+        />
+      );
+    }
+
+    // Check for dynamic invitation acceptance route: invite-{token}
+    if (currentTab.startsWith('invite-')) {
+      const token = currentTab.replace('invite-', '');
+      return (
+        <AcceptInviteView
+          inviteToken={token}
+          currentUser={currentUser}
+          onInviteAccepted={() => {
+            refreshData();
+            handleSelectTab('relationships');
+          }}
+          onBack={handleBack}
+        />
+      );
+    }
+
+    switch (currentTab) {
+      case 'dashboard':
+        return currentUser ? (
+          <Dashboard
+            user={currentUser}
+            evidence={evidence}
+            relationships={relationships}
+            receipts={receipts}
+            references={references}
+            notifications={notifications}
+            reputation={reputation}
+            onNavigateTab={handleSelectTab}
+            onOpenPhoneModal={() => setShowPhoneModal(true)}
+            onOpenIdentityModal={() => setShowIdentityModal(true)}
+            onOpenAddEvidence={() => handleSelectTab('evidence')}
+            onOpenInviteModal={() => handleSelectTab('relationships')}
+            onOpenNewReceiptModal={() => handleSelectTab('receipts')}
+            onOpenPublicLedger={() => handleSelectTab('public-ledger')}
+          />
         ) : (
-          <div className="py-20 text-center">
-            <button
-              onClick={() => setShowAuthModal(true)}
-              className="px-4 py-2 bg-indigo-600 text-white rounded text-xs font-semibold"
-            >
-              Sign In to View Dashboard
-            </button>
-          </div>
+          <LandingPage
+            onGetStarted={() => setShowAuthModal(true)}
+            onExploreProfile={(username) => handleSelectTab(`profile-${username}`)}
+            onNavigateTab={handleSelectTab}
+          />
         );
 
       case 'commitments':
@@ -340,7 +413,9 @@ export default function App() {
             onOpenIdentityModal={() => setShowIdentityModal(true)}
             onBack={handleBack}
           />
-        ) : null;
+        ) : (
+          renderSignInPrompt('Evidence Center', 'Manage cryptographic document attestations and registry credentials.')
+        );
 
       case 'relationships':
         return currentUser ? (
@@ -352,7 +427,9 @@ export default function App() {
             onOpenInviteFlow={(token) => handleSelectTab(`invite-${token}`)}
             onBack={handleBack}
           />
-        ) : null;
+        ) : (
+          renderSignInPrompt('Social Verification', 'Confirm real-world professional relationships and counterparty endorsements.')
+        );
 
       case 'receipts':
         return currentUser ? (
@@ -365,7 +442,9 @@ export default function App() {
             onDisputeReceipt={handleDisputeReceipt}
             onBack={handleBack}
           />
-        ) : null;
+        ) : (
+          renderSignInPrompt('Trust Receipts', 'Issue and verify dual-signed transaction settlements on the ledger.')
+        );
 
       case 'directory':
         return (
@@ -394,7 +473,9 @@ export default function App() {
             onBack={handleBack}
             onNavigateTab={handleSelectTab}
           />
-        ) : null;
+        ) : (
+          renderSignInPrompt('Reputation Engine', 'Inspect your weighted trust score breakdown, honesty index, and decay metrics.')
+        );
 
       case 'remember':
         return (
@@ -414,7 +495,9 @@ export default function App() {
             onNavigateTab={handleSelectTab}
             onBack={handleBack}
           />
-        ) : null;
+        ) : (
+          renderSignInPrompt('Business Entity Dashboard', 'Access corporate entity verification and organizational records.')
+        );
 
       case 'settings':
         return currentUser ? (
@@ -426,12 +509,14 @@ export default function App() {
             }}
             onBack={handleBack}
           />
-        ) : null;
+        ) : (
+          renderSignInPrompt('Settings', 'Configure privacy thresholds, profile attributes, and verification options.')
+        );
 
       default:
         return (
           <LandingPage
-            onGetStarted={() => handleSelectTab('dashboard')}
+            onGetStarted={() => (currentUser ? handleSelectTab('dashboard') : setShowAuthModal(true))}
             onExploreProfile={(username) => handleSelectTab(`profile-${username}`)}
             onNavigateTab={handleSelectTab}
           />
@@ -447,6 +532,7 @@ export default function App() {
         onSelectTab={handleSelectTab}
         notifications={notifications}
         onOpenAuth={() => setShowAuthModal(true)}
+        onLogout={handleLogout}
         onSwitchUser={handleSwitchUser}
         availableUsers={availableUsers}
         onOpenSearch={() => setShowSearchModal(true)}
@@ -472,6 +558,8 @@ export default function App() {
             handleSelectTab('dashboard');
           }}
           availableUsers={availableUsers}
+          currentUser={currentUser}
+          onLogout={handleLogout}
         />
       )}
 
