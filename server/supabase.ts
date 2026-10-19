@@ -357,7 +357,7 @@ export async function syncToSupabase(stateData: any): Promise<{
       }, { onConflict: 'id' });
 
     if (stateErr) {
-      if (stateErr.code === '42P01') {
+      if (stateErr.code === '42P01' || stateErr.code === 'PGRST205' || stateErr.message?.includes('schema cache')) {
         throw new Error('Table "devolution_state" does not exist yet. Please run the SQL migration schema in your Supabase SQL editor.');
       }
       throw new Error(`State upsert error: ${stateErr.message}`);
