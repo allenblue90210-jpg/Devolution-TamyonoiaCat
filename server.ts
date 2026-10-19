@@ -43,14 +43,15 @@ const PORT = 3000;
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
-// Ensure user for allenkinetic004@gmail.com exists for immediate accessibility
+// Ensure real user for allenkinetic006@gmail.com exists for immediate accessibility
 (function ensurePrimaryUser() {
-  const existing = db.getUserByEmail('allenkinetic004@gmail.com');
+  const targetEmail = 'allenkinetic006@gmail.com';
+  const existing = db.getUserByEmail(targetEmail);
   if (!existing) {
     const primaryUser: User = {
-      id: 'usr_allen_004',
-      email: 'allenkinetic004@gmail.com',
-      username: 'allenkinetic004',
+      id: 'usr_allen_006',
+      email: targetEmail,
+      username: 'allenkinetic006',
       fullName: 'Allen Kinetic',
       accountType: 'personal',
       avatarUrl: '/src/assets/images/avatar_founder_1792334631930.jpg',
@@ -59,7 +60,7 @@ app.use(express.urlencoded({ extended: true, limit: '15mb' }));
       category: 'Software Engineering',
       country: 'Nigeria',
       city: 'Lagos',
-      phone: '+234 803 000 0004',
+      phone: '+234 803 000 0006',
       phoneVerified: true,
       emailVerified: true,
       identityStatus: 'verified',
@@ -83,7 +84,7 @@ app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 })();
 
 // Session helper: in this full-stack environment, we track active user by header 'x-user-id'.
-// Defaults to real assigned user 'usr_allen_004' (allenkinetic004@gmail.com) unless explicitly guest.
+// Defaults to real assigned user 'usr_allen_006' (allenkinetic006@gmail.com) unless explicitly guest.
 function getSessionUserId(req: Request): string {
   const headerUserId = req.headers['x-user-id'] as string;
   if (headerUserId === 'guest' || headerUserId === 'none' || headerUserId === 'null') {
@@ -92,7 +93,13 @@ function getSessionUserId(req: Request): string {
   if (headerUserId && db.getUserById(headerUserId)) {
     return headerUserId;
   }
-  return 'usr_allen_004';
+  if (db.getUserById('usr_allen_006')) {
+    return 'usr_allen_006';
+  }
+  if (db.getUserById('usr_allen_004')) {
+    return 'usr_allen_004';
+  }
+  return 'usr_allen_001';
 }
 
 /* ==========================================================================
@@ -112,13 +119,13 @@ app.get('/api/auth/me', (req: Request, res: Response) => {
 });
 
 app.post('/api/auth/assign-real-user', (req: Request, res: Response) => {
-  const targetEmail = req.body.email || 'allenkinetic004@gmail.com';
+  const targetEmail = req.body.email || 'allenkinetic006@gmail.com';
   let user = db.getUserByEmail(targetEmail);
   if (!user) {
     user = {
-      id: 'usr_allen_004',
+      id: 'usr_allen_006',
       email: targetEmail,
-      username: 'allenkinetic004',
+      username: 'allenkinetic006',
       fullName: 'Allen Kinetic',
       accountType: 'personal',
       avatarUrl: '/src/assets/images/avatar_founder_1792334631930.jpg',

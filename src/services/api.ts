@@ -18,7 +18,7 @@ import {
   RememberCorroboration,
 } from '../types/trust.js';
 
-let currentSessionUserId = localStorage.getItem('aegis_session_user_id') || 'usr_allen_004';
+let currentSessionUserId = localStorage.getItem('aegis_session_user_id') || 'usr_allen_006';
 
 export function setSessionUserId(id: string) {
   currentSessionUserId = id;
