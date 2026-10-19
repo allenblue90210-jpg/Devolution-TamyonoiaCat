@@ -26,6 +26,7 @@ import {
   Building2,
   X,
   Bookmark,
+  LogIn,
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -34,6 +35,7 @@ interface NavigationProps {
   onSelectTab: (tab: string) => void;
   notifications: InAppNotification[];
   onOpenAuth: () => void;
+  onLogout?: () => void;
   onSwitchUser: (userId: string) => void;
   availableUsers: Array<{ id: string; username: string; fullName: string; accountType: string; avatarUrl: string }>;
   onOpenSearch?: () => void;
@@ -46,6 +48,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   onSelectTab,
   notifications,
   onOpenAuth,
+  onLogout,
   onSwitchUser,
   availableUsers,
   onOpenSearch,
