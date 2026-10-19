@@ -100,27 +100,26 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold text-slate-900">{user.fullName}</h1>
-                {user.identityStatus === 'verified' ? (
-                  <span className="inline-flex items-center gap-1 text-xs text-emerald-700 font-medium">
-                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                    <span>Identity Attested</span>
-                  </span>
-                ) : (
-                  <span className="text-xs text-amber-700 font-medium">Identity Unverified</span>
-                )}
-              </div>
-              <p className="text-xs text-slate-600">{user.headline}</p>
-              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 font-mono">
-                <span>@{user.username}</span>
-                <span aria-hidden="true">·</span>
-                <span>{user.city}, {user.country}</span>
-                {user.businessName && (
-                  <>
-                    <span aria-hidden="true">·</span>
-                    <span className="text-indigo-600 font-sans font-medium">{user.businessName}</span>
-                  </>
-                )}
-              </div>
+              {user.identityStatus === 'verified' ? (
+                <span className="inline-flex items-center gap-1 text-xs text-emerald-700 font-medium">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span>Identity Attested</span>
+                </span>
+              ) : (
+                <span className="text-xs text-amber-700 font-medium">Identity Unverified</span>
+              )}
+            </div>
+            <p className="text-xs text-slate-600">{user.headline}</p>
+            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 font-mono">
+              <span>@{user.username}</span>
+              <span aria-hidden="true">·</span>
+              <span>{user.city}, {user.country}</span>
+              {user.businessName && (
+                <>
+                  <span aria-hidden="true">·</span>
+                  <span className="text-indigo-600 font-sans font-medium">{user.businessName}</span>
+                </>
+              )}
             </div>
           </div>
 
