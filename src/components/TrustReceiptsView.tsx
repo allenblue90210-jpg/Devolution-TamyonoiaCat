@@ -118,6 +118,8 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!title || !counterpartyName || !completionConditions) return;
+    setSubmitting(true);
     const formattedValue = transactionValue.trim()
       ? formatTransactionCurrency(transactionValue, currencySign)
       : undefined;
@@ -322,7 +324,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                     {rc.transactionValue && (
                       <>
                         <span aria-hidden="true">·</span>
-                        <span className="font-mono font-semibold text-slate-900">{rc.transactionValue}</span>
+                        <span className="font-mono font-semibold text-slate-900">{formatTransactionCurrency(rc.transactionValue)}</span>
                       </>
                     )}
                     <span aria-hidden="true">·</span>
