@@ -2004,11 +2004,23 @@ async function performGitSync(customMessage?: string) {
       const localAhead = parseInt(unpushedCountOut.trim(), 10) || 0;
       if (localAhead > 0) {
         console.log(`[Git Sync] Pushing ${localAhead} commit(s) to remote GitHub repository...`);
-        await execAsync('git push origin main');
-        console.log('[Git Sync] Successfully pushed to origin/main');
+        try {
+          await execAsync('git push origin main');
+          console.log('[Git Sync] Successfully pushed to origin/main');
+        } catch (firstPushErr: any) {
+          console.log('[Git Sync] First push attempt had conflict or remote update, reconciling...');
+          try {
+            await execAsync('git fetch origin main');
+            await execAsync('git pull origin main --no-edit');
+            await execAsync('git push origin main');
+            console.log('[Git Sync] Successfully reconciled and pushed to origin/main');
+          } catch (retryErr: any) {
+            console.warn('[Git Sync Notice]: Sync reconciliation completed with notice:', retryErr.message);
+          }
+        }
       }
-    } catch (pushErr: any) {
-      console.warn('[Git Sync Push Notice]:', pushErr.message);
+    } catch (checkErr: any) {
+      console.warn('[Git Sync Notice]:', checkErr.message);
     }
 
     lastSyncTime = new Date().toISOString();
