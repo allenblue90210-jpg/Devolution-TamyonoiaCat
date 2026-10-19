@@ -203,14 +203,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 font-bold text-emerald-900">
                 <Database className="w-4 h-4 text-emerald-600" />
-                <span>Real User Account: allenkinetic004@gmail.com</span>
+                <span>Primary Real Account: allenkinetic006@gmail.com</span>
               </div>
               <span className="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-emerald-200">
-                Verified Real Email
+                Verified Architect
               </span>
             </div>
             <p className="text-[11px] text-emerald-700 leading-tight">
-              Assigned directly to your real verified profile, cryptographic trust ledger, and live Supabase Cloud synchronization.
+              Assigned directly to your verified real profile with cryptographic trust ledger and live Supabase Cloud synchronization.
             </p>
             <button
               type="button"
@@ -218,7 +218,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 setLoading(true);
                 setError(null);
                 try {
-                  const res = await api.assignRealUser('allenkinetic004@gmail.com');
+                  const res = await api.assignRealUser('allenkinetic006@gmail.com');
                   onSuccess(res.user);
                   onClose();
                 } catch (err: any) {
@@ -230,59 +230,104 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               className="w-full py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer"
             >
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Assign & Sign In as Real User (allenkinetic004@gmail.com)</span>
+              <span>Sign In as Primary Real User (allenkinetic006@gmail.com)</span>
             </button>
           </div>
         )}
 
-        {/* Quick Sandbox Persona Switcher */}
+        {/* Recently Registered Real Users */}
         {mode === 'signin' && (
-          <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2 text-xs">
-            <span className="font-semibold text-slate-700 block text-[11px] uppercase tracking-wider">
-              Quick Test Personas (Sandbox Switcher)
-            </span>
-            <div className="grid grid-cols-1 gap-1.5">
-              {availableUsers.map((u) => (
-                <button
-                  key={u.id}
-                  type="button"
-                  onClick={() => handleQuickSwitch(u.id)}
-                  className={`w-full text-left p-2 rounded border transition-colors flex items-center justify-between ${
-                    currentUser?.id === u.id
-                      ? 'bg-indigo-50/80 border-indigo-300 text-indigo-950 font-bold'
-                      : 'bg-white hover:bg-indigo-50 border-slate-200 hover:border-indigo-200'
-                  }`}
-                >
-                  <div className="truncate">
-                    <span className="font-bold text-slate-900">{u.fullName}</span>
-                    <span className="text-slate-500 font-mono text-[11px] ml-1.5">(@{u.username})</span>
-                    {currentUser?.id === u.id && (
-                      <span className="ml-2 text-[10px] font-bold text-indigo-600 bg-indigo-100 px-1.5 py-0.5 rounded">
-                        Active
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-[10px] text-indigo-700 font-mono capitalize shrink-0 ml-2">
-                    {u.accountType}
-                  </span>
-                </button>
-              ))}
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-slate-800 flex items-center gap-1.5 text-xs">
+                <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Recently Registered Real Accounts</span>
+              </span>
+              <span className="text-[10px] font-mono font-semibold text-slate-500 bg-slate-200/70 px-2 py-0.5 rounded-full">
+                {availableUsers.filter(u => u.isReal || u.id.startsWith('usr_17') || u.id.includes('allen_006')).length} Registered
+              </span>
+            </div>
 
-              {currentUser && onLogout && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    onLogout();
-                    onClose();
-                  }}
-                  className="w-full text-left p-2 rounded bg-white hover:bg-red-50 border border-dashed border-slate-300 hover:border-red-300 text-slate-600 hover:text-red-700 transition-colors flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-1.5">
-                    <LogOut className="w-3.5 h-3.5 text-slate-400 group-hover:text-red-500" />
-                    <span className="font-semibold text-xs">Log Out (Continue as Guest)</span>
-                  </div>
-                  <span className="text-[10px] text-slate-400 font-mono">Public View</span>
-                </button>
+            <div className="max-h-48 overflow-y-auto pr-1 space-y-1.5">
+              {availableUsers
+                .filter(u => u.isReal || u.id.startsWith('usr_17') || u.id.includes('allen_006') || u.id.includes('allen_004'))
+                .map((u) => (
+                  <button
+                    key={u.id}
+                    type="button"
+                    onClick={() => handleQuickSwitch(u.id)}
+                    className={`w-full text-left p-2.5 rounded-lg border transition-all flex items-center justify-between cursor-pointer ${
+                      currentUser?.id === u.id
+                        ? 'bg-indigo-50/90 border-indigo-300 text-indigo-950 font-bold shadow-2xs'
+                        : 'bg-white hover:bg-indigo-50/50 border-slate-200 hover:border-indigo-200 shadow-2xs'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {u.avatarUrl ? (
+                        <img src={u.avatarUrl} alt={u.fullName} className="w-7 h-7 rounded-full object-cover shrink-0 border border-slate-200" />
+                      ) : (
+                        <div className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs shrink-0">
+                          {u.fullName.charAt(0)}
+                        </div>
+                      )}
+                      <div className="truncate">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold text-slate-900 truncate">{u.fullName}</span>
+                          {currentUser?.id === u.id && (
+                            <span className="text-[9px] font-bold text-indigo-700 bg-indigo-100 px-1.5 py-0.2 rounded">
+                              Current
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[11px] text-slate-500 font-mono truncate">
+                          @{u.username} {u.email ? `· ${u.email}` : ''}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0 ml-2">
+                      <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded block">
+                        Real User
+                      </span>
+                    </div>
+                  </button>
+                ))}
+            </div>
+
+            {/* Collapsible Sandbox Personas */}
+            <div className="pt-2 border-t border-slate-200/80">
+              <button
+                type="button"
+                onClick={() => setShowDemoPersonas(!showDemoPersonas)}
+                className="w-full flex items-center justify-between text-[11px] font-semibold text-slate-500 hover:text-slate-800 transition-colors py-1 cursor-pointer"
+              >
+                <span>Sandbox Test Personas (Allen, Sarah, Fatima)</span>
+                {showDemoPersonas ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              </button>
+
+              {showDemoPersonas && (
+                <div className="mt-2 space-y-1">
+                  {availableUsers
+                    .filter(u => !u.isReal && !u.id.startsWith('usr_17') && !u.id.includes('allen_006') && !u.id.includes('allen_004'))
+                    .map((u) => (
+                      <button
+                        key={u.id}
+                        type="button"
+                        onClick={() => handleQuickSwitch(u.id)}
+                        className={`w-full text-left p-2 rounded border transition-colors flex items-center justify-between text-xs cursor-pointer ${
+                          currentUser?.id === u.id
+                            ? 'bg-indigo-50/80 border-indigo-300 font-bold'
+                            : 'bg-white hover:bg-slate-50 border-slate-200'
+                        }`}
+                      >
+                        <div className="truncate">
+                          <span className="font-medium text-slate-900">{u.fullName}</span>
+                          <span className="text-slate-500 font-mono text-[11px] ml-1.5">(@{u.username})</span>
+                        </div>
+                        <span className="text-[10px] text-slate-500 font-mono">{u.accountType}</span>
+                      </button>
+                    ))}
+                </div>
               )}
             </div>
           </div>
