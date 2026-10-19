@@ -220,6 +220,87 @@ export async function pullRegisteredUsersFromSupabase(): Promise<any[]> {
   }
 }
 
+export async function createSupabaseAuthUser(params: {
+  email: string;
+  password?: string;
+  fullName?: string;
+  username?: string;
+  accountType?: string;
+  phone?: string;
+}): Promise<{ success: boolean; user?: any; error?: string }> {
+  const { url, key } = getResolvedSupabaseConfig();
+  if (!url || !key) {
+    return { success: false, error: 'Supabase credentials not configured' };
+  }
+
+  try {
+    const payload: any = {
+      email: params.email,
+      email_confirm: true,
+      user_metadata: {
+        full_name: params.fullName || '',
+        username: params.username || '',
+        account_type: params.accountType || 'personal',
+        email_verified: true,
+      },
+    };
+    if (params.password) {
+      payload.password = params.password;
+    }
+    if (params.phone) {
+      payload.phone = params.phone;
+    }
+
+    const res = await fetch(`${url}/auth/v1/admin/users`, {
+      method: 'POST',
+      headers: {
+        'apikey': key,
+        'Authorization': `Bearer ${key}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data: any = await res.json();
+    if (!res.ok) {
+      if (
+        data?.msg?.includes('already been registered') ||
+        data?.message?.includes('already registered') ||
+        data?.error_description?.includes('already been registered')
+      ) {
+        return { success: true, user: data };
+      }
+      return { success: false, error: data?.msg || data?.message || res.statusText };
+    }
+
+    return { success: true, user: data };
+  } catch (err: any) {
+    console.warn('[Supabase Auth Admin Error]:', err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+export async function syncAllUsersToSupabaseAuth(users: any[]): Promise<number> {
+  let createdCount = 0;
+  for (const u of users) {
+    if (u.email && u.email.includes('@') && !u.email.includes('example.com')) {
+      try {
+        const res = await createSupabaseAuthUser({
+          email: u.email,
+          fullName: u.fullName,
+          username: u.username,
+          accountType: u.accountType,
+          phone: u.phone,
+        });
+        if (res.success) createdCount++;
+      } catch {
+        // Continue
+      }
+    }
+  }
+  return createdCount;
+}
+
 export async function supabaseAuthSignIn(email: string, password: string): Promise<{
   success: boolean;
   user?: any;
