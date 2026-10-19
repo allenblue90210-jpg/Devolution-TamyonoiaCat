@@ -28,6 +28,7 @@ import {
   Bookmark,
   LogIn,
   Database,
+  Camera,
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -41,6 +42,7 @@ interface NavigationProps {
   availableUsers: Array<{ id: string; username: string; fullName: string; accountType: string; avatarUrl: string }>;
   onOpenSearch?: () => void;
   onOpenPublicLedger?: () => void;
+  onOpenAvatarUpload?: () => void;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
@@ -54,6 +56,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   availableUsers,
   onOpenSearch,
   onOpenPublicLedger,
+  onOpenAvatarUpload,
 }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -708,6 +711,20 @@ export const Navigation: React.FC<NavigationProps> = ({
                             <span>Business Entity Dashboard</span>
                           </button>
                         )}
+                        <button
+                          onClick={() => {
+                            setShowUserMenu(false);
+                            if (onOpenAvatarUpload) {
+                              onOpenAvatarUpload();
+                            } else {
+                              onSelectTab('settings');
+                            }
+                          }}
+                          className="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 rounded-lg transition-colors flex items-center gap-2 cursor-pointer font-medium"
+                        >
+                          <Camera className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Change Profile Picture</span>
+                        </button>
                         <button
                           onClick={() => {
                             setShowUserMenu(false);
