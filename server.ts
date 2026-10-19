@@ -30,13 +30,16 @@ const PORT = 3000;
 app.use(express.json());
 
 // Session helper: in this full-stack environment, we track active user by header 'x-user-id'
-// or default to the primary seeded user 'usr_allen_001'.
+// or default to the primary seeded user 'usr_allen_001'. If header is 'guest' or 'none', user is logged out.
 function getSessionUserId(req: Request): string {
   const headerUserId = req.headers['x-user-id'] as string;
+  if (headerUserId === 'guest' || headerUserId === 'none' || headerUserId === 'null') {
+    return '';
+  }
   if (headerUserId && db.getUserById(headerUserId)) {
     return headerUserId;
   }
-  return 'usr_allen_001';
+  return headerUserId ? '' : 'usr_allen_001';
 }
 
 /* ==========================================================================
@@ -45,11 +48,18 @@ function getSessionUserId(req: Request): string {
 
 app.get('/api/auth/me', (req: Request, res: Response) => {
   const userId = getSessionUserId(req);
+  if (!userId) {
+    return res.json({ user: null });
+  }
   const user = db.getUserById(userId);
   if (!user) {
-    return res.status(404).json({ error: 'User not found' });
+    return res.json({ user: null });
   }
   res.json({ user });
+});
+
+app.post('/api/auth/logout', (_req: Request, res: Response) => {
+  res.json({ success: true, message: 'Logged out successfully' });
 });
 
 app.post('/api/auth/signin', (req: Request, res: Response) => {

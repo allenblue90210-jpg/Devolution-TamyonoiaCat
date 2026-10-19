@@ -25,6 +25,11 @@ export function setSessionUserId(id: string) {
   localStorage.setItem('aegis_session_user_id', id);
 }
 
+export function clearSessionUserId() {
+  currentSessionUserId = 'guest';
+  localStorage.setItem('aegis_session_user_id', 'guest');
+}
+
 export function getSessionUserId(): string {
   return currentSessionUserId;
 }
@@ -51,8 +56,12 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
 export const api = {
   // Auth
-  async getCurrentUser(): Promise<{ user: User }> {
+  async getCurrentUser(): Promise<{ user: User | null }> {
     return request('/api/auth/me');
+  },
+  async logout(): Promise<{ success: boolean; message: string }> {
+    clearSessionUserId();
+    return request('/api/auth/logout', { method: 'POST' });
   },
   async signIn(login: string, targetUserId?: string): Promise<{ user: User; message: string }> {
     const res = await request<{ user: User; message: string }>('/api/auth/signin', {
