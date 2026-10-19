@@ -18,7 +18,7 @@ import {
   RememberCorroboration,
 } from '../types/trust.js';
 
-let currentSessionUserId = localStorage.getItem('aegis_session_user_id') || '';
+let currentSessionUserId = localStorage.getItem('aegis_session_user_id') || 'usr_allen_004';
 
 export function setSessionUserId(id: string) {
   currentSessionUserId = id;
@@ -107,6 +107,28 @@ export const api = {
     });
     setSessionUserId(res.user.id);
     return res;
+  },
+  async loginWithSupabaseEmail(email: string, password?: string): Promise<{ user: User; message: string }> {
+    const res = await request<{ user: User; message: string }>('/api/auth/supabase-login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+    setSessionUserId(res.user.id);
+    return res;
+  },
+  async assignRealUser(email = 'allenkinetic004@gmail.com'): Promise<{ user: User; message: string }> {
+    const res = await request<{ user: User; message: string }>('/api/auth/assign-real-user', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+    setSessionUserId(res.user.id);
+    return res;
+  },
+  async sendMagicLink(email: string): Promise<{ success: boolean; message: string }> {
+    return request('/api/auth/send-magic-link', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
   },
   async signUp(data: Record<string, any>): Promise<{ user: User; message: string }> {
     const res = await request<{ user: User; message: string }>('/api/auth/signup', {
