@@ -948,7 +948,10 @@
       "witnessCount": 0,
       "positiveImpressions": 0,
       "hasWitnessed": false,
-      "createdAt": "2026-10-19T14:28:27.484Z"
+      "createdAt": "2026-10-19T14:28:27.484Z",
+      "comments": [],
+      "ratingPercent": 100,
+      "ratingBadge": "100% Exemplary Good Faith"
     },
     {
       "id": "TC-9482",
