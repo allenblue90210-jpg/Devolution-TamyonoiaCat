@@ -153,23 +153,26 @@ export const Navigation: React.FC<NavigationProps> = ({
   };
 
   // Complete navigation links with clean, distinct Lucide icons - Remember placed beside Reputation
-  const navLinks = [
+  const primaryNavLinks = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'commitments', label: 'Commitments', icon: Clock },
-    { id: 'evidence', label: 'Evidence Center', icon: ShieldCheck },
-    { id: 'relationships', label: 'Social Verification', icon: Users },
-    { id: 'receipts', label: 'Trust Receipts', icon: Receipt },
-    { id: 'public-ledger', label: 'People & Ledger', icon: Globe },
+    { id: 'evidence', label: 'Evidence', icon: ShieldCheck },
+    { id: 'relationships', label: 'Verification', icon: Users },
+    { id: 'receipts', label: 'Receipts', icon: Receipt },
+    { id: 'public-ledger', label: 'Ledger', icon: Globe },
+  ];
+
+  const moreNavLinks = [
     { id: 'directory', label: 'Directory', icon: Compass },
-    { id: 'reputation', label: 'Reputation Engine', icon: Sparkles },
+    { id: 'reputation', label: 'Reputation', icon: Sparkles },
     { id: 'remember', label: 'Remember', icon: Bookmark },
     ...(currentUser ? [{ id: `profile-${currentUser.username}`, label: 'My Profile', icon: UserIcon }] : []),
   ];
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xs border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xs border-b border-slate-200 w-full">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4">
           {/* Zone 1: Brand Wordmark */}
           <button
             onClick={() => onSelectTab('landing')}
@@ -178,12 +181,12 @@ export const Navigation: React.FC<NavigationProps> = ({
             <span className="w-7 h-7 rounded-md bg-indigo-600 flex items-center justify-center text-white text-sm font-bold shadow-xs">
               D
             </span>
-            <span className="font-extrabold tracking-tight">Devolution</span>
+            <span className="font-extrabold tracking-tight hidden min-[400px]:inline">Devolution</span>
           </button>
 
-          {/* Zone 2: Desktop Horizontal Navigation with Icons on every tab */}
-          <nav className="hidden lg:flex items-center gap-1 xl:gap-2 text-xs font-medium text-slate-600">
-            {navLinks.map((link) => {
+          {/* Zone 2: Desktop Horizontal Navigation */}
+          <nav className="hidden lg:flex items-center gap-1 text-xs font-medium text-slate-600">
+            {primaryNavLinks.map((link) => {
               const Icon = link.icon;
               const isActive = currentTab === link.id;
               return (
@@ -208,12 +211,55 @@ export const Navigation: React.FC<NavigationProps> = ({
                 </button>
               );
             })}
+
+            {/* More dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowMoreNav(!showMoreNav)}
+                className={`py-1.5 px-2.5 rounded-lg flex items-center gap-1 transition-colors cursor-pointer whitespace-nowrap ${
+                  moreNavLinks.some((l) => l.id === currentTab)
+                    ? 'text-indigo-600 font-bold bg-indigo-50/80 border border-indigo-200/80'
+                    : 'text-slate-600 hover:bg-slate-100/80'
+                }`}
+                title="More Navigation Sections"
+              >
+                <span>More</span>
+                <ChevronDown className={`w-3 h-3 transition-transform ${showMoreNav ? 'rotate-180' : ''}`} />
+              </button>
+
+              {showMoreNav && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowMoreNav(false)} />
+                  <div className="absolute left-0 mt-2 w-48 bg-white rounded-xl border border-slate-200 shadow-xl py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
+                    {moreNavLinks.map((link) => {
+                      const Icon = link.icon;
+                      const isActive = currentTab === link.id;
+                      return (
+                        <button
+                          key={link.id}
+                          onClick={() => {
+                            setShowMoreNav(false);
+                            onSelectTab(link.id);
+                          }}
+                          className={`w-full text-left px-3 py-2 text-xs flex items-center gap-2 transition-colors cursor-pointer ${
+                            isActive ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-700 hover:bg-slate-50'
+                          }`}
+                        >
+                          <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-indigo-600' : 'text-slate-400'}`} />
+                          <span>{link.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
           </nav>
 
           {/* Zone 3: Action Icons Cluster */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {/* 1. GitHub Continuous Sync Icon */}
-            <div className="relative">
+            <div className="relative shrink-0">
               <button
                 onClick={() => setShowGitMenu(!showGitMenu)}
                 className="flex items-center justify-center p-2 rounded-lg border border-slate-200 hover:border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer relative"
@@ -233,104 +279,88 @@ export const Navigation: React.FC<NavigationProps> = ({
               </button>
 
               {showGitMenu && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg border border-slate-200 shadow-xl py-3 px-4 z-50 text-xs space-y-3">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                    <div className="flex items-center gap-1.5 font-bold text-slate-900">
-                      <GitBranch className="w-4 h-4 text-indigo-600" />
-                      <span>GitHub Continuous Sync</span>
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowGitMenu(false)} />
+                  <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-1.5rem)] bg-white rounded-lg border border-slate-200 shadow-xl py-3 px-4 z-50 text-xs space-y-3">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <div className="flex items-center gap-1.5 font-bold text-slate-900">
+                        <GitBranch className="w-4 h-4 text-indigo-600" />
+                        <span>GitHub Continuous Sync</span>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        Active
+                      </span>
                     </div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      Active
-                    </span>
-                  </div>
 
-                  <div className="space-y-1.5 text-slate-600">
-                    <div className="flex justify-between items-center text-[11px]">
-                      <span className="text-slate-400">Repository:</span>
-                      <a
-                        href="https://github.com/allenblue90210-jpg/Devolution-TamyonoiaCat"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-indigo-600 hover:underline flex items-center gap-1 font-mono"
+                    <div className="space-y-1.5 text-slate-600">
+                      <div className="flex justify-between items-center text-[11px]">
+                        <span className="text-slate-400">Repository:</span>
+                        <a
+                          href="https://github.com/allenblue90210-jpg/Devolution-TamyonoiaCat"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-indigo-600 hover:underline flex items-center gap-1 font-mono"
+                        >
+                          Devolution-TamyonoiaCat
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                      <div className="flex justify-between items-center text-[11px]">
+                        <span className="text-slate-400">Branch:</span>
+                        <span className="font-mono text-slate-800">{gitStatus?.branch || 'main'}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-[11px]">
+                        <span className="text-slate-400">Latest Commit:</span>
+                        <span className="font-mono text-slate-800 truncate max-w-[150px]" title={gitStatus?.lastCommit?.message}>
+                          {gitStatus?.lastCommit?.hash || 'HEAD'} - {gitStatus?.lastCommit?.message || 'Latest'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-[11px]">
+                        <span className="text-slate-400">Working Tree:</span>
+                        <span className={gitStatus?.clean ? 'text-emerald-600 font-medium' : 'text-amber-600 font-medium'}>
+                          {gitStatus?.clean ? 'Clean (All Synced)' : `${gitStatus?.uncommittedCount || 0} change(s) pending`}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-[11px]">
+                        <span className="text-slate-400">Auto-Sync:</span>
+                        <span className="text-slate-600">Active (polls remote & pushes every 30s)</span>
+                      </div>
+                    </div>
+
+                    {syncMessage && (
+                      <div className="p-2 rounded bg-indigo-50 text-indigo-700 text-[11px] leading-tight">
+                        {syncMessage}
+                      </div>
+                    )}
+
+                    <div className="space-y-1.5 pt-1">
+                      <button
+                        onClick={handleManualSync}
+                        disabled={syncing}
+                        className="w-full py-2 px-3 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer"
                       >
-                        Devolution-TamyonoiaCat
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    </div>
-                    <div className="flex justify-between items-center text-[11px]">
-                      <span className="text-slate-400">Branch:</span>
-                      <span className="font-mono text-slate-800">{gitStatus?.branch || 'main'}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-[11px]">
-                      <span className="text-slate-400">Latest Commit:</span>
-                      <span className="font-mono text-slate-800 truncate max-w-[150px]" title={gitStatus?.lastCommit?.message}>
-                        {gitStatus?.lastCommit?.hash || 'HEAD'} - {gitStatus?.lastCommit?.message || 'Latest'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center text-[11px]">
-                      <span className="text-slate-400">Working Tree:</span>
-                      <span className={gitStatus?.clean ? 'text-emerald-600 font-medium' : 'text-amber-600 font-medium'}>
-                        {gitStatus?.clean ? 'Clean (All Synced)' : `${gitStatus?.uncommittedCount || 0} change(s) pending`}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center text-[11px]">
-                      <span className="text-slate-400">Auto-Sync:</span>
-                      <span className="text-slate-600">Active (polls remote & pushes every 30s)</span>
+                        <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
+                        <span>{syncing ? 'Syncing with GitHub...' : 'Sync & Push to Repo Now'}</span>
+                      </button>
+
+                      <button
+                        onClick={handlePullUpdates}
+                        disabled={syncing}
+                        className="w-full py-1.5 px-3 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Pull Latest Updates from GitHub</span>
+                      </button>
                     </div>
                   </div>
-
-                  {syncMessage && (
-                    <div className="p-2 rounded bg-indigo-50 text-indigo-700 text-[11px] leading-tight">
-                      {syncMessage}
-                    </div>
-                  )}
-
-                  <div className="space-y-1.5 pt-1">
-                    <button
-                      onClick={handleManualSync}
-                      disabled={syncing}
-                      className="w-full py-2 px-3 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer"
-                    >
-                      <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
-                      <span>{syncing ? 'Syncing with GitHub...' : 'Sync & Push to Repo Now'}</span>
-                    </button>
-
-                    <button
-                      onClick={handlePullUpdates}
-                      disabled={syncing}
-                      className="w-full py-1.5 px-3 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>Pull Latest Updates from GitHub</span>
-                    </button>
-                  </div>
-                </div>
+                </>
               )}
             </div>
 
-            {/* 2. World / People & Public Ledger Screen Icon */}
-            <button
-              onClick={() => onSelectTab('public-ledger')}
-              className={`relative px-2.5 py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer group shadow-2xs ${
-                currentTab === 'public-ledger'
-                  ? 'text-indigo-700 bg-indigo-100 border border-indigo-300'
-                  : 'text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80'
-              }`}
-              title="World Screen: Browse Verified People, Public Commitments & Trust Receipts"
-              aria-label="World Screen - Verified People & Public Ledger"
-            >
-              <Globe className="w-4 h-4 text-indigo-600 group-hover:scale-110 transition-transform" />
-              <span className="hidden sm:inline text-xs font-bold text-indigo-900">People & Ledger</span>
-              <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
-              </span>
-            </button>
-
-            {/* 3. Search People Icon */}
+            {/* 2. Search People Icon */}
             <button
               onClick={onOpenSearch}
-              className="p-2 text-slate-500 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors flex items-center justify-center cursor-pointer"
+              className="p-2 text-slate-500 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors flex items-center justify-center cursor-pointer shrink-0"
               title="Search verified people (Cmd+K / Ctrl+K)"
               aria-label="Search people"
             >
