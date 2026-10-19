@@ -1082,7 +1082,7 @@
   ],
   "impressions": {
     "network": {
-      "impressions": 4910,
+      "impressions": 4911,
       "witnessCount": 560
     },
     "usr_allen_001": {
@@ -1108,6 +1108,10 @@
     "fatimabello": {
       "impressions": 1890,
       "witnessCount": 240
+    },
+    "usr_1792413526573_1z1j": {
+      "impressions": 1,
+      "witnessCount": 0
     }
   },
   "rememberRecords": [
