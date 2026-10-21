@@ -105,7 +105,16 @@ export const PeopleSearchModal: React.FC<PeopleSearchModalProps> = ({
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search people by name, username, title, industry, or city..."
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  if (filteredResults.length > 0) {
+                    onSelectUser(filteredResults[0].username);
+                    onClose();
+                  }
+                }
+              }}
+              placeholder="Search person by name, @username, title, industry, or city (Press Enter to open profile)..."
               className="w-full pl-11 pr-24 py-3 bg-white text-sm text-slate-900 placeholder:text-slate-400 rounded-xl border border-slate-200 shadow-2xs focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
             />
             <div className="absolute right-3 flex items-center gap-2">
@@ -279,12 +288,13 @@ export const PeopleSearchModal: React.FC<PeopleSearchModalProps> = ({
                     </div>
 
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         onSelectUser(person.username);
                         onClose();
                       }}
-                      className="mt-1 hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-white border border-slate-200 px-3 py-1.5 rounded-lg group-hover:border-indigo-300 transition-colors"
+                      className="mt-1 inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-3.5 py-1.5 rounded-lg shadow-2xs transition-colors cursor-pointer"
                     >
                       <span>View Profile</span>
                       <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />

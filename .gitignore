@@ -9,3 +9,4 @@ coverage/
 .github_token
 .supabase_config.json
 .supabase_token
+bun.lock

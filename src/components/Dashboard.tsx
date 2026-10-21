@@ -30,6 +30,7 @@ import {
   Globe,
   Camera,
   Sparkles,
+  Search,
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -46,6 +47,7 @@ interface DashboardProps {
   onOpenNewReceiptModal: () => void;
   onOpenPublicLedger?: () => void;
   onOpenAvatarUpload?: () => void;
+  onOpenSearch?: () => void;
   onRefreshData?: () => Promise<void>;
 }
 
@@ -63,6 +65,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenNewReceiptModal,
   onOpenPublicLedger,
   onOpenAvatarUpload,
+  onOpenSearch,
   onRefreshData,
 }) => {
   const [copiedLink, setCopiedLink] = React.useState(false);
@@ -226,6 +229,37 @@ export const Dashboard: React.FC<DashboardProps> = ({
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Quick Person & Business Search Card */}
+      <div className="bg-gradient-to-r from-indigo-50/90 via-blue-50/60 to-white rounded-xl border border-indigo-100 p-4 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center shadow-xs shrink-0">
+            <Search className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-slate-900">
+              Lookup Any Person or Business Profile
+            </h3>
+            <p className="text-xs text-slate-600">
+              Find colleagues, clients, or counterparties by name, @username, skill, or city to view their verified ledger profile.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={onOpenSearch}
+          className="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 hover:text-indigo-600 border border-slate-200 hover:border-indigo-300 rounded-lg shadow-2xs font-medium text-xs flex items-center justify-between sm:justify-start gap-3 transition-all cursor-pointer group shrink-0"
+        >
+          <span className="flex items-center gap-2 text-slate-500 group-hover:text-indigo-600">
+            <Search className="w-4 h-4 text-indigo-500" />
+            <span>Search person (e.g. @allen, Sarah, Austin)...</span>
+          </span>
+          <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-slate-100 rounded border border-slate-200">
+            ⌘K
+          </kbd>
+        </button>
       </div>
 
       {/* Recently Registered Account Activation Banner */}

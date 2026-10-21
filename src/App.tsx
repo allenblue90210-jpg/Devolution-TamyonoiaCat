@@ -332,6 +332,7 @@ export default function App() {
             onOpenNewReceiptModal={() => handleSelectTab('receipts')}
             onOpenPublicLedger={() => handleSelectTab('public-ledger')}
             onOpenAvatarUpload={() => setShowAvatarModal(true)}
+            onOpenSearch={() => setShowSearchModal(true)}
             onRefreshData={refreshData}
           />
         ) : (

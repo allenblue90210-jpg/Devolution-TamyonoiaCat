@@ -1219,7 +1219,9 @@
           "createdAt": "2026-10-21T20:21:13.719Z"
         }
       ],
-      "createdAt": "2026-10-21T20:21:08.751Z"
+      "createdAt": "2026-10-21T20:21:08.751Z",
+      "ratingPercent": 100,
+      "ratingBadge": "100% Exemplary Good Faith"
     },
     {
       "id": "TC-3464",
@@ -1570,7 +1572,7 @@
       "witnessCount": 560
     },
     "usr_allen_001": {
-      "impressions": 2422,
+      "impressions": 2423,
       "witnessCount": 310
     },
     "allenokoro": {
@@ -1578,7 +1580,7 @@
       "witnessCount": 310
     },
     "usr_sarah_002": {
-      "impressions": 1381,
+      "impressions": 1382,
       "witnessCount": 195
     },
     "sarah_adesina": {
@@ -1599,6 +1601,10 @@
     },
     "usr_1792423308615_lq64": {
       "impressions": 2,
+      "witnessCount": 0
+    },
+    "usr_allen_006": {
+      "impressions": 1,
       "witnessCount": 0
     }
   },

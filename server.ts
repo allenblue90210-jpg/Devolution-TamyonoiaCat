@@ -557,7 +557,8 @@ app.get('/api/users/list', (_req: Request, res: Response) => {
    ========================================================================== */
 
 app.get('/api/profiles', (req: Request, res: Response) => {
-  const query = ((req.query.q as string) || '').toLowerCase();
+  const rawQuery = ((req.query.q as string) || '').trim();
+  const query = rawQuery.replace(/^@/, '').toLowerCase();
   const category = (req.query.category as string) || '';
   const filterVerified = req.query.verified === 'true';
 
@@ -568,7 +569,11 @@ app.get('/api/profiles', (req: Request, res: Response) => {
       (u) =>
         u.fullName.toLowerCase().includes(query) ||
         u.username.toLowerCase().includes(query) ||
-        u.category.toLowerCase().includes(query) ||
+        (u.email && u.email.toLowerCase().includes(query)) ||
+        (u.headline && u.headline.toLowerCase().includes(query)) ||
+        (u.category && u.category.toLowerCase().includes(query)) ||
+        (u.city && u.city.toLowerCase().includes(query)) ||
+        (u.country && u.country.toLowerCase().includes(query)) ||
         (u.businessName && u.businessName.toLowerCase().includes(query))
     );
   }
@@ -613,8 +618,17 @@ app.get('/api/profiles', (req: Request, res: Response) => {
 });
 
 app.get('/api/profiles/:username', (req: Request, res: Response) => {
-  const username = req.params.username;
-  const user = db.getUserByUsername(username);
+  const rawParam = req.params.username;
+  const clean = decodeURIComponent(rawParam).replace(/^@/, '').trim();
+  let user = db.getUserByUsername(clean) || db.getUserById(rawParam) || db.getUserById(clean);
+  if (!user) {
+    user = db.getState().users.find(
+      (u) =>
+        u.username.toLowerCase() === clean.toLowerCase() ||
+        u.fullName.toLowerCase() === clean.toLowerCase() ||
+        u.id.toLowerCase() === clean.toLowerCase()
+    );
+  }
   if (!user) {
     return res.status(404).json({ error: 'Profile not found' });
   }
