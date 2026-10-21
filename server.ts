@@ -37,6 +37,7 @@ import {
   PactComment,
   PactRating,
   ReceiptRating,
+  ReceiptComment,
   RememberRecord,
   RememberCorroboration,
 } from './src/types/trust.js';
@@ -1260,8 +1261,10 @@ app.post('/api/receipts', (req: Request, res: Response) => {
   if (!user) return res.status(404).json({ error: 'User not found' });
 
   const {
-    counterpartyName,
-    counterpartyContact,
+    counterpartyUserId,
+    counterpartyAvatar,
+    counterpartyName: explicitName,
+    counterpartyContact: explicitContact,
     interactionCategory,
     otherCategoryDetails,
     title,
@@ -1269,10 +1272,19 @@ app.post('/api/receipts', (req: Request, res: Response) => {
     transactionValue,
     completionConditions,
     evidenceAttachments,
+    deadline,
     isPublic,
   } = req.body;
 
-  if (!counterpartyName || !counterpartyContact || !interactionCategory || !title || !completionConditions) {
+  let targetCounterparty = counterpartyUserId && counterpartyUserId !== 'other'
+    ? db.getUserById(counterpartyUserId)
+    : null;
+
+  const finalName = targetCounterparty ? targetCounterparty.fullName : (explicitName || '').trim();
+  const finalContact = targetCounterparty ? targetCounterparty.email : (explicitContact || '').trim();
+  const finalAvatar = targetCounterparty ? targetCounterparty.avatarUrl : (counterpartyAvatar || '');
+
+  if (!finalName || !finalContact || !interactionCategory || !title || !completionConditions) {
     return res.status(400).json({ error: 'Counterparty details, category, title, and completion conditions are required.' });
   }
 
@@ -1282,8 +1294,10 @@ app.post('/api/receipts', (req: Request, res: Response) => {
     id: receiptId,
     creatorId: userId,
     creatorName: user.fullName,
-    counterpartyName,
-    counterpartyContact,
+    counterpartyName: finalName,
+    counterpartyContact: finalContact,
+    counterpartyUserId: targetCounterparty ? targetCounterparty.id : (counterpartyUserId && counterpartyUserId !== 'other' ? counterpartyUserId : null),
+    counterpartyAvatar: finalAvatar,
     interactionCategory,
     otherCategoryDetails: interactionCategory === 'Other' ? (otherCategoryDetails || 'Custom Agreement') : undefined,
     title,
@@ -1292,20 +1306,26 @@ app.post('/api/receipts', (req: Request, res: Response) => {
     status: 'pending', // Starts as pending counterparty signature!
     completionConditions,
     isFulfillmentConfirmed: false,
+    deadline: deadline || null,
+    isOverdue: deadline ? new Date(deadline).getTime() < Date.now() : false,
     evidenceAttachments: evidenceAttachments || [],
     history: [
       {
         timestamp: new Date().toISOString(),
         actor: user.fullName,
-        event: 'Trust Receipt Created & Awaiting Counterparty Confirmation',
+        event: deadline
+          ? `Trust Receipt Created with Timed Deadline (${new Date(deadline).toLocaleString()}) & Awaiting Counterparty Confirmation`
+          : 'Trust Receipt Created & Awaiting Counterparty Confirmation',
       },
     ],
+    comments: [],
     isPublic: isPublic !== undefined ? Boolean(isPublic) : true,
     createdAt: new Date().toISOString(),
   };
 
   db.addReceipt(newReceipt);
 
+  // Notify creator
   db.addNotification({
     id: `notif_${Date.now()}`,
     userId,
@@ -1316,6 +1336,20 @@ app.post('/api/receipts', (req: Request, res: Response) => {
     isRead: false,
     createdAt: new Date().toISOString(),
   });
+
+  // Notify counterparty if registered user in system
+  if (targetCounterparty) {
+    db.addNotification({
+      id: `notif_${Date.now() + 1}`,
+      userId: targetCounterparty.id,
+      type: 'receipt_action',
+      title: 'New Trust Receipt & Timed Agreement Created',
+      message: `${user.fullName} created a Trust Receipt with you: "${title}". ${deadline ? `Timed deadline: ${new Date(deadline).toLocaleString()}.` : ''} Please review and confirm on the ledger.`,
+      link: '/receipts',
+      isRead: false,
+      createdAt: new Date().toISOString(),
+    });
+  }
 
   res.status(201).json({ receipt: newReceipt });
 });
@@ -1422,6 +1456,70 @@ app.post('/api/receipts/:id/rate', (req: Request, res: Response) => {
 
   const updated = db.rateReceipt(receipt.id, receiptRating);
   res.status(201).json({ rating: receiptRating, receipt: updated, message: 'Receipt rated and verified.' });
+});
+
+app.post('/api/receipts/:id/comments', (req: Request, res: Response) => {
+  const receipt = db.getReceiptById(req.params.id);
+  if (!receipt) return res.status(404).json({ error: 'Trust receipt not found.' });
+  const userId = getSessionUserId(req);
+  const user = db.getUserById(userId);
+  const { text, ratingPercent } = req.body || {};
+  if (!text || !text.trim()) {
+    return res.status(400).json({ error: 'Comment text is required.' });
+  }
+
+  let authorRole: 'Creator' | 'Promised Counterparty' | 'Witness / Observer' | 'Verified Member' = 'Witness / Observer';
+  if (userId === receipt.creatorId) {
+    authorRole = 'Creator';
+  } else if (receipt.counterpartyUserId && userId === receipt.counterpartyUserId) {
+    authorRole = 'Promised Counterparty';
+  }
+
+  const numRating = ratingPercent === 100 || ratingPercent === 50 ? ratingPercent : null;
+
+  const comment: ReceiptComment = {
+    id: `rcmt_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    receiptId: receipt.id,
+    authorId: userId,
+    authorName: user?.fullName || 'Verified Member',
+    authorAvatar: user?.avatarUrl,
+    authorRole,
+    text: text.trim(),
+    ratingPercent: numRating,
+    createdAt: new Date().toISOString(),
+  };
+
+  const updated = db.addReceiptComment(receipt.id, comment);
+
+  // Send notifications to creator / counterparty
+  const authorName = user?.fullName || 'A member';
+  if (receipt.creatorId && receipt.creatorId !== userId) {
+    db.addNotification({
+      id: `notif_${Date.now()}`,
+      userId: receipt.creatorId,
+      type: 'receipt_action',
+      title: 'New Comment on Trust Receipt',
+      message: `${authorName} commented on Receipt ${receipt.id} ("${receipt.title}"): "${text.trim().substring(0, 60)}${text.trim().length > 60 ? '...' : ''}"`,
+      link: '/receipts',
+      isRead: false,
+      createdAt: new Date().toISOString(),
+    });
+  }
+
+  if (receipt.counterpartyUserId && receipt.counterpartyUserId !== userId) {
+    db.addNotification({
+      id: `notif_${Date.now() + 1}`,
+      userId: receipt.counterpartyUserId,
+      type: 'receipt_action',
+      title: 'New Comment on Trust Receipt',
+      message: `${authorName} commented on Receipt ${receipt.id} ("${receipt.title}"): "${text.trim().substring(0, 60)}${text.trim().length > 60 ? '...' : ''}"`,
+      link: '/receipts',
+      isRead: false,
+      createdAt: new Date().toISOString(),
+    });
+  }
+
+  res.status(201).json({ comment, receipt: updated, message: 'Comment posted to Trust Receipt successfully.' });
 });
 
 /* ==========================================================================
@@ -1609,21 +1707,25 @@ app.post('/api/commitments', (req: Request, res: Response) => {
     committerName: explicitCommitterName,
     deadline,
     trustRewardPoints,
+    creatorRole,
+    pledgeNote,
     isPublic,
   } = req.body;
   if (!title || !description || !deadline) {
     return res.status(400).json({ error: 'Title, description, and target deadline are required.' });
   }
 
-  let targetCommitter = committerId && committerId !== 'other' ? db.getUserById(committerId) : null;
-  if (!targetCommitter && committerUsername) {
-    targetCommitter = db.getUserByUsername(committerUsername);
+  let targetUser = committerId && committerId !== 'other' ? db.getUserById(committerId) : null;
+  if (!targetUser && committerUsername) {
+    targetUser = db.getUserByUsername(committerUsername);
   }
 
-  const isExternalCommitter = committerId === 'other' || (!targetCommitter && Boolean(explicitCommitterName));
-  const finalCommitterId = targetCommitter ? targetCommitter.id : `ext_${Date.now()}`;
-  const finalCommitterName = targetCommitter ? targetCommitter.fullName : (explicitCommitterName || 'External Counterparty');
-  const finalCommitterAvatar = targetCommitter ? targetCommitter.avatarUrl : '';
+  const isExternal = committerId === 'other' || (!targetUser && Boolean(explicitCommitterName));
+  const finalOtherId = targetUser ? targetUser.id : `ext_${Date.now()}`;
+  const finalOtherName = targetUser ? targetUser.fullName : (explicitCommitterName || 'External Counterparty');
+  const finalOtherAvatar = targetUser ? targetUser.avatarUrl : '';
+
+  const isPosterPromisor = creatorRole === 'promisor';
 
   const newCommitment: TrustCommitment = {
     id: `TC-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -1631,42 +1733,58 @@ app.post('/api/commitments', (req: Request, res: Response) => {
     description,
     category: category || 'Vehicle & Transportation',
     otherCategoryDetails: category === 'Other' ? (otherCategoryDetails || 'Custom Pact') : undefined,
-    requesterId,
-    requesterName: requester.fullName,
-    requesterAvatar: requester.avatarUrl,
-    committerId: finalCommitterId,
-    committerName: finalCommitterName,
-    committerAvatar: finalCommitterAvatar,
+    requesterId: isPosterPromisor ? finalOtherId : requesterId,
+    requesterName: isPosterPromisor ? finalOtherName : requester.fullName,
+    requesterAvatar: isPosterPromisor ? finalOtherAvatar : requester.avatarUrl,
+    committerId: isPosterPromisor ? requesterId : finalOtherId,
+    committerName: isPosterPromisor ? requester.fullName : finalOtherName,
+    committerAvatar: isPosterPromisor ? requester.avatarUrl : finalOtherAvatar,
+    promisedUserId: isPosterPromisor ? finalOtherId : requesterId,
+    promisedUserName: isPosterPromisor ? finalOtherName : requester.fullName,
+    promisedUserAvatar: isPosterPromisor ? finalOtherAvatar : requester.avatarUrl,
+    creatorRole: isPosterPromisor ? 'promisor' : 'requester',
     deadline,
-    status: 'pending_acceptance',
+    committerPledgeNote: isPosterPromisor
+      ? (pledgeNote || 'I pledge and promise to deliver on time as committed.')
+      : undefined,
+    status: isPosterPromisor ? 'active' : 'pending_acceptance',
     trustRewardPoints: Number(trustRewardPoints) || 25,
     penaltyRateDailyPercent: 30, // 30% daily deduction on breach
     penaltyCurrentDeductionPercent: 0,
-    isOverdue: false,
+    isOverdue: new Date(deadline).getTime() < Date.now(),
     daysOverdue: 0,
     isPublic: isPublic !== false,
     impressions: 1,
     witnessCount: 0,
     positiveImpressions: 0,
     hasWitnessed: false,
+    comments: [],
     createdAt: new Date().toISOString(),
   };
 
   db.createCommitment(newCommitment);
 
-  if (targetCommitter) {
+  if (targetUser) {
     db.addNotification({
       id: `notif_${Date.now()}`,
-      userId: targetCommitter.id,
+      userId: targetUser.id,
       type: 'receipt_action',
-      title: 'New Commitment Request Received',
-      message: `${requester.fullName} created a commitment pact: '${title}'. Sign your pledge and confirmed delivery time.`,
+      title: isPosterPromisor ? 'New Timed Commitment Promised to You' : 'New Commitment Request Received',
+      message: isPosterPromisor
+        ? `${requester.fullName} made a time-locked promise to you: '${title}'. Deadline: ${new Date(deadline).toLocaleString()}.`
+        : `${requester.fullName} created a commitment pact: '${title}'. Sign your pledge and confirmed delivery time.`,
+      link: '/commitments',
       isRead: false,
       createdAt: new Date().toISOString(),
     });
   }
 
-  res.status(201).json({ commitment: newCommitment, message: 'Commitment request created and posted.' });
+  res.status(201).json({
+    commitment: newCommitment,
+    message: isPosterPromisor
+      ? 'Timed promise committed and countdown active!'
+      : 'Commitment request created and posted.',
+  });
 });
 
 app.put('/api/commitments/:id/accept', (req: Request, res: Response) => {

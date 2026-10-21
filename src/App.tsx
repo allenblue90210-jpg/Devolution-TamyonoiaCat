@@ -386,6 +386,8 @@ export default function App() {
           <TrustReceiptsView
             user={currentUser}
             receipts={receipts}
+            availableUsers={availableUsers}
+            onRefreshAllData={refreshData}
             onCreateReceipt={handleCreateReceipt}
             onConfirmReceipt={handleConfirmReceipt}
             onCompleteReceipt={handleCompleteReceipt}

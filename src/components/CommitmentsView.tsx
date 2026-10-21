@@ -61,6 +61,8 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
   const [otherCategoryDetails, setOtherCategoryDetails] = useState('');
   const [targetCommitterId, setTargetCommitterId] = useState('');
   const [externalCommitterName, setExternalCommitterName] = useState('');
+  const [commitRole, setCommitRole] = useState<'promisor' | 'requester'>('promisor');
+  const [customPledgeText, setCustomPledgeText] = useState('');
   const [deadlineDate, setDeadlineDate] = useState('');
   const [deadlineTime, setDeadlineTime] = useState('02:00');
   const [rewardPoints, setRewardPoints] = useState(25);
@@ -162,6 +164,28 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
     }
   }, [availableUsers, currentUser]);
 
+  const setCommitmentDeadlinePreset = (preset: '2h' | '6h' | 'tomorrow_2am' | '24h' | '3d' | '7d') => {
+    const d = new Date();
+    if (preset === '2h') {
+      d.setHours(d.getHours() + 2);
+    } else if (preset === '6h') {
+      d.setHours(d.getHours() + 6);
+    } else if (preset === 'tomorrow_2am') {
+      d.setDate(d.getDate() + 1);
+      d.setHours(2, 0, 0, 0);
+    } else if (preset === '24h') {
+      d.setHours(d.getHours() + 24);
+    } else if (preset === '3d') {
+      d.setDate(d.getDate() + 3);
+    } else if (preset === '7d') {
+      d.setDate(d.getDate() + 7);
+    }
+    const dateStr = d.toISOString().split('T')[0];
+    const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    setDeadlineDate(dateStr);
+    setDeadlineTime(timeStr);
+  };
+
   const handleCreateCommitment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !description || !deadlineDate || !deadlineTime) {
@@ -181,6 +205,10 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
         committerName: targetCommitterId === 'other' ? (externalCommitterName || 'External Counterparty') : undefined,
         deadline: combinedDeadline,
         trustRewardPoints: rewardPoints,
+        creatorRole: commitRole,
+        pledgeNote: commitRole === 'promisor'
+          ? (customPledgeText.trim() || `I promise to fulfill: ${title} by deadline`)
+          : undefined,
         isPublic: true,
       });
 
@@ -189,7 +217,12 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
       setDescription('');
       setOtherCategoryDetails('');
       setExternalCommitterName('');
-      setActionSuccessMessage('Time-locked commitment request created and broadcasted!');
+      setCustomPledgeText('');
+      setActionSuccessMessage(
+        commitRole === 'promisor'
+          ? 'Time-locked promise committed! Active countdown initiated on ledger.'
+          : 'Commitment request created and sent to counterparty!'
+      );
       setTimeout(() => setActionSuccessMessage(null), 4000);
       await loadCommitments();
       onRefreshAllData();
@@ -1104,29 +1137,74 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                   <Clock className="w-4 h-4" />
                 </div>
                 <div>
-                  <h2 className="text-base font-bold text-slate-900">Create Commitment Request</h2>
-                  <p className="text-xs text-slate-500">Post a time-locked trust pact with counterparty checkout.</p>
+                  <h2 className="text-base font-bold text-slate-900 flex items-center gap-1.5">
+                    <Timer className="w-4 h-4 text-indigo-600" />
+                    <span>Create Time-Locked Commitment Pact</span>
+                  </h2>
+                  <p className="text-xs text-slate-500">Post a timed commitment, specify the user promised, and set an active countdown timer.</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold p-1"
+                className="text-slate-400 hover:text-slate-600 text-lg font-bold p-1 cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
             <form onSubmit={handleCreateCommitment} className="p-4 sm:p-6 space-y-4 text-xs overflow-y-auto flex-1 overscroll-contain">
+              {/* Role Toggle: Who is making the promise? */}
+              <div className="p-3 bg-indigo-50/70 border border-indigo-200/80 rounded-xl space-y-2">
+                <span className="block text-indigo-950 font-bold text-xs">Who is making this commitment promise?</span>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setCommitRole('promisor')}
+                    className={`p-2.5 rounded-lg border text-left transition-all cursor-pointer ${
+                      commitRole === 'promisor'
+                        ? 'bg-indigo-600 text-white border-indigo-700 shadow-xs'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div className="font-bold flex items-center gap-1.5 text-xs">
+                      <UserCheck className="w-3.5 h-3.5" />
+                      <span>I am Promising (Committer)</span>
+                    </div>
+                    <p className={`text-[10px] mt-0.5 leading-tight ${commitRole === 'promisor' ? 'text-indigo-100' : 'text-slate-500'}`}>
+                      I am pledging to deliver to another user on time. Timer runs immediately!
+                    </p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setCommitRole('requester')}
+                    className={`p-2.5 rounded-lg border text-left transition-all cursor-pointer ${
+                      commitRole === 'requester'
+                        ? 'bg-indigo-600 text-white border-indigo-700 shadow-xs'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div className="font-bold flex items-center gap-1.5 text-xs">
+                      <Users className="w-3.5 h-3.5" />
+                      <span>Someone Promising Me</span>
+                    </div>
+                    <p className={`text-[10px] mt-0.5 leading-tight ${commitRole === 'requester' ? 'text-indigo-100' : 'text-slate-500'}`}>
+                      Request another user to make and sign this commitment pact.
+                    </p>
+                  </button>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-slate-700 font-semibold mb-1">
-                  Commitment Request Title *
+                  {commitRole === 'promisor' ? 'Promise / Commitment Title *' : 'Commitment Request Title *'}
                 </label>
                 <input
                   type="text"
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. Return loaner vehicle / Deliver Audi RS5 / Handover server keys"
+                  placeholder="e.g. Return loaner vehicle / Deliver Audi RS5 / Handover server keys / Deliver code by 2am"
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 />
               </div>
@@ -1151,7 +1229,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
 
                 <div>
                   <label className="block text-slate-700 font-semibold mb-1">
-                    Committer Counterparty (User B) *
+                    {commitRole === 'promisor' ? 'User I Promised (Counterparty) *' : 'Committer Counterparty (User B) *'}
                   </label>
                   <select
                     value={targetCommitterId}
@@ -1167,6 +1245,26 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                   </select>
                 </div>
               </div>
+
+              {commitRole === 'promisor' && (
+                <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-lg space-y-1.5 animate-in fade-in duration-150">
+                  <label className="block text-emerald-950 font-bold mb-0.5 text-xs flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Your Confirmed Pledge Note (Promise Terms) *</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={customPledgeText}
+                    onChange={(e) => setCustomPledgeText(e.target.value)}
+                    placeholder="e.g. I'll bring it by 2am, parked safely in Lekki Phase 1 with full tank and keys handed to security."
+                    className="w-full px-3 py-2 border border-emerald-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white text-xs"
+                  />
+                  <p className="text-[11px] text-emerald-700">
+                    This pledge note locks your active promise and initiates the real-time countdown timer immediately upon posting.
+                  </p>
+                </div>
+              )}
 
               {targetCommitterId === 'other' && (
                 <div className="p-3 bg-indigo-50/70 border border-indigo-200 rounded-lg space-y-1 animate-in fade-in duration-150">
@@ -1220,32 +1318,80 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-slate-700 font-semibold mb-1">
-                    Deadline Date *
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={deadlineDate}
-                    onChange={(e) => setDeadlineDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
-                  >
-                  </input>
+              <div className="space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-slate-700 font-semibold mb-1">
+                      Deadline Date *
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      value={deadlineDate}
+                      onChange={(e) => setDeadlineDate(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-semibold mb-1">
+                      Deadline Time *
+                    </label>
+                    <input
+                      type="time"
+                      required
+                      value={deadlineTime}
+                      onChange={(e) => setDeadlineTime(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white font-mono"
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-slate-700 font-semibold mb-1">
-                    Deadline Time *
-                  </label>
-                  <input
-                    type="time"
-                    required
-                    value={deadlineTime}
-                    onChange={(e) => setDeadlineTime(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
-                  />
+                {/* Quick Presets for Commitment Deadline */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[10px] text-slate-500 font-medium">Quick Presets:</span>
+                  <button
+                    type="button"
+                    onClick={() => setCommitmentDeadlinePreset('2h')}
+                    className="px-2 py-0.5 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 text-[10px] font-semibold transition-colors cursor-pointer"
+                  >
+                    +2 Hours
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCommitmentDeadlinePreset('6h')}
+                    className="px-2 py-0.5 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 text-[10px] font-semibold transition-colors cursor-pointer"
+                  >
+                    +6 Hours
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCommitmentDeadlinePreset('tomorrow_2am')}
+                    className="px-2 py-0.5 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 text-[10px] font-semibold transition-colors cursor-pointer"
+                  >
+                    Tomorrow 2:00 AM
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCommitmentDeadlinePreset('24h')}
+                    className="px-2 py-0.5 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 text-[10px] font-semibold transition-colors cursor-pointer"
+                  >
+                    +24 Hours
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCommitmentDeadlinePreset('3d')}
+                    className="px-2 py-0.5 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 text-[10px] font-semibold transition-colors cursor-pointer"
+                  >
+                    +3 Days
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCommitmentDeadlinePreset('7d')}
+                    className="px-2 py-0.5 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 text-[10px] font-semibold transition-colors cursor-pointer"
+                  >
+                    +1 Week
+                  </button>
                 </div>
               </div>
 

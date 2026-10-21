@@ -14,6 +14,7 @@ import {
   PactComment,
   PactRating,
   ReceiptRating,
+  ReceiptComment,
   RememberRecord,
   RememberCorroboration,
 } from '../src/types/trust.js';
@@ -1381,6 +1382,15 @@ class Database {
     this.data.receipts[idx] = { ...this.data.receipts[idx], ...updates };
     this.persist();
     return this.data.receipts[idx];
+  }
+
+  public addReceiptComment(receiptId: string, comment: ReceiptComment): TrustReceipt | null {
+    const receipt = this.data.receipts.find((r) => r.id === receiptId);
+    if (!receipt) return null;
+    if (!receipt.comments) receipt.comments = [];
+    receipt.comments.push(comment);
+    this.persist();
+    return receipt;
   }
 
   // References

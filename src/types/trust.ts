@@ -95,6 +95,18 @@ export interface ReceiptRating {
   createdAt: string;
 }
 
+export interface ReceiptComment {
+  id: string;
+  receiptId: string;
+  authorId: string;
+  authorName: string;
+  authorAvatar?: string;
+  authorRole: 'Creator' | 'Promised Counterparty' | 'Witness / Observer' | 'Verified Member';
+  text: string;
+  ratingPercent?: 100 | 50 | null; // Optional attached rating
+  createdAt: string;
+}
+
 export type RememberWordTag = 'Business' | 'Crime' | 'Fraud' | 'Contract' | 'Reliability' | string;
 
 export interface RememberEvidenceAttachment {
@@ -163,6 +175,10 @@ export interface TrustCommitment {
   committerId: string; // User B
   committerName: string;
   committerAvatar?: string;
+  promisedUserId?: string; // Explicit ID of the user who was promised
+  promisedUserName?: string;
+  promisedUserAvatar?: string;
+  creatorRole?: 'promisor' | 'requester';
   deadline: string; // ISO string e.g. 2026-10-19T02:00:00.000Z
   committerPledgeNote?: string; // e.g. "I'll bring it by 2am"
   status: CommitmentStatus;
@@ -302,6 +318,7 @@ export interface TrustReceipt {
   counterpartyName: string;
   counterpartyContact: string;
   counterpartyUserId?: string | null;
+  counterpartyAvatar?: string;
   interactionCategory:
     | 'Freelance Project'
     | 'Goods Sale & Delivery'
@@ -318,6 +335,8 @@ export interface TrustReceipt {
   status: ReceiptStatus;
   completionConditions: string;
   isFulfillmentConfirmed: boolean;
+  deadline?: string | null; // Timed promise deadline (ISO string)
+  isOverdue?: boolean; // Whether timed deadline has passed without completion
   evidenceAttachments: Array<{
     name: string;
     date: string;
@@ -331,6 +350,7 @@ export interface TrustReceipt {
   ratings?: ReceiptRating[];
   averageRating?: number;
   ratingsCount?: number;
+  comments?: ReceiptComment[]; // Comments & updates by author, counterparty, or any user
   isPublic: boolean;
   createdAt: string;
   completedAt?: string | null;

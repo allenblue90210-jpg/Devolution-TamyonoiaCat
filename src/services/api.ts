@@ -14,6 +14,7 @@ import {
   PactComment,
   PactRating,
   ReceiptRating,
+  ReceiptComment,
   RememberRecord,
   RememberCorroboration,
 } from '../types/trust.js';
@@ -412,6 +413,9 @@ export const api = {
     committerName?: string;
     deadline: string;
     trustRewardPoints?: number;
+    creatorRole?: 'promisor' | 'requester';
+    pledgeNote?: string;
+    promisedUserId?: string;
     isPublic?: boolean;
   }): Promise<{ commitment: TrustCommitment; message: string }> {
     return request('/api/commitments', {
@@ -593,6 +597,17 @@ export const api = {
     return request(`/api/receipts/${id}/rate`, {
       method: 'POST',
       body: JSON.stringify({ rating, badge, comment }),
+    });
+  },
+
+  async addReceiptComment(
+    id: string,
+    text: string,
+    ratingPercent?: 100 | 50 | null
+  ): Promise<{ comment: ReceiptComment; receipt: TrustReceipt; message: string }> {
+    return request(`/api/receipts/${id}/comments`, {
+      method: 'POST',
+      body: JSON.stringify({ text, ratingPercent }),
     });
   },
 

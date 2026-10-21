@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TrustReceipt, ReceiptStatus, User } from '../types/trust.js';
+import { TrustReceipt, ReceiptStatus, User, ReceiptComment } from '../types/trust.js';
 import { api } from '../services/api.js';
 import {
   Receipt,
@@ -21,12 +21,26 @@ import {
   Star,
   MessageSquare,
   ThumbsUp,
+  Timer,
+  Send,
+  Calendar,
+  UserCheck,
+  UserPlus,
 } from 'lucide-react';
 import { formatTransactionCurrency, CURRENCY_OPTIONS } from '../utils/currency.js';
 
 interface TrustReceiptsViewProps {
   user: User;
   receipts: TrustReceipt[];
+  availableUsers?: Array<{
+    id: string;
+    username: string;
+    fullName: string;
+    accountType: string;
+    avatarUrl: string;
+    email?: string;
+  }>;
+  onRefreshAllData?: () => void;
   onCreateReceipt: (data: Partial<TrustReceipt>) => Promise<void>;
   onConfirmReceipt: (id: string) => Promise<void>;
   onCompleteReceipt: (id: string) => Promise<void>;
@@ -37,6 +51,8 @@ interface TrustReceiptsViewProps {
 export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
   user,
   receipts,
+  availableUsers = [],
+  onRefreshAllData,
   onCreateReceipt,
   onConfirmReceipt,
   onCompleteReceipt,
@@ -57,11 +73,29 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
   const [submittingRating, setSubmittingRating] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Comments State (per receipt)
+  const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
+  const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
+  const [commentRatingTags, setCommentRatingTags] = useState<Record<string, 100 | 50 | null>>({});
+  const [commentSubmitting, setCommentSubmitting] = useState<Record<string, boolean>>({});
+
+  // Live Clock Tick for Real-Time Countdown
+  const [currentTime, setCurrentTime] = useState(Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   useEffect(() => {
     setLocalReceipts(receipts);
   }, [receipts]);
 
   // Form states for create
+  const [counterpartyType, setCounterpartyType] = useState<'registered' | 'external'>('registered');
+  const [targetCounterpartyId, setTargetCounterpartyId] = useState('');
   const [counterpartyName, setCounterpartyName] = useState('');
   const [counterpartyContact, setCounterpartyContact] = useState('');
   const [interactionCategory, setInteractionCategory] = useState<TrustReceipt['interactionCategory']>('Freelance Project');
@@ -71,6 +105,9 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
   const [currencySign, setCurrencySign] = useState('₦');
   const [transactionValue, setTransactionValue] = useState('');
   const [completionConditions, setCompletionConditions] = useState('');
+  const [isTimed, setIsTimed] = useState(true);
+  const [deadlineDate, setDeadlineDate] = useState('');
+  const [deadlineTime, setDeadlineTime] = useState('18:00');
   const [isPublic, setIsPublic] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -79,11 +116,142 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
   const [disputeReason, setDisputeReason] = useState('Unfulfilled Deliverables');
   const [disputeDesc, setDisputeDesc] = useState('');
 
+  // Auto-select other user when availableUsers updates
+  useEffect(() => {
+    if (availableUsers.length > 0 && !targetCounterpartyId) {
+      const otherUser = availableUsers.find((u) => u.id !== user.id) || availableUsers[0];
+      if (otherUser) {
+        setTargetCounterpartyId(otherUser.id);
+        setCounterpartyName(otherUser.fullName);
+        setCounterpartyContact(otherUser.email || `${otherUser.username}@devolution.network`);
+      }
+    }
+  }, [availableUsers, user.id, targetCounterpartyId]);
+
+  // Initial default deadline: tomorrow 18:00
+  useEffect(() => {
+    const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    setDeadlineDate(tomorrow.toISOString().split('T')[0]);
+  }, []);
+
+  const handleSelectCounterpartyUser = (userId: string) => {
+    setTargetCounterpartyId(userId);
+    if (userId === 'other') {
+      setCounterpartyType('external');
+      setCounterpartyName('');
+      setCounterpartyContact('');
+    } else {
+      setCounterpartyType('registered');
+      const found = availableUsers.find((u) => u.id === userId);
+      if (found) {
+        setCounterpartyName(found.fullName);
+        setCounterpartyContact(found.email || `${found.username}@devolution.network`);
+      }
+    }
+  };
+
+  const setDeadlinePreset = (preset: '2h' | 'today_6pm' | 'tomorrow_2am' | '24h' | '3d' | '7d') => {
+    const d = new Date();
+    if (preset === '2h') {
+      d.setHours(d.getHours() + 2);
+    } else if (preset === 'today_6pm') {
+      d.setHours(18, 0, 0, 0);
+      if (d.getTime() < Date.now()) {
+        d.setDate(d.getDate() + 1);
+      }
+    } else if (preset === 'tomorrow_2am') {
+      d.setDate(d.getDate() + 1);
+      d.setHours(2, 0, 0, 0);
+    } else if (preset === '24h') {
+      d.setHours(d.getHours() + 24);
+    } else if (preset === '3d') {
+      d.setDate(d.getDate() + 3);
+    } else if (preset === '7d') {
+      d.setDate(d.getDate() + 7);
+    }
+    const dateStr = d.toISOString().split('T')[0];
+    const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    setDeadlineDate(dateStr);
+    setDeadlineTime(timeStr);
+  };
+
+  const formatCountdown = (deadlineStr?: string | null, status?: string) => {
+    if (!deadlineStr) return null;
+    const deadline = new Date(deadlineStr).getTime();
+    if (isNaN(deadline)) return null;
+    const diff = deadline - currentTime;
+
+    if (status === 'completed') {
+      return { text: 'Fulfilled on time', isOverdue: false, isCompleted: true, urgent: false };
+    }
+
+    if (diff <= 0) {
+      const overdueMins = Math.floor(Math.abs(diff) / (1000 * 60));
+      const hours = Math.floor(overdueMins / 60);
+      const mins = overdueMins % 60;
+      const days = Math.floor(hours / 24);
+      if (days > 0) {
+        return { text: `Overdue by ${days}d ${hours % 24}h`, isOverdue: true, isCompleted: false, urgent: true };
+      }
+      return { text: `Overdue by ${hours > 0 ? `${hours}h ` : ''}${mins}m`, isOverdue: true, isCompleted: false, urgent: true };
+    }
+
+    const totalMins = Math.floor(diff / (1000 * 60));
+    const days = Math.floor(totalMins / (60 * 24));
+    const hours = Math.floor((totalMins % (60 * 24)) / 60);
+    const mins = totalMins % 60;
+    const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+    if (days > 0) {
+      return { text: `${days}d ${hours}h left`, isOverdue: false, isCompleted: false, urgent: false };
+    }
+    if (hours > 0) {
+      return { text: `${hours}h ${mins}m left`, isOverdue: false, isCompleted: false, urgent: hours < 3 };
+    }
+    return { text: `${mins}m ${secs}s left`, isOverdue: false, isCompleted: false, urgent: true };
+  };
+
   const filteredReceipts = localReceipts.filter((r) => {
     if (filterStatus === 'all') return true;
     if (filterStatus === 'other') return r.interactionCategory === 'Other';
     return r.status === filterStatus;
   });
+
+  const toggleComments = (id: string) => {
+    setExpandedComments((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const handleAddComment = async (receiptId: string) => {
+    const text = (commentInputs[receiptId] || '').trim();
+    if (!text) {
+      alert('Please enter a comment or progress update for this receipt.');
+      return;
+    }
+    const ratingTag = commentRatingTags[receiptId] ?? null;
+
+    try {
+      setCommentSubmitting((prev) => ({ ...prev, [receiptId]: true }));
+      const res = await api.addReceiptComment(receiptId, text, ratingTag);
+      setLocalReceipts((prev) =>
+        prev.map((r) => (r.id === receiptId ? res.receipt : r))
+      );
+      if (selectedReceipt?.id === receiptId) {
+        setSelectedReceipt(res.receipt);
+      }
+      setCommentInputs((prev) => ({ ...prev, [receiptId]: '' }));
+      setExpandedComments((prev) => ({ ...prev, [receiptId]: true }));
+      setToastMessage('Comment posted to Trust Receipt & synchronized to ledger!');
+      setTimeout(() => setToastMessage(null), 3500);
+      if (onRefreshAllData) onRefreshAllData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to post comment');
+    } finally {
+      setCommentSubmitting((prev) => ({ ...prev, [receiptId]: false }));
+    }
+  };
 
   const handleOpenRateModal = (rc: TrustReceipt, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
@@ -109,6 +277,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
       setShowRateModal(false);
       setToastMessage(`Receipt #${ratingReceipt.id} rated at ${rateScore} ★ (${rateBadge})!`);
       setTimeout(() => setToastMessage(null), 4000);
+      if (onRefreshAllData) onRefreshAllData();
     } catch (err: any) {
       alert(err.message || 'Failed to submit rating.');
     } finally {
@@ -118,22 +287,34 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !counterpartyName || !completionConditions) return;
+    if (!title || !counterpartyName || !completionConditions) {
+      alert('Please fill out all required fields: Title, Counterparty, and Completion Conditions.');
+      return;
+    }
     setSubmitting(true);
     const formattedValue = transactionValue.trim()
       ? formatTransactionCurrency(transactionValue, currencySign)
       : undefined;
 
+    const formattedDeadline = isTimed && deadlineDate && deadlineTime
+      ? new Date(`${deadlineDate}T${deadlineTime}:00`).toISOString()
+      : undefined;
+
+    const selectedUser = availableUsers.find((u) => u.id === targetCounterpartyId);
+
     try {
       await onCreateReceipt({
-        counterpartyName,
-        counterpartyContact,
+        counterpartyUserId: targetCounterpartyId && targetCounterpartyId !== 'other' ? targetCounterpartyId : undefined,
+        counterpartyAvatar: selectedUser?.avatarUrl,
+        counterpartyName: counterpartyName.trim(),
+        counterpartyContact: counterpartyContact.trim(),
+        deadline: formattedDeadline,
         interactionCategory,
         otherCategoryDetails: interactionCategory === 'Other' ? otherCategoryDetails : undefined,
-        title,
-        description,
+        title: title.trim(),
+        description: description.trim(),
         transactionValue: formattedValue,
-        completionConditions,
+        completionConditions: completionConditions.trim(),
         isPublic,
         evidenceAttachments: [
           {
@@ -145,12 +326,15 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
       });
       setShowCreateModal(false);
       setTitle('');
-      setCounterpartyName('');
-      setCounterpartyContact('');
-      setOtherCategoryDetails('');
       setDescription('');
       setTransactionValue('');
       setCompletionConditions('');
+      setOtherCategoryDetails('');
+      setToastMessage('Timed Trust Receipt created and broadcasted to counterparty!');
+      setTimeout(() => setToastMessage(null), 4000);
+      if (onRefreshAllData) onRefreshAllData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to create trust receipt.');
     } finally {
       setSubmitting(false);
     }
@@ -158,109 +342,119 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
 
   const handleRaiseDispute = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedReceipt || !disputeDesc) return;
-    await onDisputeReceipt(selectedReceipt.id, disputeReason, disputeDesc);
-    setShowDisputeModal(false);
-    setSelectedReceipt(null);
+    if (!selectedReceipt || !disputeDesc.trim()) return;
+    try {
+      await onDisputeReceipt(selectedReceipt.id, disputeReason, disputeDesc);
+      setShowDisputeModal(false);
+      setSelectedReceipt(null);
+      setDisputeDesc('');
+      setToastMessage('Dispute recorded and flagged on ledger.');
+      setTimeout(() => setToastMessage(null), 4000);
+      if (onRefreshAllData) onRefreshAllData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to file dispute.');
+    }
   };
 
   const getStatusBadge = (status: ReceiptStatus) => {
     switch (status) {
-      case 'completed':
-        return (
-          <span className="inline-flex items-center gap-1 text-emerald-700 font-semibold text-xs">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Dual-Signed & Completed</span>
-          </span>
-        );
       case 'confirmed':
         return (
-          <span className="inline-flex items-center gap-1 text-indigo-700 font-medium text-xs">
-            <Clock className="w-3.5 h-3.5 text-indigo-600" />
-            <span>Terms Executed (In Progress)</span>
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+            <CheckCircle2 className="w-3 h-3 text-blue-600" />
+            <span>Counterparty Signed</span>
           </span>
         );
-      case 'pending':
+      case 'completed':
         return (
-          <span className="inline-flex items-center gap-1 text-amber-700 font-medium text-xs">
-            <Clock className="w-3.5 h-3.5 text-amber-600" />
-            <span>Awaiting Counterparty Sign-Off</span>
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+            <Check className="w-3 h-3 text-emerald-600" />
+            <span>Dual Fulfilled</span>
           </span>
         );
       case 'disputed':
         return (
-          <span className="inline-flex items-center gap-1 text-red-700 font-bold text-xs">
-            <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
-            <span>Disputed Record</span>
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-200">
+            <AlertTriangle className="w-3 h-3 text-red-600" />
+            <span>Disputed</span>
+          </span>
+        );
+      case 'cancelled':
+        return (
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+            <X className="w-3 h-3 text-slate-500" />
+            <span>Cancelled</span>
           </span>
         );
       default:
-        return <span className="text-slate-500 text-xs">Cancelled</span>;
+        return (
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+            <Clock className="w-3 h-3 text-amber-600" />
+            <span>Awaiting Signature</span>
+          </span>
+        );
     }
   };
 
+  const tabs = [
+    { id: 'all', label: 'All Receipts', count: localReceipts.length },
+    { id: 'pending', label: 'Pending Signature', count: localReceipts.filter((r) => r.status === 'pending').length },
+    { id: 'confirmed', label: 'In Progress / Signed', count: localReceipts.filter((r) => r.status === 'confirmed').length },
+    { id: 'completed', label: 'Fulfilled & Settled', count: localReceipts.filter((r) => r.status === 'completed').length },
+    { id: 'disputed', label: 'Disputed', count: localReceipts.filter((r) => r.status === 'disputed').length },
+    { id: 'other', label: 'Other Classification', count: localReceipts.filter((r) => r.interactionCategory === 'Other').length },
+  ];
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      {onBack && (
-        <div>
-          <button
-            onClick={onBack}
-            className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg shadow-2xs hover:border-slate-300 transition-all cursor-pointer group"
-            title="Back to Dashboard"
-          >
-            <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:-translate-x-0.5 transition-transform" />
-            <span>Back to Dashboard</span>
-          </button>
-        </div>
-      )}
-
+    <div className="space-y-6 animate-in fade-in duration-200">
+      {/* Toast Notification */}
       {toastMessage && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 font-medium flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>{toastMessage}</span>
-          </div>
-          <button onClick={() => setToastMessage(null)} className="text-emerald-700 hover:text-emerald-950">
-            <X className="w-4 h-4" />
-          </button>
+        <div className="fixed top-4 right-4 z-50 bg-indigo-900 text-white px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 text-xs border border-indigo-700 animate-in fade-in slide-in-from-top-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* Header Banner */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xs">
+      {/* Top Banner & Action */}
+      <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="text-xs font-semibold uppercase tracking-wider text-indigo-700">
-            Documented Fulfillment
+          <div className="flex items-center gap-2">
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="p-1 -ml-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
+                title="Back to Dashboard"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+            )}
+            <h2 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+              <Receipt className="w-5 h-5 text-indigo-600" />
+              <span>Bilateral Trust Receipts & Timed Promises</span>
+            </h2>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Trust Receipts</h1>
-          <p className="text-xs text-slate-600 max-w-2xl leading-relaxed">
-            Dual-signed records of agreements, services, deliveries, and transactions. Neither party can unilaterally fabricate a completed commitment.
+          <p className="text-xs text-slate-500 max-w-2xl leading-relaxed">
+            Cryptographically anchored milestone receipts and timed commitments. Specify the exact user promised, set live countdown timers, and collaborate via verifiable discussion threads.
           </p>
         </div>
-
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex items-center gap-1.5 shadow-xs shrink-0"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>New Trust Receipt</span>
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Post Timed Trust Receipt</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 border-b border-slate-200">
-        {[
-          { id: 'all', label: 'All Receipts', count: receipts.length },
-          { id: 'completed', label: 'Completed & Dual-Signed', count: receipts.filter((r) => r.status === 'completed').length },
-          { id: 'confirmed', label: 'Confirmed / Active', count: receipts.filter((r) => r.status === 'confirmed').length },
-          { id: 'pending', label: 'Pending Sign-Off', count: receipts.filter((r) => r.status === 'pending').length },
-          { id: 'disputed', label: 'Disputed', count: receipts.filter((r) => r.status === 'disputed').length },
-          { id: 'other', label: 'Other / Custom', count: receipts.filter((r) => r.interactionCategory === 'Other').length },
-        ].map((tab) => (
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs border-b border-slate-200">
+        {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setFilterStatus(tab.id)}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer ${
               filterStatus === tab.id
                 ? 'bg-indigo-50 text-indigo-700 font-semibold'
                 : 'text-slate-600 hover:bg-slate-100'
@@ -273,103 +467,328 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
       </div>
 
       {/* Receipts List */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
-        <div className="divide-y divide-slate-100">
-          {filteredReceipts.length === 0 ? (
-            <div className="p-12 text-center text-xs text-slate-500 space-y-3">
-              <Receipt className="w-8 h-8 text-slate-300 mx-auto" />
-              <p>No trust receipts found in this view.</p>
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100"
-              >
-                Draft First Receipt
-              </button>
-            </div>
-          ) : (
-            filteredReceipts.map((rc) => (
+      <div className="space-y-4">
+        {filteredReceipts.length === 0 ? (
+          <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-xs text-slate-500 space-y-3">
+            <Receipt className="w-8 h-8 text-slate-300 mx-auto" />
+            <p>No trust receipts found in this view.</p>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 cursor-pointer"
+            >
+              Post First Timed Receipt
+            </button>
+          </div>
+        ) : (
+          filteredReceipts.map((rc) => {
+            const countdown = formatCountdown(rc.deadline, rc.status);
+            const isCommentsOpen = Boolean(expandedComments[rc.id]);
+
+            return (
               <div
                 key={rc.id}
-                onClick={() => setSelectedReceipt(rc)}
-                className="p-5 hover:bg-slate-50/80 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs cursor-pointer"
+                className="bg-white rounded-xl border border-slate-200/90 hover:border-slate-300 overflow-hidden shadow-xs transition-all"
               >
-                <div className="space-y-1.5 max-w-2xl">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-indigo-700 text-xs">{rc.id}</span>
-                    <span className="font-bold text-slate-900 text-sm">{rc.title}</span>
-                    {getStatusBadge(rc.status)}
-                    {rc.isPublic ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                        <Globe className="w-3 h-3 text-emerald-600" />
-                        <span>Public</span>
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
-                        <Lock className="w-3 h-3 text-slate-500" />
-                        <span>Private</span>
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 text-slate-500 text-[11px]">
-                    {rc.interactionCategory === 'Other' ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
-                        <Tag className="w-3 h-3 text-purple-600" />
-                        <span>{rc.otherCategoryDetails ? `Other: ${rc.otherCategoryDetails}` : 'Other (Custom)'}</span>
-                      </span>
-                    ) : (
-                      <span className="font-medium text-slate-700">{rc.interactionCategory}</span>
-                    )}
-                    <span aria-hidden="true">·</span>
-                    <span>Counterparty: {rc.counterpartyName}</span>
-                    {rc.transactionValue && (
-                      <>
-                        <span aria-hidden="true">·</span>
-                        <span className="font-mono font-semibold text-slate-900">{formatTransactionCurrency(rc.transactionValue)}</span>
-                      </>
-                    )}
-                    <span aria-hidden="true">·</span>
-                    <span className="font-mono tabular-nums">
-                      Created {new Date(rc.createdAt).toLocaleDateString()}
-                    </span>
-                    {rc.averageRating && (
-                      <>
-                        <span aria-hidden="true">·</span>
-                        <span className="inline-flex items-center gap-1 font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                          <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
-                          <span>{rc.averageRating} ★</span>
-                          <span className="text-slate-400 font-normal">({rc.ratingsCount || rc.ratings?.length || 1})</span>
+                {/* Main Card Header & Details */}
+                <div
+                  onClick={() => setSelectedReceipt(rc)}
+                  className="p-5 hover:bg-slate-50/70 transition-colors flex flex-col md:flex-row md:items-start justify-between gap-4 text-xs cursor-pointer"
+                >
+                  <div className="space-y-2 max-w-2xl flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono font-bold text-indigo-700 text-xs">{rc.id}</span>
+                      <span className="font-bold text-slate-900 text-sm">{rc.title}</span>
+                      {getStatusBadge(rc.status)}
+
+                      {/* Timed Promise Countdown Badge */}
+                      {rc.deadline && countdown && (
+                        <span
+                          className={`inline-flex items-center gap-1 font-mono text-[10px] font-bold px-2 py-0.5 rounded border ${
+                            countdown.isCompleted
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                              : countdown.isOverdue
+                              ? 'bg-rose-50 text-rose-800 border-rose-300 animate-pulse'
+                              : countdown.urgent
+                              ? 'bg-amber-50 text-amber-800 border-amber-300 animate-pulse'
+                              : 'bg-indigo-50 text-indigo-800 border-indigo-200'
+                          }`}
+                        >
+                          <Clock className="w-3 h-3 text-indigo-600" />
+                          <span>{countdown.text}</span>
                         </span>
-                      </>
-                    )}
+                      )}
+
+                      {rc.isPublic ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                          <Globe className="w-3 h-3 text-emerald-600" />
+                          <span>Public</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                          <Lock className="w-3 h-3 text-slate-500" />
+                          <span>Private</span>
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 text-slate-500 text-[11px]">
+                      {rc.interactionCategory === 'Other' ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                          <Tag className="w-3 h-3 text-purple-600" />
+                          <span>{rc.otherCategoryDetails ? `Other: ${rc.otherCategoryDetails}` : 'Other (Custom)'}</span>
+                        </span>
+                      ) : (
+                        <span className="font-medium text-slate-700">{rc.interactionCategory}</span>
+                      )}
+
+                      <span aria-hidden="true">·</span>
+
+                      {/* Promised User / Counterparty */}
+                      <span className="inline-flex items-center gap-1.5 font-medium text-slate-800">
+                        {rc.counterpartyAvatar ? (
+                          <img
+                            src={rc.counterpartyAvatar}
+                            alt=""
+                            className="w-4 h-4 rounded-full object-cover border border-slate-200"
+                          />
+                        ) : (
+                          <UserCheck className="w-3.5 h-3.5 text-indigo-500" />
+                        )}
+                        <span>Promised: <strong>{rc.counterpartyName}</strong></span>
+                      </span>
+
+                      {rc.transactionValue && (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <span className="font-mono font-semibold text-slate-900">
+                            {formatTransactionCurrency(rc.transactionValue)}
+                          </span>
+                        </>
+                      )}
+
+                      {rc.deadline && (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <span className="text-slate-600 font-mono">
+                            Target: {new Date(rc.deadline).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </>
+                      )}
+
+                      <span aria-hidden="true">·</span>
+                      <span className="font-mono tabular-nums text-slate-400">
+                        Created {new Date(rc.createdAt).toLocaleDateString()}
+                      </span>
+
+                      {rc.averageRating && (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <span className="inline-flex items-center gap-1 font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                            <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                            <span>{rc.averageRating} ★</span>
+                            <span className="text-slate-400 font-normal">
+                              ({rc.ratingsCount || rc.ratings?.length || 1})
+                            </span>
+                          </span>
+                        </>
+                      )}
+                    </div>
+
+                    <p className="text-slate-600 text-[11px] leading-relaxed line-clamp-2">
+                      {rc.completionConditions}
+                    </p>
                   </div>
-                  <p className="text-slate-600 text-[11px] leading-relaxed line-clamp-1">
-                    {rc.completionConditions}
-                  </p>
+
+                  <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
+                    {/* Toggle Comments Button */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleComments(rc.id);
+                      }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer border ${
+                        isCommentsOpen
+                          ? 'bg-indigo-600 text-white border-indigo-700'
+                          : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border-indigo-200'
+                      }`}
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      <span>Comments ({rc.comments?.length || 0})</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={(e) => handleOpenRateModal(rc, e)}
+                      className="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                    >
+                      <Star className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Rate</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedReceipt(rc);
+                      }}
+                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium transition-colors cursor-pointer"
+                    >
+                      Inspect Ledger
+                    </button>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    onClick={(e) => handleOpenRateModal(rc, e)}
-                    className="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
-                  >
-                    <Star className="w-3.5 h-3.5 text-amber-600" />
-                    <span>Rate Receipt</span>
-                  </button>
+                {/* Inline Expandable Comments Thread (for that user or any user to post) */}
+                {isCommentsOpen && (
+                  <div className="p-4 bg-slate-50/80 border-t border-slate-100 space-y-3 animate-in fade-in duration-150">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                        <MessageSquare className="w-4 h-4 text-indigo-600" />
+                        <span>Receipt Discussion & Progress Thread ({rc.comments?.length || 0})</span>
+                      </span>
+                      <span className="text-[10px] text-slate-500 font-mono">
+                        Open for promised user, creator, or any verified member
+                      </span>
+                    </div>
 
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedReceipt(rc);
-                    }}
-                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium transition-colors cursor-pointer"
-                  >
-                    Inspect Ledger Details
-                  </button>
-                </div>
+                    {/* Comments List */}
+                    {rc.comments && rc.comments.length > 0 ? (
+                      <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+                        {rc.comments.map((cmt) => (
+                          <div
+                            key={cmt.id}
+                            className="p-3 rounded-xl bg-white border border-slate-200/90 shadow-2xs space-y-1"
+                          >
+                            <div className="flex items-center justify-between gap-2 text-[11px]">
+                              <div className="flex items-center gap-2">
+                                {cmt.authorAvatar ? (
+                                  <img
+                                    src={cmt.authorAvatar}
+                                    alt=""
+                                    className="w-5 h-5 rounded-full object-cover border border-slate-200"
+                                  />
+                                ) : (
+                                  <div className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-[10px]">
+                                    {cmt.authorName[0]}
+                                  </div>
+                                )}
+                                <span className="font-bold text-slate-900">{cmt.authorName}</span>
+                                <span
+                                  className={`px-1.5 py-0.2 rounded text-[9px] font-semibold border ${
+                                    cmt.authorRole === 'Creator'
+                                      ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                                      : cmt.authorRole === 'Promised Counterparty'
+                                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                      : 'bg-slate-100 text-slate-600 border-slate-200'
+                                  }`}
+                                >
+                                  {cmt.authorRole}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-2 text-slate-400 text-[10px]">
+                                {cmt.ratingPercent && (
+                                  <span
+                                    className={`px-1.5 py-0.2 rounded font-bold text-[9px] ${
+                                      cmt.ratingPercent === 100
+                                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                        : 'bg-amber-100 text-amber-800 border border-amber-300'
+                                    }`}
+                                  >
+                                    {cmt.ratingPercent}% Rating
+                                  </span>
+                                )}
+                                <span>
+                                  {new Date(cmt.createdAt).toLocaleTimeString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })}
+                                </span>
+                              </div>
+                            </div>
+                            <p className="text-slate-700 text-xs leading-relaxed pl-7">{cmt.text}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-slate-400 italic text-[11px] py-2 bg-white/70 p-3 rounded-lg border border-dashed border-slate-200">
+                        No comments posted yet. The promised user, creator, or any verified network member can post progress updates, delivery notes, or witness comments here.
+                      </p>
+                    )}
+
+                    {/* Add Comment Input Form */}
+                    <div className="space-y-2 pt-2 border-t border-slate-200/80">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="font-semibold text-slate-700">Post Comment / Status Note:</span>
+                        <div className="flex items-center gap-1">
+                          <span className="text-[10px] text-slate-500">Attach Rating:</span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setCommentRatingTags((prev) => ({
+                                ...prev,
+                                [rc.id]: prev[rc.id] === 100 ? null : 100,
+                              }))
+                            }
+                            className={`px-1.5 py-0.5 rounded text-[10px] font-bold border transition-colors cursor-pointer ${
+                              commentRatingTags[rc.id] === 100
+                                ? 'bg-emerald-100 text-emerald-900 border-emerald-400 ring-1 ring-emerald-400'
+                                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                            }`}
+                          >
+                            100% Rating
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setCommentRatingTags((prev) => ({
+                                ...prev,
+                                [rc.id]: prev[rc.id] === 50 ? null : 50,
+                              }))
+                            }
+                            className={`px-1.5 py-0.5 rounded text-[10px] font-bold border transition-colors cursor-pointer ${
+                              commentRatingTags[rc.id] === 50
+                                ? 'bg-amber-100 text-amber-900 border-amber-400 ring-1 ring-amber-400'
+                                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                            }`}
+                          >
+                            50% Rating
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={commentInputs[rc.id] || ''}
+                          onChange={(e) => setCommentInputs((prev) => ({ ...prev, [rc.id]: e.target.value }))}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              handleAddComment(rc.id);
+                            }
+                          }}
+                          placeholder="Type an update, delivery confirmation, or witness note (Press Enter to post)..."
+                          className="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          disabled={commentSubmitting[rc.id] || !commentInputs[rc.id]?.trim()}
+                          onClick={() => handleAddComment(rc.id)}
+                          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                        >
+                          <Send className="w-3.5 h-3.5" />
+                          <span>{commentSubmitting[rc.id] ? 'Posting...' : 'Post'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-            ))
-          )}
-        </div>
+            );
+          })
+        )}
       </div>
 
       {/* Selected Receipt Ledger Drawer / Modal */}
@@ -385,12 +804,26 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                   <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                     Bilateral Trust Receipt
                   </span>
+                  {selectedReceipt.deadline && formatCountdown(selectedReceipt.deadline, selectedReceipt.status) && (
+                    <span
+                      className={`inline-flex items-center gap-1 font-mono text-[10px] font-bold px-2 py-0.5 rounded border ${
+                        formatCountdown(selectedReceipt.deadline, selectedReceipt.status)?.isCompleted
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                          : formatCountdown(selectedReceipt.deadline, selectedReceipt.status)?.isOverdue
+                          ? 'bg-rose-50 text-rose-800 border-rose-300'
+                          : 'bg-indigo-50 text-indigo-800 border-indigo-200'
+                      }`}
+                    >
+                      <Clock className="w-3 h-3 text-indigo-600" />
+                      <span>{formatCountdown(selectedReceipt.deadline, selectedReceipt.status)?.text}</span>
+                    </span>
+                  )}
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mt-0.5">{selectedReceipt.title}</h3>
               </div>
               <button
                 onClick={() => setSelectedReceipt(null)}
-                className="p-1 rounded text-slate-400 hover:text-slate-700"
+                className="p-1 rounded text-slate-400 hover:text-slate-700 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -421,13 +854,22 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                   <span className="font-medium text-slate-800">{selectedReceipt.creatorName}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block">Counterparty:</span>
-                  <span className="font-medium text-slate-800">{selectedReceipt.counterpartyName}</span>
+                  <span className="text-slate-400 block">Promised Counterparty:</span>
+                  <span className="font-medium text-slate-800 flex items-center gap-1.5 mt-0.5">
+                    {selectedReceipt.counterpartyAvatar && (
+                      <img
+                        src={selectedReceipt.counterpartyAvatar}
+                        alt=""
+                        className="w-4 h-4 rounded-full object-cover border border-slate-200"
+                      />
+                    )}
+                    <span>{selectedReceipt.counterpartyName}</span>
+                  </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block">Fulfillment Attested:</span>
+                  <span className="text-slate-400 block">Timed Deadline:</span>
                   <span className="font-medium text-slate-800">
-                    {selectedReceipt.isFulfillmentConfirmed ? 'Yes (Dual Signed)' : 'Pending'}
+                    {selectedReceipt.deadline ? new Date(selectedReceipt.deadline).toLocaleString() : 'Open / Untimed'}
                   </span>
                 </div>
               </div>
@@ -483,6 +925,70 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                 </div>
               </div>
 
+              {/* Comments & Activity Section inside Modal */}
+              <div className="pt-2 border-t border-slate-100 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 font-bold text-slate-800">
+                    <MessageSquare className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>Receipt Discussion Thread ({selectedReceipt.comments?.length || 0})</span>
+                  </div>
+                  <span className="text-[10px] text-slate-500">Open to all network participants</span>
+                </div>
+
+                {selectedReceipt.comments && selectedReceipt.comments.length > 0 ? (
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                    {selectedReceipt.comments.map((cmt) => (
+                      <div key={cmt.id} className="p-2.5 rounded-lg bg-slate-50 border border-slate-200/80 space-y-1">
+                        <div className="flex items-center justify-between gap-2 text-[11px]">
+                          <div className="flex items-center gap-1.5">
+                            {cmt.authorAvatar ? (
+                              <img src={cmt.authorAvatar} alt="" className="w-4 h-4 rounded-full object-cover" />
+                            ) : null}
+                            <span className="font-bold text-slate-900">{cmt.authorName}</span>
+                            <span className="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-slate-200 text-slate-700">
+                              {cmt.authorRole}
+                            </span>
+                          </div>
+                          <span className="text-[10px] text-slate-400">
+                            {new Date(cmt.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                        <p className="text-slate-700 text-xs">{cmt.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-slate-400 italic text-[11px]">
+                    No comments posted yet. The promised user, creator, or any member can post below.
+                  </p>
+                )}
+
+                {/* Comment Input in modal */}
+                <div className="flex gap-2 pt-1">
+                  <input
+                    type="text"
+                    value={commentInputs[selectedReceipt.id] || ''}
+                    onChange={(e) => setCommentInputs((prev) => ({ ...prev, [selectedReceipt.id]: e.target.value }))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleAddComment(selectedReceipt.id);
+                      }
+                    }}
+                    placeholder="Write a comment or progress verification..."
+                    className="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    disabled={commentSubmitting[selectedReceipt.id] || !commentInputs[selectedReceipt.id]?.trim()}
+                    onClick={() => handleAddComment(selectedReceipt.id)}
+                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                  >
+                    Post
+                  </button>
+                </div>
+              </div>
+
               {/* Peer Ratings & Reviews Section */}
               <div className="pt-2 border-t border-slate-100 space-y-2.5">
                 <div className="flex items-center justify-between">
@@ -522,7 +1028,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
               </div>
             </div>
 
-            {/* Bilateral Action Controls (Sandbox Interactive!) */}
+            {/* Bilateral Action Controls */}
             <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <button
@@ -548,9 +1054,10 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                       await onConfirmReceipt(selectedReceipt.id);
                       setSelectedReceipt(null);
                     }}
-                    className="px-4 py-2 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg"
+                    className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
                   >
-                    Simulate Counterparty Terms Confirmation
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Sign Counterparty Acceptance</span>
                   </button>
                 )}
 
@@ -560,87 +1067,14 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                       await onCompleteReceipt(selectedReceipt.id);
                       setSelectedReceipt(null);
                     }}
-                    className="px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg flex items-center gap-1.5 shadow-xs"
+                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
                   >
                     <Check className="w-3.5 h-3.5" />
-                    <span>Dual Sign-Off: Acknowledge Fulfillment</span>
+                    <span>Attest Final Fulfillment</span>
                   </button>
                 )}
-
-                <button
-                  onClick={() => setSelectedReceipt(null)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg"
-                >
-                  Close
-                </button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Dispute Modal */}
-      {showDisputeModal && selectedReceipt && (
-        <div className="fixed inset-0 z-50 overflow-y-auto p-3 sm:p-6 bg-slate-900/60 backdrop-blur-xs flex min-h-full items-center justify-center">
-          <div className="relative bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl p-5 sm:p-6 space-y-4 my-auto max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3.5rem)] overflow-y-auto overscroll-contain text-xs animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <h3 className="text-base font-bold text-red-700 flex items-center gap-1.5">
-                <AlertTriangle className="w-4 h-4" />
-                <span>Formal Receipt Dispute</span>
-              </h3>
-              <button onClick={() => setShowDisputeModal(false)} className="text-slate-400">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <p className="text-slate-600 leading-relaxed">
-              Disputes are logged onto the public audit ledger. Please detail the unfulfilled commitments or discrepancies.
-            </p>
-
-            <form onSubmit={handleRaiseDispute} className="space-y-3">
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Dispute Reason</label>
-                <select
-                  value={disputeReason}
-                  onChange={(e) => setDisputeReason(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg"
-                >
-                  <option value="Unfulfilled Deliverables">Unfulfilled Deliverables</option>
-                  <option value="Late / Missing Milestone">Late / Missing Milestone</option>
-                  <option value="Non-Payment / Partial Payment">Non-Payment / Partial Payment</option>
-                  <option value="Material Breach of Specifications">Material Breach of Specifications</option>
-                  <option value="Fraudulent Representation">Fraudulent Representation</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Detailed Explanation</label>
-                <textarea
-                  required
-                  rows={3}
-                  value={disputeDesc}
-                  onChange={(e) => setDisputeDesc(e.target.value)}
-                  placeholder="Detail the timeline, specific unmet condition, and communications..."
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900"
-                />
-              </div>
-
-              <div className="pt-2 flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowDisputeModal(false)}
-                  className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded font-semibold"
-                >
-                  Record Formal Dispute
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}
@@ -651,12 +1085,17 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
           <div className="relative bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl p-5 sm:p-6 space-y-5 my-auto max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3.5rem)] overflow-y-auto overscroll-contain animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Create Bilateral Trust Receipt</h3>
-                <p className="text-xs text-slate-500">Document a commitment with counterparty confirmation.</p>
+                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <Receipt className="w-4 h-4 text-indigo-600" />
+                  <span>Create Bilateral Trust Receipt</span>
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Add the user you promised, set a timed countdown deadline, and open a public comment log.
+                </p>
               </div>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="p-1 rounded text-slate-400 hover:text-slate-700"
+                className="p-1 rounded text-slate-400 hover:text-slate-700 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -665,16 +1104,188 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
             <form onSubmit={handleCreate} className="space-y-4 text-xs">
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
-                  Commitment / Project Title
+                  Commitment / Project Title *
                 </label>
                 <input
                   type="text"
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. Distributed Payment Microservice Architecture"
+                  placeholder="e.g. Return loaner vehicle / Deliver payment API / Complete frontend milestone"
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
+              </div>
+
+              {/* USER HE PROMISED (Counterparty Selector) */}
+              <div className="p-3 bg-indigo-50/60 rounded-xl border border-indigo-200/80 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <label className="block font-bold text-indigo-950 text-xs flex items-center gap-1.5">
+                    <UserCheck className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>The User You Promised / Counterparty *</span>
+                  </label>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setCounterpartyType('registered')}
+                      className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-colors cursor-pointer ${
+                        counterpartyType === 'registered'
+                          ? 'bg-indigo-600 text-white'
+                          : 'bg-white text-slate-600 border border-slate-200'
+                      }`}
+                    >
+                      Network Member
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCounterpartyType('external');
+                        setTargetCounterpartyId('other');
+                      }}
+                      className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-colors cursor-pointer ${
+                        counterpartyType === 'external'
+                          ? 'bg-indigo-600 text-white'
+                          : 'bg-white text-slate-600 border border-slate-200'
+                      }`}
+                    >
+                      External
+                    </button>
+                  </div>
+                </div>
+
+                {counterpartyType === 'registered' ? (
+                  <div>
+                    <select
+                      value={targetCounterpartyId}
+                      onChange={(e) => handleSelectCounterpartyUser(e.target.value)}
+                      className="w-full px-3 py-2 border border-indigo-300 rounded-lg text-slate-900 bg-white font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    >
+                      {availableUsers.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.fullName} (@{u.username}) — {u.accountType}
+                        </option>
+                      ))}
+                      <option value="other">Other (Enter custom counterparty name)</option>
+                    </select>
+                    <p className="text-[11px] text-indigo-700 mt-1">
+                      The selected user will be notified and can sign off and post comments directly on this receipt.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">Full Name *</label>
+                      <input
+                        type="text"
+                        required
+                        value={counterpartyName}
+                        onChange={(e) => setCounterpartyName(e.target.value)}
+                        placeholder="e.g. Samuel Adekunle"
+                        className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">Email / Phone *</label>
+                      <input
+                        type="text"
+                        required
+                        value={counterpartyContact}
+                        onChange={(e) => setCounterpartyContact(e.target.value)}
+                        placeholder="samuel@example.com"
+                        className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* KEEP IT TIMED (Timed Promise & Deadline) */}
+              <div className="p-3 bg-amber-50/60 rounded-xl border border-amber-200/80 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <label className="block font-bold text-amber-950 text-xs flex items-center gap-1.5">
+                    <Timer className="w-3.5 h-3.5 text-amber-600" />
+                    <span>Keep It Timed (Promise Deadline)</span>
+                  </label>
+                  <label className="flex items-center gap-1.5 text-[11px] font-medium text-amber-900 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={isTimed}
+                      onChange={(e) => setIsTimed(e.target.checked)}
+                      className="rounded text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span>Active Timer</span>
+                  </label>
+                </div>
+
+                {isTimed && (
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-600 mb-1">
+                          Deadline Date *
+                        </label>
+                        <input
+                          type="date"
+                          required={isTimed}
+                          value={deadlineDate}
+                          onChange={(e) => setDeadlineDate(e.target.value)}
+                          className="w-full px-2.5 py-1.5 bg-white border border-amber-300 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-amber-500 text-xs font-mono"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-600 mb-1">
+                          Deadline Time *
+                        </label>
+                        <input
+                          type="time"
+                          required={isTimed}
+                          value={deadlineTime}
+                          onChange={(e) => setDeadlineTime(e.target.value)}
+                          className="w-full px-2.5 py-1.5 bg-white border border-amber-300 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-amber-500 text-xs font-mono"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Quick Presets */}
+                    <div className="flex flex-wrap items-center gap-1 pt-1">
+                      <span className="text-[10px] text-slate-500 font-medium">Quick Presets:</span>
+                      <button
+                        type="button"
+                        onClick={() => setDeadlinePreset('2h')}
+                        className="px-2 py-0.5 rounded bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-semibold transition-colors cursor-pointer"
+                      >
+                        +2 Hours
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeadlinePreset('today_6pm')}
+                        className="px-2 py-0.5 rounded bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-semibold transition-colors cursor-pointer"
+                      >
+                        Today 6 PM
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeadlinePreset('tomorrow_2am')}
+                        className="px-2 py-0.5 rounded bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-semibold transition-colors cursor-pointer"
+                      >
+                        Tomorrow 2 AM
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeadlinePreset('24h')}
+                        className="px-2 py-0.5 rounded bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-semibold transition-colors cursor-pointer"
+                      >
+                        +24 Hours
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeadlinePreset('3d')}
+                        className="px-2 py-0.5 rounded bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-semibold transition-colors cursor-pointer"
+                      >
+                        +3 Days
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -683,7 +1294,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                   <select
                     value={interactionCategory}
                     onChange={(e) => setInteractionCategory(e.target.value as any)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
                   >
                     <option value="Freelance Project">Freelance Project</option>
                     <option value="Goods Sale & Delivery">Goods Sale & Delivery</option>
@@ -704,7 +1315,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                     type="text"
                     value={transactionValue}
                     onChange={(e) => setTransactionValue(e.target.value)}
-                    placeholder="e.g. ₦ 2,500,000 NGN or $3,500 USD"
+                    placeholder="e.g. ₦ 2,500,000 NGN or $3,500"
                     className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900 font-mono focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   />
                 </div>
@@ -720,44 +1331,11 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                     required
                     value={otherCategoryDetails}
                     onChange={(e) => setOtherCategoryDetails(e.target.value)}
-                    placeholder="e.g. Intellectual Property License, Custody Transfer, Art Commission..."
+                    placeholder="e.g. Rare Equipment Custody, Art Commission..."
                     className="w-full px-3 py-2 bg-white border border-purple-300 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-purple-500"
                   />
-                  <p className="text-[11px] text-purple-700">
-                    Defines custom classification for this bilateral trust receipt.
-                  </p>
                 </div>
               )}
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Counterparty Individual or Org
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={counterpartyName}
-                    onChange={(e) => setCounterpartyName(e.target.value)}
-                    placeholder="e.g. Horizon Global Freight"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Counterparty Contact
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={counterpartyContact}
-                    onChange={(e) => setCounterpartyContact(e.target.value)}
-                    placeholder="phone or email"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  />
-                </div>
-              </div>
 
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
@@ -767,60 +1345,53 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                   rows={2}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Outline key deliverables, SLAs, or delivery specifications..."
+                  placeholder="Outline key deliverables, promise conditions, or delivery specifications..."
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
 
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
-                  Defined Completion Conditions (Crucial)
+                  Defined Completion Conditions (Crucial) *
                 </label>
                 <textarea
                   required
                   rows={2}
                   value={completionConditions}
                   onChange={(e) => setCompletionConditions(e.target.value)}
-                  placeholder="State the exact measurable criteria required before this receipt can be finalized (e.g. staging cluster signoff, bill of lading confirmation)..."
+                  placeholder="e.g. Full source code delivered on GitHub and verified by 6:00 PM; vehicle parked with full fuel tank."
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
 
-              {/* Public vs Private Receipt Privacy Selector */}
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <div className="text-xs font-semibold text-slate-900 flex items-center gap-1.5">
-                    {isPublic ? <Globe className="w-3.5 h-3.5 text-indigo-600" /> : <Lock className="w-3.5 h-3.5 text-slate-500" />}
-                    <span>{isPublic ? 'Public Trust Receipt' : 'Private Trust Receipt'}</span>
-                  </div>
-                  <div className="text-[11px] text-slate-500 leading-tight">
-                    {isPublic
-                      ? 'Note: Public receipts appear on the public evidentiary ledger for anyone to inspect.'
-                      : 'Note: Private receipts remain completely confidential between counterparties only.'}
-                  </div>
-                </div>
+              <div className="flex items-center gap-2 pt-1">
                 <input
                   type="checkbox"
+                  id="receipt-public"
                   checked={isPublic}
                   onChange={(e) => setIsPublic(e.target.checked)}
-                  className="w-4 h-4 text-indigo-600 rounded border-slate-300"
+                  className="rounded text-indigo-600 focus:ring-indigo-500"
                 />
+                <label htmlFor="receipt-public" className="text-slate-700 font-medium cursor-pointer">
+                  Publish to Open Verifiable Ledger (Enables community comments & public audit)
+                </label>
               </div>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg"
+                  className="px-3 py-2 text-slate-600 hover:text-slate-800 rounded-lg cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg disabled:opacity-50"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg font-semibold flex items-center gap-1.5 shadow-xs cursor-pointer"
                 >
-                  {submitting ? 'Creating...' : 'Issue Trust Receipt'}
+                  <Plus className="w-4 h-4" />
+                  <span>{submitting ? 'Creating Receipt...' : 'Post Timed Trust Receipt'}</span>
                 </button>
               </div>
             </form>
@@ -828,91 +1399,157 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
         </div>
       )}
 
-      {/* Rate Trust Receipt Modal */}
+      {/* Rate Receipt Modal */}
       {showRateModal && ratingReceipt && (
-        <div className="fixed inset-0 z-50 overflow-y-auto p-4 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center">
-          <div className="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl p-6 space-y-4 my-auto">
+        <div className="fixed inset-0 z-50 overflow-y-auto p-3 sm:p-6 bg-slate-900/60 backdrop-blur-xs flex min-h-full items-center justify-center">
+          <div className="relative bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl p-5 sm:p-6 space-y-4 my-auto animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
-                <h3 className="text-base font-bold text-slate-900">
-                  Rate Trust Receipt #{ratingReceipt.id}
-                </h3>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Rate & Review Trust Receipt</h3>
+                <p className="text-xs text-slate-500">Receipt #{ratingReceipt.id} · {ratingReceipt.title}</p>
               </div>
               <button
                 onClick={() => setShowRateModal(false)}
-                className="text-slate-400 hover:text-slate-600"
+                className="p-1 rounded text-slate-400 hover:text-slate-700 cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="text-xs bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1">
-              <div className="font-bold text-slate-900">{ratingReceipt.title}</div>
-              <div className="text-slate-600">Counterparty: {ratingReceipt.counterpartyName}</div>
-            </div>
-
-            <form onSubmit={handleSubmitRating} className="space-y-3 text-xs">
+            <form onSubmit={handleSubmitRating} className="space-y-4 text-xs">
               <div>
-                <label className="block font-bold text-slate-800 mb-1">Rating Score</label>
+                <label className="block text-slate-700 font-semibold mb-1">Rating Score</label>
                 <div className="flex items-center gap-2">
-                  {[5, 4, 3, 2, 1].map((s) => (
+                  {[1, 2, 3, 4, 5].map((star) => (
                     <button
+                      key={star}
                       type="button"
-                      key={s}
-                      onClick={() => setRateScore(s)}
-                      className={`flex-1 py-2 text-xs font-mono font-bold rounded-lg border transition-colors cursor-pointer ${
-                        rateScore === s
-                          ? 'bg-amber-500 text-white border-amber-500 shadow-2xs'
-                          : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
-                      }`}
+                      onClick={() => setRateScore(star)}
+                      className="p-1 rounded hover:scale-110 transition-transform cursor-pointer"
                     >
-                      {s} ★
+                      <Star
+                        className={`w-6 h-6 ${
+                          star <= rateScore
+                            ? 'text-amber-500 fill-amber-500'
+                            : 'text-slate-300'
+                        }`}
+                      />
                     </button>
                   ))}
+                  <span className="font-mono font-bold text-slate-700 ml-2">{rateScore} of 5 Stars</span>
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-slate-800 mb-1">Rating Badge</label>
+                <label className="block text-slate-700 font-semibold mb-1">Verification Badge</label>
                 <select
                   value={rateBadge}
                   onChange={(e) => setRateBadge(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 bg-white"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
                 >
                   <option value="Full Fulfillment Verified">Full Fulfillment Verified</option>
-                  <option value="Prompt Reliability">Prompt Reliability</option>
-                  <option value="Exceptional Milestone Delivery">Exceptional Milestone Delivery</option>
-                  <option value="Settled with Minor Caveats">Settled with Minor Caveats</option>
-                  <option value="Disputed Delivery Conditions">Disputed Delivery Conditions</option>
+                  <option value="Prompt & Reliable Execution">Prompt & Reliable Execution</option>
+                  <option value="Exemplary Good Faith">Exemplary Good Faith</option>
+                  <option value="Minor Delay / Accepted Handover">Minor Delay / Accepted Handover</option>
+                  <option value="Disputed / Partial Delivery">Disputed / Partial Delivery</option>
                 </select>
               </div>
 
               <div>
-                <label className="block font-bold text-slate-800 mb-1">Review Commentary</label>
+                <label className="block text-slate-700 font-semibold mb-1">Review Note (Optional)</label>
                 <textarea
                   rows={3}
-                  placeholder="Detail your firsthand experience with this transaction, deliverable quality, and honor."
                   value={rateComment}
                   onChange={(e) => setRateComment(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-indigo-500"
+                  placeholder="Describe your counterparty experience, punctuality, and condition of deliverables..."
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowRateModal(false)}
-                  className="px-4 py-2 font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg cursor-pointer"
+                  className="px-3 py-1.5 text-slate-600 hover:text-slate-800 rounded-lg cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submittingRating}
-                  className="px-4 py-2 font-semibold text-white bg-amber-600 hover:bg-amber-700 disabled:opacity-50 rounded-lg shadow-2xs cursor-pointer"
+                  className="px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-semibold flex items-center gap-1.5 shadow-xs cursor-pointer"
                 >
-                  {submittingRating ? 'Recording...' : 'Submit Rating'}
+                  <Star className="w-3.5 h-3.5 fill-white text-white" />
+                  <span>{submittingRating ? 'Submitting...' : 'Submit Rating'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Raise Dispute Modal */}
+      {showDisputeModal && selectedReceipt && (
+        <div className="fixed inset-0 z-50 overflow-y-auto p-3 sm:p-6 bg-slate-900/60 backdrop-blur-xs flex min-h-full items-center justify-center">
+          <div className="relative bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl p-5 sm:p-6 space-y-4 my-auto animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div>
+                <h3 className="text-base font-bold text-red-950 flex items-center gap-1.5">
+                  <AlertTriangle className="w-4 h-4 text-red-600" />
+                  <span>Raise Formal Dispute</span>
+                </h3>
+                <p className="text-xs text-slate-500">Flag receipt #{selectedReceipt.id} for network review</p>
+              </div>
+              <button
+                onClick={() => setShowDisputeModal(false)}
+                className="p-1 rounded text-slate-400 hover:text-slate-700 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleRaiseDispute} className="space-y-4 text-xs">
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Dispute Reason</label>
+                <select
+                  value={disputeReason}
+                  onChange={(e) => setDisputeReason(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
+                >
+                  <option value="Unfulfilled Deliverables">Unfulfilled Deliverables / Breach of Promise</option>
+                  <option value="Overdue Without Communication">Overdue Without Communication</option>
+                  <option value="Damaged or Incomplete Handover">Damaged or Incomplete Handover</option>
+                  <option value="Fraudulent or Forged Conditions">Fraudulent or Forged Conditions</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Detailed Description *</label>
+                <textarea
+                  required
+                  rows={3}
+                  value={disputeDesc}
+                  onChange={(e) => setDisputeDesc(e.target.value)}
+                  placeholder="Provide explicit facts and evidentiary context regarding the breach..."
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowDisputeModal(false)}
+                  className="px-3 py-1.5 text-slate-600 hover:text-slate-800 rounded-lg cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold flex items-center gap-1.5 shadow-xs cursor-pointer"
+                >
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  <span>Submit Dispute</span>
                 </button>
               </div>
             </form>
