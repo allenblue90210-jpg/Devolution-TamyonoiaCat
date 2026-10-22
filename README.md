@@ -67,8 +67,8 @@ git push -u origin main
 
 ## Registered Network Participants
 
-- **Allen Kinetic (`@allenkinetic006`)**: Architect & Verified Trustee, Devolution Technologies Ltd (RC-1849204). Verified identity, phone verified, attested credentials, confirmed relationships, and completed Trust Receipts.
+- **Allen Kinetic (`@allenkinetic006`)**: Architect & Verified Trustee, Devolution Technologies Ltd (RC-1849204). Verified identity, phone verified, attested credentials, confirmed relationships.
 - **Allen Blue (`@allenblue`)**: Verified Trustee (`allennuclear001@gmail.com`).
 - **Lola (`@lola`)**: Operations & Advisory Partner (`allenkinetic001@gmail.com`). Confirmed peer who co-built payment settlement pipelines.
-- **wolf (`@kai`)**: Technology & Hardware Counterparty (`allenblack530@gmail.com`). Counterparty on completed Trust Receipt `TR-90214`.
+- **wolf (`@kai`)**: Technology & Hardware Counterparty (`allenblack530@gmail.com`). Confirmed counterparty on verified enterprise collaborations.
 
