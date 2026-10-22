@@ -108,6 +108,20 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
   const [finishComment, setFinishComment] = useState<string>('');
   const [isSubmittingFinish, setIsSubmittingFinish] = useState(false);
 
+  // Post-Completion Display State: Shown immediately when task is finished & rated
+  const [justFinishedPact, setJustFinishedPact] = useState<{
+    commitmentId: string;
+    title: string;
+    receiptId: string;
+    ratedUserName: string;
+    ratedUserAvatar?: string;
+    starRating: number;
+    ratingPercent: number;
+    badge: string;
+    comment: string;
+    pointsAwarded: number;
+  } | null>(null);
+
   const getCounterpartyForTask = (c: TrustCommitment) => {
     if (c.committerId && c.committerId !== currentUser?.id) {
       return {
@@ -172,6 +186,21 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
         prev.map((c) => (c.id === finishingCommitment.id ? { ...c, ...res.commitment, status: 'completed' } : c))
       );
       setFinishingCommitment(null);
+
+      // Display the rating immediately upon finishing
+      setJustFinishedPact({
+        commitmentId: finishingCommitment.id,
+        title: finishingCommitment.title,
+        receiptId: res.receipt.id,
+        ratedUserName: otherParty.name,
+        ratedUserAvatar: otherParty.avatar,
+        starRating: finishStarRating,
+        ratingPercent: finishRatingPercent,
+        badge: finishRatingBadge,
+        comment: finishComment,
+        pointsAwarded: res.pointsAwarded,
+      });
+
       setActionSuccessMessage(
         `Task marked finished! Attested Trust Receipt #${res.receipt.id} generated and ${otherParty.name} received your ${finishStarRating}★ rating (+${res.pointsAwarded} Trust Points)!`
       );
