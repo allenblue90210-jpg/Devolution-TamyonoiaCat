@@ -1214,6 +1214,15 @@ class Database {
   }
 
   public createCommitment(commitment: TrustCommitment): TrustCommitment {
+    if (!commitment.history) {
+      commitment.history = [];
+    }
+    const actor = commitment.creatorRole === 'promisor' ? commitment.committerName : commitment.requesterName;
+    commitment.history.push({
+      timestamp: commitment.createdAt || new Date().toISOString(),
+      actor: actor || 'Trust Initiator',
+      event: `Commitment pact recorded on ledger (${commitment.isPublic ? 'Public Ledger' : 'Private Bilateral'})`,
+    });
     this.data.commitments.unshift(commitment);
     this.persist();
     return commitment;
@@ -1222,7 +1231,30 @@ class Database {
   public updateCommitment(id: string, updates: Partial<TrustCommitment>): TrustCommitment | null {
     const idx = this.data.commitments.findIndex((c) => c.id === id);
     if (idx === -1) return null;
-    this.data.commitments[idx] = { ...this.data.commitments[idx], ...updates };
+    const current = this.data.commitments[idx];
+    const history = current.history ? [...current.history] : [];
+    if (updates.status && updates.status !== current.status) {
+      history.push({
+        timestamp: new Date().toISOString(),
+        actor: 'Network Ledger',
+        event: `Status changed to "${updates.status}"`,
+      });
+    }
+    if (updates.isPublic !== undefined && updates.isPublic !== current.isPublic) {
+      history.push({
+        timestamp: new Date().toISOString(),
+        actor: 'Network Ledger',
+        event: `Visibility changed to ${updates.isPublic ? 'Public Ledger' : 'Private Bilateral'}`,
+      });
+    }
+    if (updates.linkedReceiptId && updates.linkedReceiptId !== current.linkedReceiptId) {
+      history.push({
+        timestamp: new Date().toISOString(),
+        actor: 'Network Ledger',
+        event: `Dual-signed Trust Receipt #${updates.linkedReceiptId} generated and permanently linked to pact`,
+      });
+    }
+    this.data.commitments[idx] = { ...current, ...updates, history };
     this.persist();
     return this.data.commitments[idx];
   }
