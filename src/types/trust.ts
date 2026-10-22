@@ -526,3 +526,50 @@ export interface ProfileImpressions {
   ratingsCount: number;
 }
 
+export type LedgerEntryType =
+  | 'RECEIPT_DROPPED'
+  | 'COMMITMENT_DROPPED'
+  | 'RECEIPT_CONFIRMED'
+  | 'RECEIPT_FULFILLED'
+  | 'RECEIPT_DISPUTED'
+  | 'RECEIPT_DROPPED_CANCELLED'
+  | 'COMMITMENT_ACCEPTED'
+  | 'COMMITMENT_FULFILLED'
+  | 'COMMITMENT_CHECKED_OUT'
+  | 'COMMITMENT_DROPPED_CANCELLED'
+  | 'GIT_COMMIT_RECORDED'
+  | 'PUBLIC_RECORD_DROPPED'
+  | 'REMEMBER_DROPPED';
+
+export interface RecordedLedgerEntry {
+  id: string; // e.g. "REC-94821"
+  sequence: number; // sequential monotonic counter
+  recordHash: string; // SHA-256 cryptographic digest
+  entryType: LedgerEntryType;
+  targetId: string; // e.g. TR-89241 or TC-9014 or Git commit hash
+  targetTitle: string; // Title or subject
+  actorId?: string;
+  actorName: string;
+  actorAvatar?: string;
+  counterpartyId?: string | null;
+  counterpartyName?: string;
+  counterpartyAvatar?: string;
+  category: string;
+  summary: string;
+  isPublic: boolean;
+  status: string;
+  gitSynced: boolean;
+  gitCommitHash?: string;
+  metadata?: Record<string, any>;
+  timestamp: string; // ISO string
+}
+
+export interface LedgerStats {
+  totalRecorded: number;
+  receiptsDropped: number;
+  commitsDropped: number;
+  publicRecords: number;
+  gitCommits: number;
+  lastRecordedAt: string;
+}
+
