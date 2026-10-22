@@ -552,6 +552,25 @@ app.get('/api/users/list', (_req: Request, res: Response) => {
   res.json({ users });
 });
 
+app.get('/api/users', (_req: Request, res: Response) => {
+  const users = db.getState().users.map((u) => {
+    const isReal = u.id.startsWith('usr_17') || u.id === 'usr_allen_006' || u.id === 'usr_allen_004';
+    return {
+      id: u.id,
+      username: u.username,
+      fullName: u.fullName,
+      accountType: u.accountType,
+      category: u.category,
+      avatarUrl: u.avatarUrl,
+      email: u.email,
+      identityStatus: u.identityStatus,
+      isReal,
+      createdAt: u.createdAt,
+    };
+  });
+  res.json({ users });
+});
+
 /* ==========================================================================
    PUBLIC PROFILES & DISCOVERY
    ========================================================================== */

@@ -1758,6 +1758,154 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
           </div>
         </div>
       )}
+
+      {/* Edit Counterparty Modal */}
+      {editingReceipt && (
+        <div className="fixed inset-0 z-50 overflow-y-auto p-3 sm:p-6 bg-slate-900/60 backdrop-blur-xs flex min-h-full items-center justify-center">
+          <div className="relative bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl p-5 sm:p-6 space-y-4 my-auto animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 flex items-center gap-1.5">
+                  <Users className="w-4 h-4 text-indigo-600" />
+                  <span>Change Counterparty</span>
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Select a registered network participant or specify an external counterparty for Receipt #{editingReceipt.id}
+                </p>
+              </div>
+              <button
+                onClick={() => setEditingReceipt(null)}
+                className="p-1 rounded text-slate-400 hover:text-slate-700 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateReceiptCounterparty} className="space-y-4 text-xs">
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Search Network Members</label>
+                <div className="relative">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                  <input
+                    type="text"
+                    value={editReceiptSearch}
+                    onChange={(e) => setEditReceiptSearch(e.target.value)}
+                    placeholder="Search by name, @username, or email..."
+                    className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              {editReceiptSelectedUser && (
+                <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-lg flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {editReceiptSelectedUser.avatarUrl ? (
+                      <img src={editReceiptSelectedUser.avatarUrl} alt="" className="w-7 h-7 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-7 h-7 rounded-full bg-indigo-200 text-indigo-800 font-bold flex items-center justify-center text-xs">
+                        {editReceiptSelectedUser.fullName?.charAt(0) || 'U'}
+                      </div>
+                    )}
+                    <div>
+                      <div className="font-bold text-indigo-950">{editReceiptSelectedUser.fullName}</div>
+                      <div className="text-[10px] text-indigo-700">
+                        {editReceiptSelectedUser.username ? `@${editReceiptSelectedUser.username}` : 'Custom Counterparty'}
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditReceiptSelectedUser(null);
+                      setEditReceiptExternalName('');
+                    }}
+                    className="text-xs text-indigo-600 font-semibold hover:underline cursor-pointer"
+                  >
+                    Clear
+                  </button>
+                </div>
+              )}
+
+              {/* People list */}
+              <div className="max-h-48 overflow-y-auto rounded-lg border border-slate-200 divide-y divide-slate-100 bg-white">
+                {availableUsers
+                  .filter((u) => {
+                    if (u.id === user.id) return false;
+                    if (!editReceiptSearch.trim()) return true;
+                    const q = editReceiptSearch.toLowerCase();
+                    return (
+                      u.fullName.toLowerCase().includes(q) ||
+                      u.username.toLowerCase().includes(q) ||
+                      (u.email && u.email.toLowerCase().includes(q))
+                    );
+                  })
+                  .map((u) => (
+                    <button
+                      key={u.id}
+                      type="button"
+                      onClick={() => {
+                        setEditReceiptSelectedUser(u);
+                        setEditReceiptExternalName('');
+                      }}
+                      className={`w-full p-2.5 flex items-center justify-between text-left transition-colors cursor-pointer ${
+                        editReceiptSelectedUser?.id === u.id ? 'bg-indigo-50 font-bold' : 'hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        {u.avatarUrl ? (
+                          <img src={u.avatarUrl} alt="" className="w-6 h-6 rounded-full object-cover shrink-0" />
+                        ) : (
+                          <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-[10px] shrink-0">
+                            {u.fullName.charAt(0)}
+                          </div>
+                        )}
+                        <div className="truncate">
+                          <span className="truncate block font-semibold text-slate-800">{u.fullName}</span>
+                          <span className="text-[10px] text-slate-400 font-mono">@{u.username}</span>
+                        </div>
+                      </div>
+                      <span className="text-[10px] text-indigo-600 font-semibold px-2 py-0.5 rounded bg-indigo-50">
+                        {editReceiptSelectedUser?.id === u.id ? 'Selected' : 'Select'}
+                      </span>
+                    </button>
+                  ))}
+
+                {/* External person button */}
+                <div className="p-2.5 bg-slate-50 space-y-1.5">
+                  <div className="text-[11px] font-semibold text-slate-600">Or type custom external counterparty name:</div>
+                  <input
+                    type="text"
+                    value={editReceiptExternalName}
+                    onChange={(e) => {
+                      setEditReceiptExternalName(e.target.value);
+                      setEditReceiptSelectedUser({ id: 'other', fullName: e.target.value });
+                    }}
+                    placeholder="e.g. Victor Okafor"
+                    className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setEditingReceipt(null)}
+                  className="px-4 py-2 font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdatingReceiptCounterparty || (!editReceiptSelectedUser && !editReceiptExternalName.trim())}
+                  className="px-4 py-2 font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 rounded-lg shadow-2xs cursor-pointer"
+                >
+                  {isUpdatingReceiptCounterparty ? 'Updating...' : 'Update Counterparty'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
