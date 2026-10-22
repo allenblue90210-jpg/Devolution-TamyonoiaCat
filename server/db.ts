@@ -747,6 +747,10 @@ function getInitialData(): DatabaseSchema {
   const goodFaithRatings = getInitialGoodFaithRatings();
   const impressions = getInitialImpressions();
 
+  const initialCommitments = getInitialCommitments();
+  const rememberRecords = getInitialRememberRecords();
+  const recordedLedger = buildInitialRecordedLedger(initialCommitments, receipts, rememberRecords);
+
   return {
     users: [allenUser, lolaUser, wolfUser],
     evidence,
@@ -756,13 +760,14 @@ function getInitialData(): DatabaseSchema {
     disputes,
     notifications,
     businesses,
-    commitments: getInitialCommitments(),
+    commitments: initialCommitments,
     phoneOtps: {
       '+234 803 491 8821': { code: '849201', expiresAt: Date.now() + 3600000 },
     },
     goodFaithRatings,
     impressions,
-    rememberRecords: getInitialRememberRecords(),
+    rememberRecords,
+    recordedLedger,
   };
 }
 
@@ -1081,12 +1086,12 @@ class Database {
         const raw = fs.readFileSync(DB_FILE, 'utf-8');
         const parsed = JSON.parse(raw);
         let updated = false;
-        if (!parsed.commitments) {
-          parsed.commitments = [];
+        if (!parsed.commitments || parsed.commitments.length === 0) {
+          parsed.commitments = getInitialCommitments();
           updated = true;
         }
-        if (!parsed.receipts) {
-          parsed.receipts = [];
+        if (!parsed.receipts || parsed.receipts.length === 0) {
+          parsed.receipts = getInitialReceipts();
           updated = true;
         }
         if (!parsed.goodFaithRatings || parsed.goodFaithRatings.length === 0) {
@@ -1099,6 +1104,10 @@ class Database {
         }
         if (!parsed.rememberRecords || parsed.rememberRecords.length === 0) {
           parsed.rememberRecords = getInitialRememberRecords();
+          updated = true;
+        }
+        if (!parsed.recordedLedger || parsed.recordedLedger.length === 0) {
+          parsed.recordedLedger = buildInitialRecordedLedger(parsed.commitments, parsed.receipts, parsed.rememberRecords || []);
           updated = true;
         }
         if (updated) {
@@ -1123,18 +1132,20 @@ class Database {
     };
   }
 
-  private save(data: DatabaseSchema) {
+  private save(data: DatabaseSchema, notify = true) {
     try {
       const dir = path.dirname(DB_FILE);
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
       }
       fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
-      for (const listener of this.saveListeners) {
-        try {
-          listener();
-        } catch (lErr) {
-          console.error('Error in db save listener:', lErr);
+      if (notify) {
+        for (const listener of this.saveListeners) {
+          try {
+            listener();
+          } catch (lErr) {
+            console.error('Error in db save listener:', lErr);
+          }
         }
       }
     } catch (err) {
@@ -1146,8 +1157,8 @@ class Database {
     return this.data;
   }
 
-  public persist() {
-    this.save(this.data);
+  public persist(notify = true) {
+    this.save(this.data, notify);
   }
 
   public reload(): DatabaseSchema {
