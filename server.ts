@@ -2639,6 +2639,32 @@ async function performGitSync(customMessage?: string) {
       }
     }
 
+    // Record git commit on immutable ledger if new commit or push occurred
+    if (committed || pushed) {
+      try {
+        const { stdout: hashOut } = await execAsync('git rev-parse --short HEAD');
+        const shortCommit = hashOut.trim();
+        const syncMsg = customMessage || `chore(sync): automated continuous sync [${new Date().toISOString()}]`;
+        db.recordLedgerEntry(
+          {
+            entryType: 'GIT_COMMIT_RECORDED',
+            targetId: shortCommit,
+            targetTitle: syncMsg,
+            actorName: 'allenblue90210-jpg',
+            category: 'Repository Audit Sync',
+            summary: `Git commit ${shortCommit} synchronized and anchored on GitHub repository. Message: "${syncMsg}".`,
+            isPublic: true,
+            status: pushed ? 'pushed_to_github' : 'committed_locally',
+            gitSynced: true,
+            gitCommitHash: shortCommit,
+          },
+          true
+        );
+      } catch {
+        // ignore
+      }
+    }
+
     lastSyncTime = new Date().toISOString();
     lastSyncStatus = 'synced';
     if (pushed) {
@@ -2770,6 +2796,67 @@ app.post('/api/git/pull', async (_req: Request, res: Response) => {
   } catch (err: any) {
     res.status(500).json({ error: err.message || 'Failed to pull updates from repository' });
   }
+});
+
+/* ==========================================================================
+   IMMUTABLE PUBLIC RECORDED LEDGER & DROPPED AUDIT TRAIL
+   ========================================================================== */
+
+app.get('/api/ledger/records', (req: Request, res: Response) => {
+  const type = req.query.type as string;
+  const isPublicOnly = req.query.public === 'true';
+  const targetId = req.query.targetId as string;
+  const search = req.query.q as string;
+  const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 200;
+
+  const records = db.getRecordedLedger({
+    type,
+    isPublicOnly,
+    targetId,
+    search,
+    limit,
+  });
+
+  res.json({ records, total: records.length });
+});
+
+app.get('/api/ledger/stats', (_req: Request, res: Response) => {
+  const stats = db.getLedgerStats();
+  res.json({ stats });
+});
+
+app.post('/api/ledger/record', (req: Request, res: Response) => {
+  const userId = getSessionUserId(req);
+  const user = db.getUserById(userId);
+  const {
+    targetId,
+    targetTitle,
+    category,
+    summary,
+    isPublic = true,
+    metadata,
+  } = req.body || {};
+
+  if (!targetTitle || !summary) {
+    return res.status(400).json({ error: 'Title and summary are required to record proof on the ledger.' });
+  }
+
+  const record = db.recordLedgerEntry({
+    entryType: 'PUBLIC_RECORD_DROPPED',
+    targetId: targetId || `REC-PROOF-${Date.now()}`,
+    targetTitle,
+    actorId: user?.id || userId,
+    actorName: user?.fullName || 'Verified Network Member',
+    actorAvatar: user?.avatarUrl,
+    category: category || 'Public Trust Attestation',
+    summary,
+    isPublic: Boolean(isPublic),
+    status: 'recorded',
+    metadata,
+  });
+
+  triggerGitSyncDebounced(`record on ledger: ${record.id}`);
+  res.status(201).json({ record, message: 'Attestation permanently recorded on immutable ledger.' });
 });
 
 // Supabase Cloud Backend Endpoints

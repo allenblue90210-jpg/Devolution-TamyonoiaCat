@@ -17,6 +17,8 @@ import {
   ReceiptComment,
   RememberRecord,
   RememberCorroboration,
+  RecordedLedgerEntry,
+  LedgerStats,
 } from '../types/trust.js';
 
 let currentSessionUserId = localStorage.getItem('aegis_session_user_id') || 'usr_allen_006';
@@ -766,6 +768,42 @@ export const api = {
   async getSupabaseSchema(): Promise<string> {
     const res = await fetch('/api/supabase/schema');
     return res.text();
+  },
+
+  // Immutable Recorded Ledger API
+  async getLedgerRecords(params?: {
+    type?: string;
+    isPublicOnly?: boolean;
+    targetId?: string;
+    search?: string;
+    limit?: number;
+  }): Promise<{ records: RecordedLedgerEntry[]; total: number }> {
+    const q = new URLSearchParams();
+    if (params?.type && params.type !== 'all') q.set('type', params.type);
+    if (params?.isPublicOnly) q.set('public', 'true');
+    if (params?.targetId) q.set('targetId', params.targetId);
+    if (params?.search) q.set('q', params.search);
+    if (params?.limit) q.set('limit', String(params.limit));
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return request(`/api/ledger/records${qs}`);
+  },
+
+  async getLedgerStats(): Promise<{ stats: LedgerStats }> {
+    return request('/api/ledger/stats');
+  },
+
+  async recordLedgerAttestation(data: {
+    targetId?: string;
+    targetTitle: string;
+    category?: string;
+    summary: string;
+    isPublic?: boolean;
+    metadata?: Record<string, any>;
+  }): Promise<{ record: RecordedLedgerEntry; message: string }> {
+    return request('/api/ledger/record', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   },
 };
 
