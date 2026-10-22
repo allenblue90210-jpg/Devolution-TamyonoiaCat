@@ -454,7 +454,12 @@ export const api = {
   async checkoutCommitment(
     id: string,
     ratingPercent: number = 100,
-    ratingBadge?: string
+    ratingBadge?: string,
+    extra?: {
+      starRating?: number;
+      comment?: string;
+      ratedUserId?: string;
+    }
   ): Promise<{
     commitment: TrustCommitment;
     receipt: TrustReceipt;
@@ -464,7 +469,7 @@ export const api = {
   }> {
     return request(`/api/commitments/${id}/checkout`, {
       method: 'PUT',
-      body: JSON.stringify({ ratingPercent, ratingBadge }),
+      body: JSON.stringify({ ratingPercent, ratingBadge, ...extra }),
     });
   },
   async addCommitmentComment(

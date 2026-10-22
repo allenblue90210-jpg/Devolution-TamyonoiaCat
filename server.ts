@@ -1935,13 +1935,39 @@ app.put('/api/commitments/:id/checkout', (req: Request, res: Response) => {
   const commitment = db.getCommitmentById(req.params.id);
   if (!commitment) return res.status(404).json({ error: 'Commitment not found' });
 
-  const { ratingPercent = 100, ratingBadge } = req.body || {};
+  const userId = getSessionUserId(req);
+  const currentUser = db.getUserById(userId);
+
+  const {
+    ratingPercent = 100,
+    ratingBadge,
+    starRating = 5,
+    comment = '',
+    ratedUserId,
+  } = req.body || {};
+
   const numRating = Number(ratingPercent) === 50 ? 50 : 100;
+  const numStars = Math.max(1, Math.min(5, Number(starRating) || (numRating === 100 ? 5 : 3)));
   const verifiedBadge = ratingBadge || (numRating === 100 ? '100% Exemplary Good Faith Handover' : '50% Partial / Settled with Caveats');
 
   const now = new Date();
   const deadlineDate = new Date(commitment.deadline);
   const isFulfilledOnTime = now.getTime() <= deadlineDate.getTime();
+
+  // Determine who is being rated (the other user involved in this task)
+  let otherUserId = ratedUserId;
+  if (!otherUserId) {
+    if (userId === commitment.requesterId) {
+      otherUserId = commitment.committerId;
+    } else if (userId === commitment.committerId) {
+      otherUserId = commitment.requesterId;
+    } else {
+      otherUserId = commitment.committerId || commitment.promisedUserId;
+    }
+  }
+
+  const otherUser = otherUserId ? db.getUserById(otherUserId) : null;
+  const otherUserName = otherUser?.fullName || (userId === commitment.requesterId ? commitment.committerName : commitment.requesterName);
 
   const receiptId = `TR-${Math.floor(10000 + Math.random() * 90000)}`;
   const trustReceipt: TrustReceipt = {
@@ -1954,9 +1980,9 @@ app.put('/api/commitments/:id/checkout', (req: Request, res: Response) => {
     interactionCategory: commitment.category === 'Other' ? 'Other' : 'Service Contract',
     otherCategoryDetails: commitment.category === 'Other' ? (commitment.otherCategoryDetails || 'Custom Handover Pact') : undefined,
     title: `Fulfilled Commitment: ${commitment.title}`,
-    description: `Dual-attested fulfillment of time-locked trust pact (${numRating}% Rating). ${commitment.description}. Committer pledged: "${commitment.committerPledgeNote || 'As agreed'}".`,
+    description: `Dual-attested fulfillment of time-locked trust pact (${numRating}% Rating, ${numStars}★). ${commitment.description}. ${comment ? `Review: "${comment.trim()}"` : ''}`,
     status: 'completed',
-    completionConditions: `Delivered by deadline (${new Date(commitment.deadline).toLocaleString()}) and dual-verified at ${numRating}% rating.`,
+    completionConditions: `Delivered and verified finished at ${numRating}% rating (${numStars}★).`,
     isFulfillmentConfirmed: true,
     evidenceAttachments: [
       {
@@ -1978,10 +2004,25 @@ app.put('/api/commitments/:id/checkout', (req: Request, res: Response) => {
       },
       {
         timestamp: now.toISOString(),
-        actor: commitment.requesterName,
-        event: `Dual Checkout Confirmed (${numRating}% Rating Awarded)`,
+        actor: currentUser?.fullName || commitment.requesterName,
+        event: `Marked Finished & Rated (${numRating}% Rating, ${numStars}★)`,
       },
     ],
+    ratings: [
+      {
+        id: `rc_rt_${Date.now()}`,
+        receiptId,
+        authorId: userId,
+        authorName: currentUser?.fullName || 'Verified Observer',
+        authorAvatar: currentUser?.avatarUrl,
+        rating: numStars,
+        goodFaithBadge: verifiedBadge,
+        comment: comment?.trim() || 'Prompt and verified fulfillment in good faith.',
+        createdAt: now.toISOString(),
+      },
+    ],
+    averageRating: numStars,
+    ratingsCount: 1,
     isPublic: commitment.isPublic,
     createdAt: commitment.createdAt,
     completedAt: now.toISOString(),
@@ -1999,24 +2040,81 @@ app.put('/api/commitments/:id/checkout', (req: Request, res: Response) => {
     linkedReceiptId: receiptId,
     ratingPercent: numRating,
     ratingBadge: verifiedBadge,
+    averageRating: numStars,
+    ratingsCount: (commitment.ratingsCount || 0) + 1,
   });
 
-  db.addNotification({
-    id: `notif_${Date.now()}`,
-    userId: commitment.committerId,
-    type: 'receipt_action',
-    title: `Commitment Checked Out (${numRating}% Rating)!`,
-    message: `Checkout confirmed for '${commitment.title}' at ${numRating}% rating. Dual-signed Trust Receipt ${receiptId} generated!`,
-    isRead: false,
+  // Record pact rating review on the commitment itself
+  const pactRating: PactRating = {
+    id: `pct_rate_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    commitmentId: commitment.id,
+    authorId: userId,
+    authorName: currentUser?.fullName || 'Verified Member',
+    authorAvatar: currentUser?.avatarUrl,
+    rating: numStars,
+    ratingPercent: numRating,
+    badge: verifiedBadge,
+    comment: (comment || '').trim() || `${numStars}★ verified fulfillment on completion.`,
     createdAt: now.toISOString(),
-  });
+  };
+  db.ratePactReview(commitment.id, pactRating);
+
+  // If a review comment was provided, also post to pact discussion thread
+  if (comment && comment.trim()) {
+    db.addCommitmentComment(commitment.id, {
+      id: `pcmt_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      commitmentId: commitment.id,
+      authorId: userId,
+      authorName: currentUser?.fullName || 'Verified Member',
+      authorAvatar: currentUser?.avatarUrl,
+      authorRole: userId === commitment.requesterId ? 'Requester' : 'Committer',
+      text: `Marked finished with ${numStars}★ rating: "${comment.trim()}"`,
+      ratingPercent: (numRating === 100 || numRating === 50) ? (numRating as 100 | 50) : null,
+      createdAt: now.toISOString(),
+    });
+  }
+
+  // Record GoodFaithRating on the other user's profile if registered!
+  if (otherUser) {
+    const goodFaithRatingItem: GoodFaithRating = {
+      id: `gfr_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      targetUserId: otherUser.id,
+      targetUsername: otherUser.username,
+      authorId: userId,
+      authorName: currentUser?.fullName || 'Verified Member',
+      authorAvatar: currentUser?.avatarUrl || '',
+      authorTitle: currentUser?.headline || 'Good Faith Community Member',
+      rating: numStars,
+      goodFaithBadge: numStars >= 4 ? 'Exemplary Integrity' : 'Prompt Delivery',
+      comment: comment?.trim() || `Fulfilled and finished task "${commitment.title}" successfully with ${numStars}★ rating!`,
+      context: `Task Completion: ${commitment.title}`,
+      impressions: 1,
+      helpfulCount: 0,
+      createdAt: now.toISOString(),
+    };
+    db.addGoodFaithRating(goodFaithRatingItem);
+  }
+
+  // Notify other user
+  if (otherUserId) {
+    db.addNotification({
+      id: `notif_${Date.now()}`,
+      userId: otherUserId,
+      type: 'receipt_action',
+      title: `Task Marked Finished & Rated (${numStars}★)!`,
+      message: `${currentUser?.fullName || 'Your counterparty'} marked '${commitment.title}' as FINISHED and rated you ${numStars}★ (${verifiedBadge})${comment ? `: "${comment.trim()}"` : '.'} Dual-signed Trust Receipt ${receiptId} generated!`,
+      link: '/commitments',
+      isRead: false,
+      createdAt: now.toISOString(),
+    });
+  }
 
   res.json({
     commitment: updated,
     receipt: trustReceipt,
     pointsAwarded: numRating === 100 ? commitment.trustRewardPoints : Math.round(commitment.trustRewardPoints * 0.5),
     onTime: isFulfilledOnTime,
-    message: `Checkout confirmed at ${numRating}% rating! Trust Receipt generated and reputation updated.`,
+    message: `Task marked finished! Rated ${otherUserName} with ${numStars}★ (${numRating}% rating). Trust Receipt generated and public reputation updated!`,
   });
 });
 
