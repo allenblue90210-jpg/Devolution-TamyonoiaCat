@@ -10,6 +10,7 @@ import {
   ReputationBreakdown,
   TrustCommitment,
 } from '../types/trust.js';
+import { UserAvatar } from './UserAvatar.js';
 import {
   ShieldCheck,
   CheckCircle2,
@@ -132,17 +133,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
               title="Click to upload profile picture"
             >
               <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full ring-2 ring-indigo-100 overflow-hidden bg-slate-100 shadow-xs flex items-center justify-center">
-                {user.avatarUrl ? (
-                  <img
-                    src={user.avatarUrl}
-                    alt={user.fullName}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-indigo-600 text-white font-bold text-lg flex items-center justify-center">
-                    {user.fullName.slice(0, 2).toUpperCase()}
-                  </div>
-                )}
+                <UserAvatar
+                  src={user.avatarUrl}
+                  name={user.fullName}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  iconClassName="w-8 h-8 text-slate-500"
+                />
               </div>
               <div className="absolute inset-0 bg-slate-900/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
                 <Camera className="w-5 h-5 drop-shadow" />

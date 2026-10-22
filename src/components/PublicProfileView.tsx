@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api.js';
 import { User, EvidenceItem, ProfessionalReference, ReputationBreakdown, TrustCommitment } from '../types/trust.js';
+import { UserAvatar } from './UserAvatar.js';
 import {
   ShieldCheck,
   CheckCircle2,
@@ -174,18 +175,12 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
                   : user.fullName
               }
             >
-              {user.avatarUrl ? (
-                <img
-                  src={user.avatarUrl}
-                  alt={user.fullName}
-                  referrerPolicy="no-referrer"
-                  className="w-20 h-20 rounded-full object-cover border-2 border-slate-200 group-hover:scale-105 transition-transform"
-                />
-              ) : (
-                <div className="w-20 h-20 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-2xl border-2 border-white shadow-xs">
-                  {user.fullName.charAt(0)}
-                </div>
-              )}
+              <UserAvatar
+                src={user.avatarUrl}
+                name={user.fullName}
+                className="w-20 h-20 rounded-full border-2 border-slate-200 group-hover:scale-105 transition-transform"
+                iconClassName="w-10 h-10 text-slate-500"
+              />
               {currentUser?.username === user.username && onOpenAvatarUpload && (
                 <>
                   <div className="absolute inset-0 bg-slate-900/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">

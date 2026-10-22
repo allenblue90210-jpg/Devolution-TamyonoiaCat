@@ -695,18 +695,12 @@ export const Navigation: React.FC<NavigationProps> = ({
                   aria-label="User Profile and Account Menu"
                 >
                   <div className="relative shrink-0">
-                    {currentUser.avatarUrl ? (
-                      <img
-                        src={currentUser.avatarUrl}
-                        alt={currentUser.fullName}
-                        referrerPolicy="no-referrer"
-                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover ring-2 ring-indigo-500/20 border border-white shadow-2xs shrink-0"
-                      />
-                    ) : (
-                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs ring-2 ring-indigo-500/20 shadow-2xs shrink-0">
-                        {currentUser.fullName.charAt(0)}
-                      </div>
-                    )}
+                    <UserAvatar
+                      src={currentUser.avatarUrl}
+                      name={currentUser.fullName}
+                      className="w-7 h-7 sm:w-8 sm:h-8 rounded-full ring-2 ring-indigo-500/20 border border-white shadow-2xs shrink-0"
+                      iconClassName="w-4 h-4 text-slate-500"
+                    />
                     <span
                       className="absolute -bottom-0.5 -right-0.5 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"
                       title="Active Profile"
@@ -742,17 +736,12 @@ export const Navigation: React.FC<NavigationProps> = ({
                     <div className="absolute right-0 mt-2 w-72 max-w-[calc(100vw-1.5rem)] bg-white rounded-xl border border-slate-200 shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
                       <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 rounded-t-xl">
                         <div className="flex items-center gap-3">
-                          {currentUser.avatarUrl ? (
-                            <img
-                              src={currentUser.avatarUrl}
-                              alt={currentUser.fullName}
-                              className="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-sm shrink-0">
-                              {currentUser.fullName.charAt(0)}
-                            </div>
-                          )}
+                          <UserAvatar
+                            src={currentUser.avatarUrl}
+                            name={currentUser.fullName}
+                            className="w-10 h-10 rounded-full border border-slate-200 shrink-0"
+                            iconClassName="w-5 h-5 text-slate-500"
+                          />
                           <div className="min-w-0 flex-1">
                             <div className="text-xs font-bold text-slate-900 truncate">{currentUser.fullName}</div>
                             <div className="text-[11px] text-slate-500 font-mono truncate">@{currentUser.username}</div>
