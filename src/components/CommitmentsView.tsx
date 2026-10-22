@@ -1205,49 +1205,44 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                     </button>
                   </div>
 
-                  {/* Step 3: User A confirms dual checkout with GREEN BUTTON & Rating Choice */}
-                  {isRequester && (c.status === 'fulfilled_pending_checkout' || c.status === 'active' || c.status === 'overdue') && (
-                    <div className="mt-2 p-3 rounded-xl bg-emerald-50/90 border border-emerald-300 space-y-2">
-                      <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                        <span className="font-bold text-emerald-950 flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
-                          <span>Dual Checkout Verification</span>
-                        </span>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[11px] text-emerald-800 font-medium">Attest Handover Rating:</span>
-                          <button
-                            type="button"
-                            onClick={() => setCheckoutRatings((prev) => ({ ...prev, [c.id]: 100 }))}
-                            className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-colors cursor-pointer ${
-                              (checkoutRatings[c.id] ?? 100) === 100
-                                ? 'bg-emerald-600 text-white border-emerald-700 font-extrabold'
-                                : 'bg-white text-emerald-800 border-emerald-300 hover:bg-emerald-100'
-                            }`}
-                          >
-                            100% Rating
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setCheckoutRatings((prev) => ({ ...prev, [c.id]: 50 }))}
-                            className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-colors cursor-pointer ${
-                              checkoutRatings[c.id] === 50
-                                ? 'bg-amber-600 text-white border-amber-700 font-extrabold'
-                                : 'bg-white text-amber-800 border-amber-300 hover:bg-amber-100'
-                            }`}
-                          >
-                            50% Rating
-                          </button>
+                  {/* Ongoing Task: Mark Finished & Rate */}
+                  {c.status !== 'completed' && c.status !== 'cancelled' && (
+                    <div className="mt-2.5 p-3.5 rounded-xl bg-gradient-to-r from-emerald-50 via-teal-50/50 to-emerald-50 border border-emerald-300 space-y-2.5 shadow-2xs">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                            <CheckCircle2 className="w-4 h-4 text-white" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-xs font-bold text-emerald-950 flex items-center gap-1.5 flex-wrap">
+                              <span>Has {getCounterpartyForTask(c).name} fulfilled this task?</span>
+                              {c.status === 'fulfilled_pending_checkout' ? (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-600 text-white shadow-2xs">
+                                  Handover Ready
+                                </span>
+                              ) : c.status === 'active' ? (
+                                <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-indigo-100 text-indigo-800">
+                                  Ongoing Task
+                                </span>
+                              ) : null}
+                            </div>
+                            <p className="text-[11px] text-emerald-800">
+                              Mark finished to verify completion and submit your peer rating for {getCounterpartyForTask(c).name}.
+                            </p>
+                          </div>
                         </div>
-                      </div>
 
-                      {/* THE GREEN CHECKOUT BUTTON */}
-                      <button
-                        onClick={() => handleCheckoutCommitment(c.id, checkoutRatings[c.id] ?? 100)}
-                        className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
-                      >
-                        <CheckCircle2 className="w-4 h-4 text-white" />
-                        <span>Confirm Dual Checkout & Verify ({checkoutRatings[c.id] ?? 100}% Rating)</span>
-                      </button>
+                        {/* PRIMARY BUTTON: Mark Finished & Rate */}
+                        <button
+                          type="button"
+                          onClick={() => handleOpenFinishModal(c)}
+                          className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs transition-transform hover:scale-[1.02] cursor-pointer shrink-0"
+                        >
+                          <Check className="w-4 h-4 text-white" />
+                          <Star className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
+                          <span>Mark Finished & Rate</span>
+                        </button>
+                      </div>
                     </div>
                   )}
 
@@ -1914,7 +1909,193 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
             </form>
           </div>
         </div>
-      )}
+      {/* Mark Task Finished & Rate Counterparty Modal */}
+      {finishingCommitment && (() => {
+        const otherParty = getCounterpartyForTask(finishingCommitment);
+        return (
+          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+            <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150 my-auto">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">Mark Task Finished & Rate</h3>
+                    <p className="text-[11px] text-slate-500">Sign off completion and attest counterparty honor</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFinishingCommitment(null)}
+                  className="text-slate-400 hover:text-slate-600 p-1 rounded-lg cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Task Details Banner */}
+              <div className="mb-4 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-indigo-700 font-bold">{finishingCommitment.id}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                    + {finishingCommitment.trustRewardPoints || 25} Trust Points
+                  </span>
+                </div>
+                <div className="font-bold text-slate-900 text-sm">{finishingCommitment.title}</div>
+                <p className="text-slate-600 text-[11px] line-clamp-2">{finishingCommitment.description}</p>
+              </div>
+
+              {/* Counterparty being rated */}
+              <div className="mb-4 p-3.5 bg-gradient-to-r from-indigo-50/80 via-blue-50/60 to-purple-50/40 rounded-xl border border-indigo-200 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {otherParty.avatar ? (
+                    <img src={otherParty.avatar} alt="" className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-2xs" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-2xs">
+                      {otherParty.name.charAt(0)}
+                    </div>
+                  )}
+                  <div>
+                    <div className="text-[10px] uppercase font-bold text-indigo-700 tracking-wider">Rating Counterparty</div>
+                    <div className="font-bold text-slate-900 text-sm">{otherParty.name}</div>
+                    <div className="text-[11px] text-slate-500">{otherParty.role}</div>
+                  </div>
+                </div>
+                <span className="text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-md">
+                  Fulfillment Verified
+                </span>
+              </div>
+
+              <form onSubmit={handleConfirmFinishAndRate} className="space-y-4 text-xs">
+                {/* 1-5 Star Selector */}
+                <div>
+                  <label className="block font-bold text-slate-800 mb-1.5 flex items-center justify-between">
+                    <span>Performance Rating *</span>
+                    <span className="text-amber-600 font-bold font-mono">
+                      {finishStarRating} of 5 Stars
+                    </span>
+                  </label>
+                  <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200 justify-center">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setFinishStarRating(star)}
+                        className="p-1 text-slate-300 hover:text-amber-400 focus:outline-none transition-transform hover:scale-110 cursor-pointer"
+                        title={`${star} Star${star > 1 ? 's' : ''}`}
+                      >
+                        <Star
+                          className={`w-7 h-7 transition-colors ${
+                            star <= finishStarRating
+                              ? 'text-amber-500 fill-amber-500'
+                              : 'text-slate-300 hover:text-amber-300'
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Fulfillment Score (100% or 50%) */}
+                <div>
+                  <label className="block font-bold text-slate-800 mb-1">Attested Fulfillment Honor</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFinishRatingPercent(100);
+                        setFinishRatingBadge('100% Exemplary Good Faith Handover');
+                      }}
+                      className={`p-2.5 rounded-lg border text-left transition-all cursor-pointer ${
+                        finishRatingPercent === 100
+                          ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-400 text-emerald-950 font-bold'
+                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                        <span className="text-xs">100% Full Honor</span>
+                      </div>
+                      <div className="text-[10px] text-slate-500 font-normal mt-0.5">
+                        Delivered fully to satisfaction & on-time.
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFinishRatingPercent(50);
+                        setFinishRatingBadge('50% Partial / Settled with Minor Caveats');
+                      }}
+                      className={`p-2.5 rounded-lg border text-left transition-all cursor-pointer ${
+                        finishRatingPercent === 50
+                          ? 'bg-amber-50 border-amber-500 ring-2 ring-amber-400 text-amber-950 font-bold'
+                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="w-4 h-4 text-amber-600" />
+                        <span className="text-xs">50% Partial Settle</span>
+                      </div>
+                      <div className="text-[10px] text-slate-500 font-normal mt-0.5">
+                        Completed with accepted delays or caveats.
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Rating Badge Selector */}
+                <div>
+                  <label className="block font-bold text-slate-800 mb-1">Good Faith Endorsement Badge</label>
+                  <select
+                    value={finishRatingBadge}
+                    onChange={(e) => setFinishRatingBadge(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  >
+                    <option value="100% Exemplary Good Faith Handover">100% Exemplary Good Faith Handover</option>
+                    <option value="100% Flawless Honor Pledged">100% Flawless Honor Pledged</option>
+                    <option value="Prompt On-Time Delivery">Prompt On-Time Delivery</option>
+                    <option value="Exemplary Work Quality">Exemplary Work Quality</option>
+                    <option value="50% Partial / Settled with Minor Caveats">50% Partial / Settled with Minor Caveats</option>
+                    <option value="Default Averted / Remedial Fulfilled">Default Averted / Remedial Fulfilled</option>
+                  </select>
+                </div>
+
+                {/* Review Note / Comment */}
+                <div>
+                  <label className="block font-bold text-slate-800 mb-1">Review Note & Feedback for {otherParty.name} (Optional)</label>
+                  <textarea
+                    rows={3}
+                    value={finishComment}
+                    onChange={(e) => setFinishComment(e.target.value)}
+                    placeholder={`Describe ${otherParty.name}'s fulfillment, punctuality, and handover condition. This public feedback will be recorded on their verified profile ledger.`}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setFinishingCommitment(null)}
+                    className="px-4 py-2 font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmittingFinish}
+                    className="px-5 py-2.5 font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-50 rounded-lg shadow-xs flex items-center gap-2 cursor-pointer"
+                  >
+                    <Check className="w-4 h-4" />
+                    <span>{isSubmittingFinish ? 'Marking Finished...' : 'Confirm Finished & Submit Rating'}</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Change / Reassign Counterparty Modal */}
       {editingCommitment && (
