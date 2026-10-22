@@ -1474,9 +1474,9 @@
       "status": "overdue",
       "trustRewardPoints": 20,
       "penaltyRateDailyPercent": 30,
-      "penaltyCurrentDeductionPercent": 60,
+      "penaltyCurrentDeductionPercent": 90,
       "isOverdue": true,
-      "daysOverdue": 2,
+      "daysOverdue": 3,
       "checkedOutByCommitterAt": null,
       "checkedOutByRequesterAt": null,
       "linkedReceiptId": null,
@@ -1568,7 +1568,7 @@
   ],
   "impressions": {
     "network": {
-      "impressions": 4940,
+      "impressions": 4941,
       "witnessCount": 560
     },
     "usr_allen_001": {
