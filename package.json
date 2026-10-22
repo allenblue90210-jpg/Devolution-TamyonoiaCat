@@ -8,7 +8,7 @@
     "build": "vite build",
     "start": "node server.ts",
     "preview": "vite preview",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
     "sync": "git add -A && (git diff --cached --quiet || git commit -m 'chore: continuous repo sync') && git push origin main",
     "push": "git add -A && (git diff --cached --quiet || git commit -m 'chore: manual push to repo') && git push origin main"
