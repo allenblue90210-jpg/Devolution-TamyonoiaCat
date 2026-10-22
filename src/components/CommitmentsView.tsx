@@ -259,6 +259,43 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
     }
   };
 
+  const handleUpdateCommitmentCounterparty = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCommitment) return;
+
+    const chosenUser = editSelectedUser;
+    const isOther = chosenUser?.id === 'other' || (!chosenUser && editExternalName.trim());
+    const finalName = chosenUser && chosenUser.id !== 'other'
+      ? chosenUser.fullName
+      : (editExternalName.trim() || editCounterpartySearch.trim());
+
+    if (!finalName) {
+      alert('Please select a network member or enter an external counterparty name.');
+      return;
+    }
+
+    try {
+      setIsUpdatingCounterparty(true);
+      await api.updateCommitment(editingCommitment.id, {
+        counterpartyUserId: isOther ? 'other' : chosenUser?.id,
+        counterpartyName: finalName,
+      });
+
+      setEditingCommitment(null);
+      setEditSelectedUser(null);
+      setEditCounterpartySearch('');
+      setEditExternalName('');
+      setActionSuccessMessage(`Counterparty successfully changed to "${finalName}"!`);
+      setTimeout(() => setActionSuccessMessage(null), 4000);
+      await loadCommitments();
+      onRefreshAllData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to update counterparty');
+    } finally {
+      setIsUpdatingCounterparty(false);
+    }
+  };
+
   const handleAcceptCommitment = async (id: string) => {
     if (!pledgeNote.trim()) {
       alert('Please enter your confirmed pledge note (e.g. "I\'ll bring it by 2am").');
@@ -808,6 +845,24 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                         {c.ratingPercent ?? 100}% Rating ({c.ratingBadge || ((c.ratingPercent ?? 100) === 100 ? 'Exemplary Honor' : 'Partial / Settled')})
                       </span>
                     </div>
+
+                    {c.status !== 'completed' && c.status !== 'cancelled' && (
+                      <div className="w-full pt-1.5 flex justify-end border-t border-slate-200/60">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingCommitment(c);
+                            setEditSelectedUser(null);
+                            setEditCounterpartySearch('');
+                            setEditExternalName('');
+                          }}
+                          className="text-[11px] text-indigo-600 hover:text-indigo-800 font-semibold hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          <UserCheck className="w-3.5 h-3.5" />
+                          <span>Change Counterparty</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
 
