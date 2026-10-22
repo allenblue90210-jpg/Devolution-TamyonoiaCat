@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TrustReceipt, ReceiptStatus, User, ReceiptComment } from '../types/trust.js';
 import { api } from '../services/api.js';
+import { UserAvatar } from './UserAvatar.js';
 import {
   Receipt,
   CheckCircle2,
@@ -1246,17 +1247,12 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                         return (
                           <div className="p-2.5 bg-indigo-50/80 border border-indigo-200 rounded-xl flex items-center justify-between gap-3 shadow-2xs">
                             <div className="flex items-center gap-2.5 min-w-0">
-                              {sel?.avatarUrl ? (
-                                <img
-                                  src={sel.avatarUrl}
-                                  alt={sel.fullName}
-                                  className="w-8 h-8 rounded-full object-cover border border-indigo-200 shrink-0"
-                                />
-                              ) : (
-                                <div className="w-8 h-8 rounded-full bg-indigo-200 text-indigo-800 font-bold flex items-center justify-center shrink-0 text-xs">
-                                  {(counterpartyName || 'U').charAt(0)}
-                                </div>
-                              )}
+                              <UserAvatar
+                                src={sel?.avatarUrl}
+                                name={counterpartyName || 'User'}
+                                className="w-8 h-8 rounded-full border border-indigo-200 shrink-0"
+                                iconClassName="w-4 h-4 text-slate-500"
+                              />
                               <div className="min-w-0">
                                 <div className="font-bold text-slate-900 text-xs truncate flex items-center gap-1.5">
                                   <span>{counterpartyName}</span>
@@ -1334,17 +1330,12 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                                 className="w-full p-2.5 flex items-center justify-between hover:bg-indigo-50/80 text-left transition-colors cursor-pointer group"
                               >
                                 <div className="flex items-center gap-2.5 min-w-0">
-                                  {u.avatarUrl ? (
-                                    <img
-                                      src={u.avatarUrl}
-                                      alt={u.fullName}
-                                      className="w-7 h-7 rounded-full object-cover shrink-0 border border-slate-200"
-                                    />
-                                  ) : (
-                                    <div className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center shrink-0 text-xs">
-                                      {u.fullName.charAt(0)}
-                                    </div>
-                                  )}
+                                  <UserAvatar
+                                    src={u.avatarUrl}
+                                    name={u.fullName}
+                                    className="w-7 h-7 rounded-full shrink-0 border border-slate-200"
+                                    iconClassName="w-3.5 h-3.5 text-slate-500"
+                                  />
                                   <div className="min-w-0">
                                     <span className="font-semibold text-slate-900 truncate block group-hover:text-indigo-600">
                                       {u.fullName}
@@ -1815,13 +1806,12 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
               {editReceiptSelectedUser && (
                 <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-lg flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    {editReceiptSelectedUser.avatarUrl ? (
-                      <img src={editReceiptSelectedUser.avatarUrl} alt="" className="w-7 h-7 rounded-full object-cover" />
-                    ) : (
-                      <div className="w-7 h-7 rounded-full bg-indigo-200 text-indigo-800 font-bold flex items-center justify-center text-xs">
-                        {editReceiptSelectedUser.fullName?.charAt(0) || 'U'}
-                      </div>
-                    )}
+                    <UserAvatar
+                      src={editReceiptSelectedUser.avatarUrl}
+                      name={editReceiptSelectedUser.fullName}
+                      className="w-7 h-7 rounded-full"
+                      iconClassName="w-3.5 h-3.5 text-slate-500"
+                    />
                     <div>
                       <div className="font-bold text-indigo-950">{editReceiptSelectedUser.fullName}</div>
                       <div className="text-[10px] text-indigo-700">
@@ -1868,13 +1858,12 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                       }`}
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        {u.avatarUrl ? (
-                          <img src={u.avatarUrl} alt="" className="w-6 h-6 rounded-full object-cover shrink-0" />
-                        ) : (
-                          <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-[10px] shrink-0">
-                            {u.fullName.charAt(0)}
-                          </div>
-                        )}
+                        <UserAvatar
+                          src={u.avatarUrl}
+                          name={u.fullName}
+                          className="w-6 h-6 rounded-full shrink-0"
+                          iconClassName="w-3 h-3 text-slate-500"
+                        />
                         <div className="truncate">
                           <span className="truncate block font-semibold text-slate-800">{u.fullName}</span>
                           <span className="text-[10px] text-slate-400 font-mono">@{u.username}</span>
