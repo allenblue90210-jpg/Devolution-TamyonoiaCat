@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, UserPrivacySettings } from '../types/trust.js';
 import { api } from '../services/api.js';
+import { UserAvatar } from './UserAvatar.js';
 import {
   ShieldCheck,
   Download,
@@ -311,11 +312,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-indigo-100 bg-slate-200 shrink-0 shadow-xs flex items-center justify-center">
-                {user.avatarUrl ? (
-                  <img src={user.avatarUrl} alt={user.fullName} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="font-bold text-indigo-700 text-lg">{user.fullName.slice(0, 2).toUpperCase()}</span>
-                )}
+                <UserAvatar
+                  src={user.avatarUrl}
+                  name={user.fullName}
+                  className="w-full h-full object-cover"
+                  iconClassName="w-8 h-8 text-slate-500"
+                />
               </div>
               <div>
                 <h3 className="font-bold text-slate-900 text-xs">Profile Picture</h3>

@@ -506,10 +506,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="bg-slate-50 rounded-xl border border-slate-200 p-5 space-y-4 hover:border-indigo-300 hover:shadow-xs transition-all flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="flex items-start gap-3.5">
-                    <img
-                      src="/src/assets/images/avatar_founder_1792334631930.jpg"
-                      alt="Allen Kinetic"
-                      className="w-12 h-12 rounded-xl object-cover border border-slate-200 shadow-2xs"
+                    <UserAvatar
+                      src=""
+                      name="Allen Kinetic"
+                      className="w-12 h-12 rounded-xl border border-slate-200 shadow-2xs"
+                      iconClassName="w-6 h-6 text-slate-500"
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
@@ -566,10 +567,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="bg-slate-50 rounded-xl border border-slate-200 p-5 space-y-4 hover:border-indigo-300 hover:shadow-xs transition-all flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="flex items-start gap-3.5">
-                    <img
-                      src="/src/assets/images/avatar_consultant_1792334644466.jpg"
-                      alt="Lola"
-                      className="w-12 h-12 rounded-xl object-cover border border-slate-200 shadow-2xs"
+                    <UserAvatar
+                      src=""
+                      name="Lola"
+                      className="w-12 h-12 rounded-xl border border-slate-200 shadow-2xs"
+                      iconClassName="w-6 h-6 text-slate-500"
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
@@ -734,17 +736,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-3">
-                        {item.authorAvatar ? (
-                          <img
-                            src={item.authorAvatar}
-                            alt={item.authorName}
-                            className="w-10 h-10 rounded-full object-cover border border-slate-100"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">
-                            {item.authorName.charAt(0)}
-                          </div>
-                        )}
+                        <UserAvatar
+                          src={item.authorAvatar}
+                          name={item.authorName}
+                          className="w-10 h-10 rounded-full border border-slate-100"
+                          iconClassName="w-5 h-5 text-slate-500"
+                        />
                         <div>
                           <div className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
                             <span>{item.authorName}</span>
