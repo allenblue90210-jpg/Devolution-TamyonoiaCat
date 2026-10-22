@@ -1551,17 +1551,12 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                   {selectedCounterpartyUser ? (
                     <div className="p-2.5 bg-indigo-50/80 border border-indigo-200 rounded-xl flex items-center justify-between gap-3 shadow-2xs">
                       <div className="flex items-center gap-2.5 min-w-0">
-                        {selectedCounterpartyUser.avatarUrl ? (
-                          <img
-                            src={selectedCounterpartyUser.avatarUrl}
-                            alt={selectedCounterpartyUser.fullName}
-                            className="w-8 h-8 rounded-full object-cover border border-indigo-200 shrink-0"
-                          />
-                        ) : (
-                          <div className="w-8 h-8 rounded-full bg-indigo-200 text-indigo-800 font-bold flex items-center justify-center shrink-0 text-xs">
-                            {selectedCounterpartyUser.fullName.charAt(0)}
-                          </div>
-                        )}
+                        <UserAvatar
+                          src={selectedCounterpartyUser.avatarUrl}
+                          name={selectedCounterpartyUser.fullName}
+                          className="w-8 h-8 rounded-full border border-indigo-200 shrink-0"
+                          iconClassName="w-4 h-4 text-slate-500"
+                        />
                         <div className="min-w-0">
                           <div className="font-bold text-slate-900 text-xs truncate flex items-center gap-1.5">
                             <span>{selectedCounterpartyUser.fullName}</span>
@@ -1672,17 +1667,12 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                               className="w-full p-2.5 flex items-center justify-between hover:bg-indigo-50/80 text-left transition-colors cursor-pointer group"
                             >
                               <div className="flex items-center gap-2.5 min-w-0">
-                                {u.avatarUrl ? (
-                                  <img
-                                    src={u.avatarUrl}
-                                    alt={u.fullName}
-                                    className="w-7 h-7 rounded-full object-cover shrink-0 border border-slate-200"
-                                  />
-                                ) : (
-                                  <div className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center shrink-0 text-xs">
-                                    {u.fullName.charAt(0)}
-                                  </div>
-                                )}
+                                <UserAvatar
+                                  src={u.avatarUrl}
+                                  name={u.fullName}
+                                  className="w-7 h-7 rounded-full shrink-0 border border-slate-200"
+                                  iconClassName="w-3.5 h-3.5 text-slate-500"
+                                />
                                 <div className="min-w-0">
                                   <span className="font-semibold text-slate-900 truncate block group-hover:text-indigo-600">
                                     {u.fullName}
@@ -2077,13 +2067,12 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
               {/* Counterparty being rated */}
               <div className="mb-4 p-3.5 bg-gradient-to-r from-indigo-50/80 via-blue-50/60 to-purple-50/40 rounded-xl border border-indigo-200 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  {otherParty.avatar ? (
-                    <img src={otherParty.avatar} alt="" className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-2xs" />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-2xs">
-                      {otherParty.name.charAt(0)}
-                    </div>
-                  )}
+                  <UserAvatar
+                    src={otherParty.avatar}
+                    name={otherParty.name}
+                    className="w-10 h-10 rounded-full border-2 border-white shadow-2xs"
+                    iconClassName="w-5 h-5 text-slate-500"
+                  />
                   <div>
                     <div className="text-[10px] uppercase font-bold text-indigo-700 tracking-wider">Rating Counterparty</div>
                     <div className="font-bold text-slate-900 text-sm">{otherParty.name}</div>
@@ -2436,13 +2425,12 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                       }`}
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        {u.avatarUrl ? (
-                          <img src={u.avatarUrl} alt="" className="w-6 h-6 rounded-full object-cover shrink-0" />
-                        ) : (
-                          <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-[10px] shrink-0">
-                            {u.fullName.charAt(0)}
-                          </div>
-                        )}
+                        <UserAvatar
+                          src={u.avatarUrl}
+                          name={u.fullName}
+                          className="w-6 h-6 rounded-full shrink-0"
+                          iconClassName="w-3 h-3 text-slate-500"
+                        />
                         <div className="truncate">
                           <span className="truncate block">{u.fullName}</span>
                           <span className="text-[10px] text-slate-400 font-mono">@{u.username}</span>
