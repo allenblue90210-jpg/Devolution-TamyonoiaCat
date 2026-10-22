@@ -78,7 +78,7 @@ export function calculateReputation(
 
   const onTimeDeliveryRate = totalCommitments > 0
     ? Math.round((completedOnTime / totalCommitments) * 100)
-    : 100;
+    : 0;
 
   // Base Trust Score Calculation (0 - 100 scale)
   let calculatedScore = 20; // baseline identity stake

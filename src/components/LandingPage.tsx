@@ -326,7 +326,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       <div className="text-[11px] text-slate-500">Confirmed Ties</div>
                     </div>
                     <div>
-                      <div className="text-lg font-bold font-mono tabular-nums text-slate-900">3</div>
+                      <div className="text-lg font-bold font-mono tabular-nums text-slate-900">0</div>
                       <div className="text-[11px] text-slate-500">Completed Receipts</div>
                     </div>
                     <div>
@@ -1006,7 +1006,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       "entity_name": "Aegis Tech Systems Ltd"
     },
     "confirmed_relationships": 8,
-    "fulfilled_trust_receipts": 3,
+    "fulfilled_trust_receipts": 0,
     "active_disputes": 0
   },
   "signature": "0x7f4e91c...b28a9",

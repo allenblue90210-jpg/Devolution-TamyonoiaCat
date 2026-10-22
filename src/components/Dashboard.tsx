@@ -369,9 +369,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <Flame className="w-3 h-3 text-red-600" />
                   -{reputation.penaltyPercent}% Penalty Active for Overdue Pact
                 </span>
-              ) : (
+              ) : reputation?.commitmentsSummary?.total && reputation.commitmentsSummary.total > 0 ? (
                 <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                  {reputation?.commitmentsSummary?.onTimeDeliveryRate ?? 100}% On-Time Delivery
+                  {reputation.commitmentsSummary.onTimeDeliveryRate}% On-Time Delivery ({reputation.commitmentsSummary.completedOnTime}/{reputation.commitmentsSummary.total})
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                  0 Commitments on Ledger
                 </span>
               )}
             </div>
