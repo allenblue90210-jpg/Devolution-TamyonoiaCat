@@ -500,27 +500,27 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Person 1: Allen Okoro */}
+              {/* Person 1: Allen Kinetic */}
               <div className="bg-slate-50 rounded-xl border border-slate-200 p-5 space-y-4 hover:border-indigo-300 hover:shadow-xs transition-all flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="flex items-start gap-3.5">
                     <img
                       src="/src/assets/images/avatar_founder_1792334631930.jpg"
-                      alt="Allen Okoro"
+                      alt="Allen Kinetic"
                       className="w-12 h-12 rounded-xl object-cover border border-slate-200 shadow-2xs"
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <h4 className="font-bold text-slate-900 text-sm truncate">Allen Okoro</h4>
+                        <h4 className="font-bold text-slate-900 text-sm truncate">Allen Kinetic</h4>
                         <span title="Identity Verified"><ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" /></span>
                       </div>
-                      <div className="text-xs text-slate-500 font-mono">@allenokoro</div>
+                      <div className="text-xs text-slate-500 font-mono">@allenkinetic006</div>
                       <div className="text-[11px] text-slate-400 mt-0.5">Lagos, Nigeria</div>
                     </div>
                   </div>
 
                   <p className="text-xs text-slate-600 line-clamp-2">
-                    Founder & Principal Systems Architect at Aegis Systems. Distributed consensus & smart escrow.
+                    Devolution Network Architect & Verified Trustee. Distributed systems and cryptographic evidence.
                   </p>
 
                   {/* Impression & Good Faith Ratings Pills */}
@@ -535,21 +535,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     </span>
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 font-bold border border-amber-200" title="Good faith community rating">
                       <Star className="w-3 h-3 text-amber-500 fill-amber-400" />
-                      <span>5.0 (2 reviews)</span>
+                      <span>5.0 (5 reviews)</span>
                     </span>
                   </div>
                 </div>
 
                 <div className="pt-3 border-t border-slate-200/80 flex items-center gap-2">
                   <button
-                    onClick={() => onExploreProfile('allenokoro')}
+                    onClick={() => onExploreProfile('allenkinetic006')}
                     className="flex-1 py-1.5 px-3 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg text-center transition-colors cursor-pointer"
                   >
                     View Profile
                   </button>
                   <button
                     onClick={() => {
-                      setSelectedReviewTarget({ name: 'Allen Okoro', userId: 'usr_allen_001', username: 'allenokoro' });
+                      setSelectedReviewTarget({ name: 'Allen Kinetic', userId: 'usr_allen_006', username: 'allenkinetic006' });
                       setShowRateModal(true);
                     }}
                     className="py-1.5 px-2.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors cursor-pointer"
@@ -560,27 +560,27 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
               </div>
 
-              {/* Person 2: Sarah Adesina */}
+              {/* Person 2: Lola */}
               <div className="bg-slate-50 rounded-xl border border-slate-200 p-5 space-y-4 hover:border-indigo-300 hover:shadow-xs transition-all flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="flex items-start gap-3.5">
                     <img
-                      src="/src/assets/images/avatar_sarah_1792334645228.jpg"
-                      alt="Sarah Adesina"
+                      src="/src/assets/images/avatar_consultant_1792334644466.jpg"
+                      alt="Lola"
                       className="w-12 h-12 rounded-xl object-cover border border-slate-200 shadow-2xs"
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <h4 className="font-bold text-slate-900 text-sm truncate">Sarah Adesina</h4>
+                        <h4 className="font-bold text-slate-900 text-sm truncate">Lola</h4>
                         <span title="Identity Verified"><ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" /></span>
                       </div>
-                      <div className="text-xs text-slate-500 font-mono">@sarah_adesina</div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">Abuja, Nigeria</div>
+                      <div className="text-xs text-slate-500 font-mono">@lola</div>
+                      <div className="text-[11px] text-slate-400 mt-0.5">Verified Member</div>
                     </div>
                   </div>
 
                   <p className="text-xs text-slate-600 line-clamp-2">
-                    Senior Cloud Security Architect at CloudWorks NG. Zero-trust infrastructure auditor.
+                    Verified relationship anchor & transaction partner on Devolution trust infrastructure.
                   </p>
 
                   <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-200/80 text-[11px]">
@@ -594,52 +594,50 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     </span>
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 font-bold border border-amber-200">
                       <Star className="w-3 h-3 text-amber-500 fill-amber-400" />
-                      <span>5.0 (1 review)</span>
+                      <span>5.0 (3 reviews)</span>
                     </span>
                   </div>
                 </div>
 
                 <div className="pt-3 border-t border-slate-200/80 flex items-center gap-2">
                   <button
-                    onClick={() => onExploreProfile('sarah_adesina')}
+                    onClick={() => onExploreProfile('lola')}
                     className="flex-1 py-1.5 px-3 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg text-center transition-colors cursor-pointer"
                   >
                     View Profile
                   </button>
                   <button
                     onClick={() => {
-                      setSelectedReviewTarget({ name: 'Sarah Adesina', userId: 'usr_sarah_002', username: 'sarah_adesina' });
+                      setSelectedReviewTarget({ name: 'Lola', userId: 'usr_1792419058259_ehg5', username: 'lola' });
                       setShowRateModal(true);
                     }}
                     className="py-1.5 px-2.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors cursor-pointer"
-                    title="Rate Sarah in good faith"
+                    title="Rate Lola in good faith"
                   >
                     Rate
                   </button>
                 </div>
               </div>
 
-              {/* Person 3: Fatima Bello */}
+              {/* Person 3: wolf / Kai */}
               <div className="bg-slate-50 rounded-xl border border-slate-200 p-5 space-y-4 hover:border-indigo-300 hover:shadow-xs transition-all flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="flex items-start gap-3.5">
-                    <img
-                      src="/src/assets/images/avatar_fatima_1792334658112.jpg"
-                      alt="Fatima Bello"
-                      className="w-12 h-12 rounded-xl object-cover border border-slate-200 shadow-2xs"
-                    />
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold flex items-center justify-center text-lg border border-slate-200 shadow-2xs">
+                      W
+                    </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <h4 className="font-bold text-slate-900 text-sm truncate">Fatima Bello</h4>
+                        <h4 className="font-bold text-slate-900 text-sm truncate">wolf</h4>
                         <span title="Identity Verified"><ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" /></span>
                       </div>
-                      <div className="text-xs text-slate-500 font-mono">@fatimabello</div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">Port Harcourt, Nigeria</div>
+                      <div className="text-xs text-slate-500 font-mono">@kai</div>
+                      <div className="text-[11px] text-slate-400 mt-0.5">Verified Network Member</div>
                     </div>
                   </div>
 
                   <p className="text-xs text-slate-600 line-clamp-2">
-                    Chief Operating Officer at Horizon Global Freight. Cross-border logistics settlement.
+                    Verified counterparty on collaborative pacts, hardware loaners, and dual-signed milestones.
                   </p>
 
                   <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-200/80 text-[11px]">
@@ -653,25 +651,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     </span>
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 font-bold border border-amber-200">
                       <Star className="w-3 h-3 text-amber-500 fill-amber-400" />
-                      <span>5.0 (1 review)</span>
+                      <span>5.0 (2 reviews)</span>
                     </span>
                   </div>
                 </div>
 
                 <div className="pt-3 border-t border-slate-200/80 flex items-center gap-2">
                   <button
-                    onClick={() => onExploreProfile('fatimabello')}
+                    onClick={() => onExploreProfile('kai')}
                     className="flex-1 py-1.5 px-3 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg text-center transition-colors cursor-pointer"
                   >
                     View Profile
                   </button>
                   <button
                     onClick={() => {
-                      setSelectedReviewTarget({ name: 'Fatima Bello', userId: 'usr_fatima_003', username: 'fatimabello' });
+                      setSelectedReviewTarget({ name: 'wolf', userId: 'usr_1792423308615_lq64', username: 'kai' });
                       setShowRateModal(true);
                     }}
                     className="py-1.5 px-2.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors cursor-pointer"
-                    title="Rate Fatima in good faith"
+                    title="Rate wolf in good faith"
                   >
                     Rate
                   </button>
