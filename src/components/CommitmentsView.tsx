@@ -32,6 +32,7 @@ import {
   MessageCircle,
   X,
   Search,
+  Award,
 } from 'lucide-react';
 
 interface CommitmentsViewProps {
