@@ -177,7 +177,6 @@ export const Navigation: React.FC<NavigationProps> = ({
   // Clean, prioritized primary navigation links
   const primaryNavLinks = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'profile', label: 'Profile', icon: UserIcon },
     { id: 'commitments', label: 'Commitments', icon: Clock },
     { id: 'relationships', label: 'Verification', icon: Users },
     { id: 'receipts', label: 'Receipts', icon: Receipt },
@@ -187,8 +186,13 @@ export const Navigation: React.FC<NavigationProps> = ({
   const moreNavLinks = [
     { id: 'evidence', label: 'Evidence', icon: ShieldCheck },
     { id: 'directory', label: 'Directory', icon: Compass },
-    { id: 'reputation', label: 'Reputation', icon: Sparkles },
     { id: 'remember', label: 'Remember', icon: Bookmark },
+  ];
+
+  // Placed at the end right: Reputation beside Profile
+  const endNavLinks = [
+    { id: 'reputation', label: 'Reputation', icon: Sparkles },
+    { id: 'profile', label: 'Profile', icon: UserIcon },
   ];
 
   return (
@@ -212,21 +216,13 @@ export const Navigation: React.FC<NavigationProps> = ({
           <nav className="hidden lg:flex items-center gap-1 text-xs font-medium text-slate-600">
             {primaryNavLinks.map((link) => {
               const Icon = link.icon;
-              const isActive =
-                currentTab === link.id ||
-                (link.id === 'profile' && (currentTab === 'profile' || currentTab.startsWith('profile-')));
+              const isActive = currentTab === link.id;
               return (
                 <button
                   key={link.id}
                   onClick={() => {
                     if (link.id === 'public-ledger') {
                       onOpenPublicLedger?.();
-                    } else if (link.id === 'profile') {
-                      if (currentUser) {
-                        onSelectTab(`profile-${currentUser.username}`);
-                      } else {
-                        onOpenAuth();
-                      }
                     } else {
                       onSelectTab(link.id);
                     }
@@ -286,6 +282,39 @@ export const Navigation: React.FC<NavigationProps> = ({
                 </>
               )}
             </div>
+
+            {/* End right navigation links: Reputation beside Profile at the end right */}
+            {endNavLinks.map((link) => {
+              const Icon = link.icon;
+              const isActive =
+                currentTab === link.id ||
+                (link.id === 'profile' && (currentTab === 'profile' || currentTab.startsWith('profile-')));
+              return (
+                <button
+                  key={link.id}
+                  onClick={() => {
+                    if (link.id === 'profile') {
+                      if (currentUser) {
+                        onSelectTab(`profile-${currentUser.username}`);
+                      } else {
+                        onOpenAuth();
+                      }
+                    } else {
+                      onSelectTab(link.id);
+                    }
+                  }}
+                  className={`hover:text-slate-900 transition-colors whitespace-nowrap shrink-0 py-1.5 px-2.5 rounded-lg flex items-center gap-1.5 cursor-pointer ${
+                    isActive
+                      ? 'text-indigo-600 font-bold bg-indigo-50/80 border border-indigo-200/80'
+                      : 'text-slate-600 hover:bg-slate-100/80'
+                  }`}
+                  title={link.label}
+                >
+                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-indigo-600' : 'text-slate-500'}`} />
+                  <span>{link.label}</span>
+                </button>
+              );
+            })}
           </nav>
 
           {/* Zone 3: Action Icons Cluster */}
@@ -633,9 +662,22 @@ export const Navigation: React.FC<NavigationProps> = ({
                   </>
                 )}
               </div>
-            )}
+            {/* Reputation quick access button - beside profile menu (second end right) */}
+            <button
+              onClick={() => onSelectTab('reputation')}
+              className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border transition-all cursor-pointer shadow-xs shrink-0 ${
+                currentTab === 'reputation'
+                  ? 'bg-amber-50 border-amber-400 text-amber-800 ring-2 ring-amber-200 font-bold'
+                  : 'bg-white hover:bg-amber-50/60 border-slate-200 hover:border-amber-300 text-slate-700'
+              }`}
+              title="Transparent Multi-Dimensional Reputation & Trust Metrics"
+              aria-label="Reputation Breakdown"
+            >
+              <Sparkles className={`w-3.5 h-3.5 ${currentTab === 'reputation' ? 'text-amber-600' : 'text-amber-500'}`} />
+              <span className="text-xs font-semibold">Reputation</span>
+            </button>
 
-            {/* 4. Active User Profile Menu */}
+            {/* 4. Active User Profile Menu (at the end right) */}
             {currentUser ? (
               <div className="relative shrink-0">
                 <button
