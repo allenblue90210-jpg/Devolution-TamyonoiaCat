@@ -390,6 +390,33 @@ export const PublicLedgerScreen: React.FC<PublicLedgerScreenProps> = ({
     return matchesSearch && matchesCategory && matchesSub;
   });
 
+  // Filter Recorded Ledger
+  const filteredLedgerRecords = ledgerRecords.filter((rec) => {
+    if (ledgerTypeFilter === 'receipts' && !rec.entryType.startsWith('RECEIPT_')) return false;
+    if (ledgerTypeFilter === 'commitments' && !rec.entryType.startsWith('COMMITMENT_')) return false;
+    if (ledgerTypeFilter === 'public' && !rec.isPublic) return false;
+    if (ledgerTypeFilter === 'git' && rec.entryType !== 'GIT_COMMIT_RECORDED') return false;
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      const match =
+        rec.id.toLowerCase().includes(q) ||
+        rec.targetId.toLowerCase().includes(q) ||
+        rec.targetTitle.toLowerCase().includes(q) ||
+        rec.actorName.toLowerCase().includes(q) ||
+        (rec.counterpartyName && rec.counterpartyName.toLowerCase().includes(q)) ||
+        rec.summary.toLowerCase().includes(q) ||
+        rec.recordHash.toLowerCase().includes(q);
+      if (!match) return false;
+    }
+
+    if (selectedCategory !== 'all' && rec.category !== selectedCategory) {
+      return false;
+    }
+
+    return true;
+  });
+
   const publicReceiptsCount = receipts.filter((r) => r.isPublic).length;
   const privateReceiptsCount = receipts.filter((r) => !r.isPublic).length;
   const publicCommitmentsCount = commitments.filter((c) => c.isPublic).length;
