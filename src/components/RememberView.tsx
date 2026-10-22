@@ -189,7 +189,7 @@ export const RememberView: React.FC<RememberViewProps> = ({
             ]
           : [],
         attachedReviewer: {
-          userId: reviewer?.id || 'usr_sarah_002',
+          userId: reviewer?.id || availableUsers.find(u => u.id !== currentUser?.id)?.id || 'usr_reviewer_01',
           name: reviewer?.fullName || 'Designated Expert Reviewer',
           avatarUrl: reviewer?.avatarUrl,
           headline: 'Enterprise Security & Compliance Auditor',

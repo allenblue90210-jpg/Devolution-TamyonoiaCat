@@ -164,7 +164,7 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
         description: postDescription,
         category: postCategory,
         otherCategoryDetails: postCategory === 'Other' ? postOtherCategoryDetails : undefined,
-        committerId: postCommitterId === 'other' ? undefined : (postCommitterId || (availableUsers.find((u) => u.id !== currentUser.id)?.id || 'usr_sarah_002')),
+        committerId: postCommitterId === 'other' ? undefined : (postCommitterId || (availableUsers.find((u) => u.id !== currentUser.id)?.id || '')),
         committerName: postCommitterId === 'other' ? (postExternalCommitterName || 'External Counterparty') : undefined,
         deadline: combinedDeadline,
         trustRewardPoints: postRewardPoints,

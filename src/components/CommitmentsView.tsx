@@ -911,7 +911,10 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                       <div className="min-w-0">
                         <div className="text-[10px] uppercase font-semibold text-slate-400">Committer (User B)</div>
                         <button
-                          onClick={() => onSelectTab(`profile-${c.committerId === 'usr_sarah_002' ? 'sarah_adesina' : 'fatimabello'}`)}
+                          onClick={() => {
+                            const matched = availableUsers.find(u => u.id === c.committerId) || availableUsers.find(u => u.fullName.toLowerCase() === c.committerName.toLowerCase());
+                            onSelectTab(`profile-${matched?.username || c.committerUsername || 'lola'}`);
+                          }}
                           className="font-bold text-slate-900 truncate hover:text-indigo-600 block text-right"
                         >
                           {c.committerName}
@@ -1227,7 +1230,10 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
 
                     {/* Public Profile Link */}
                     <button
-                      onClick={() => onSelectTab(`profile-${c.committerId === 'usr_sarah_002' ? 'sarah_adesina' : 'fatimabello'}`)}
+                      onClick={() => {
+                        const matched = availableUsers.find(u => u.id === c.committerId) || availableUsers.find(u => u.fullName.toLowerCase() === c.committerName.toLowerCase());
+                        onSelectTab(`profile-${matched?.username || c.committerUsername || 'lola'}`);
+                      }}
                       className="text-xs text-slate-500 hover:text-slate-800 flex items-center gap-1 ml-auto cursor-pointer"
                     >
                       <span>Public Profile</span>
