@@ -13,6 +13,7 @@ import {
   AlertCircle,
   ExternalLink,
   Shield,
+  ShieldCheck,
   HelpCircle,
   ArrowLeft,
   Globe,
