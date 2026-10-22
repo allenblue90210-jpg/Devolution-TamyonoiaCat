@@ -562,7 +562,7 @@ export const api = {
     });
   },
   async syncGit(commitMessage?: string) {
-    return this.triggerGitSync(commitMessage);
+    return this.syncGitRepo(commitMessage);
   },
   async pullGitRepo(): Promise<{
     success: boolean;
