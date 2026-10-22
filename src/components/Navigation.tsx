@@ -10,6 +10,7 @@ import {
   Globe,
   Compass,
   Sparkles,
+  Shield,
   Bell,
   ChevronDown,
   UserCheck,
@@ -191,7 +192,7 @@ export const Navigation: React.FC<NavigationProps> = ({
 
   // Placed at the end right: Reputation beside Profile
   const endNavLinks = [
-    { id: 'reputation', label: 'Reputation', icon: Sparkles },
+    { id: 'reputation', label: 'Reputation', icon: Shield },
     { id: 'profile', label: 'Profile', icon: UserIcon },
   ];
 
