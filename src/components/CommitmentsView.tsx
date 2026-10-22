@@ -34,6 +34,7 @@ import {
   X,
   Search,
   Award,
+  Lock,
 } from 'lucide-react';
 
 interface CommitmentsViewProps {
@@ -78,6 +79,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
   const [deadlineDate, setDeadlineDate] = useState('');
   const [deadlineTime, setDeadlineTime] = useState('02:00');
   const [rewardPoints, setRewardPoints] = useState(25);
+  const [isPublic, setIsPublic] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   // Edit / Reassign Counterparty on existing commitment
@@ -351,10 +353,11 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
         pledgeNote: commitRole === 'promisor'
           ? (customPledgeText.trim() || `I promise to fulfill: ${title} by deadline`)
           : undefined,
-        isPublic: true,
+        isPublic,
       });
 
       setShowCreateModal(false);
+      setIsPublic(true);
       setTitle('');
       setDescription('');
       setOtherCategoryDetails('');
@@ -1864,6 +1867,47 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                   >
                     +1 Week
                   </button>
+                </div>
+              </div>
+
+              {/* Visibility Setting: Public Ledger vs Private Bilateral */}
+              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-slate-800 flex items-center gap-1.5">
+                    {isPublic ? (
+                      <Globe className="w-4 h-4 text-emerald-600" />
+                    ) : (
+                      <Lock className="w-4 h-4 text-slate-600" />
+                    )}
+                    <span>Commitment Visibility</span>
+                  </span>
+                  <span
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                      isPublic
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        : 'bg-slate-100 text-slate-700 border-slate-300'
+                    }`}
+                  >
+                    {isPublic ? 'Public Ledger' : 'Private (Confidential)'}
+                  </span>
+                </div>
+
+                <div className="flex items-start gap-2.5 pt-1">
+                  <input
+                    type="checkbox"
+                    id="commitment-is-public"
+                    checked={isPublic}
+                    onChange={(e) => setIsPublic(e.target.checked)}
+                    className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                  />
+                  <label htmlFor="commitment-is-public" className="text-slate-700 font-medium cursor-pointer leading-tight">
+                    <span>Publish openly to Public Ledger feed</span>
+                    <span className="block text-[11px] text-slate-500 font-normal mt-0.5">
+                      {isPublic
+                        ? 'Visible across the public network on open ledger feeds. Other users can view this commitment.'
+                        : 'Private and confidential between you and the counterparty. Other users and new accounts will NOT be able to see this.'}
+                    </span>
+                  </label>
                 </div>
               </div>
 
