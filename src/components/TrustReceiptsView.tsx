@@ -26,6 +26,8 @@ import {
   Calendar,
   UserCheck,
   UserPlus,
+  Search,
+  Users,
 } from 'lucide-react';
 import { formatTransactionCurrency, CURRENCY_OPTIONS } from '../utils/currency.js';
 
@@ -98,6 +100,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
   const [targetCounterpartyId, setTargetCounterpartyId] = useState('');
   const [counterpartyName, setCounterpartyName] = useState('');
   const [counterpartyContact, setCounterpartyContact] = useState('');
+  const [receiptCounterpartySearch, setReceiptCounterpartySearch] = useState('');
   const [interactionCategory, setInteractionCategory] = useState<TrustReceipt['interactionCategory']>('Freelance Project');
   const [otherCategoryDetails, setOtherCategoryDetails] = useState('');
   const [title, setTitle] = useState('');
