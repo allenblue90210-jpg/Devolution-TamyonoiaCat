@@ -1260,7 +1260,7 @@ app.get('/api/receipts/:id', (req: Request, res: Response) => {
 
 app.patch('/api/receipts/:id', (req: Request, res: Response) => {
   const { id } = req.params;
-  const { isPublic } = req.body;
+  const { isPublic, counterpartyUserId, counterpartyName, counterpartyContact, counterpartyAvatar } = req.body;
   const receipt = db.getReceiptById(id);
   if (!receipt) return res.status(404).json({ error: 'Trust receipt not found' });
 
@@ -1271,9 +1271,30 @@ app.patch('/api/receipts/:id', (req: Request, res: Response) => {
       actor: receipt.creatorName,
       event: `Receipt visibility changed to ${receipt.isPublic ? 'Public Ledger' : 'Private Counterparty Only'}`,
     });
-    db.updateReceipt(id, receipt);
   }
-  res.json({ receipt, message: `Receipt set to ${receipt.isPublic ? 'Public' : 'Private'}` });
+
+  if (counterpartyName || counterpartyUserId) {
+    let target = counterpartyUserId && counterpartyUserId !== 'other' ? db.getUserById(counterpartyUserId) : null;
+    const name = target ? target.fullName : (counterpartyName || receipt.counterpartyName);
+    const contact = target
+      ? (target.email || `${target.username}@devolution.network`)
+      : (counterpartyContact || receipt.counterpartyContact || `${name.toLowerCase().replace(/\s+/g, '.')}@devolution.network`);
+    const avatar = target ? target.avatarUrl : (counterpartyAvatar || receipt.counterpartyAvatar);
+
+    receipt.counterpartyUserId = target ? target.id : (counterpartyUserId === 'other' ? null : receipt.counterpartyUserId);
+    receipt.counterpartyName = name;
+    receipt.counterpartyContact = contact;
+    receipt.counterpartyAvatar = avatar;
+
+    receipt.history.push({
+      timestamp: new Date().toISOString(),
+      actor: receipt.creatorName,
+      event: `Counterparty updated to ${name}`,
+    });
+  }
+
+  db.updateReceipt(id, receipt);
+  res.json({ receipt, message: 'Trust receipt updated successfully' });
 });
 
 app.post('/api/receipts', (req: Request, res: Response) => {
@@ -1302,11 +1323,13 @@ app.post('/api/receipts', (req: Request, res: Response) => {
     : null;
 
   const finalName = targetCounterparty ? targetCounterparty.fullName : (explicitName || '').trim();
-  const finalContact = targetCounterparty ? targetCounterparty.email : (explicitContact || '').trim();
+  const finalContact = targetCounterparty
+    ? (targetCounterparty.email || `${targetCounterparty.username}@devolution.network`)
+    : ((explicitContact || '').trim() || `${(finalName || 'counterparty').toLowerCase().replace(/\s+/g, '.')}@devolution.network`);
   const finalAvatar = targetCounterparty ? targetCounterparty.avatarUrl : (counterpartyAvatar || '');
 
-  if (!finalName || !finalContact || !interactionCategory || !title || !completionConditions) {
-    return res.status(400).json({ error: 'Counterparty details, category, title, and completion conditions are required.' });
+  if (!finalName || !interactionCategory || !title || !completionConditions) {
+    return res.status(400).json({ error: 'Counterparty name, category, title, and completion conditions are required.' });
   }
 
   const receiptId = `TR-${Math.floor(10000 + Math.random() * 90000)}`;
@@ -1702,15 +1725,46 @@ app.get('/api/commitments/:id', (req: Request, res: Response) => {
 
 app.patch('/api/commitments/:id', (req: Request, res: Response) => {
   const { id } = req.params;
-  const { isPublic } = req.body;
+  const {
+    isPublic,
+    committerId,
+    committerName,
+    promisedUserId,
+    promisedUserName,
+    counterpartyName,
+    counterpartyUserId,
+  } = req.body;
   const commitment = db.getCommitmentById(id);
   if (!commitment) return res.status(404).json({ error: 'Commitment not found' });
 
   if (isPublic !== undefined) {
-    const updated = db.updateCommitment(id, { isPublic: Boolean(isPublic) });
-    return res.json({ commitment: updated, message: `Commitment set to ${updated?.isPublic ? 'Public' : 'Private'}` });
+    commitment.isPublic = Boolean(isPublic);
   }
-  res.json({ commitment });
+
+  const newTargetId = counterpartyUserId || committerId || promisedUserId;
+  const newTargetName = counterpartyName || committerName || promisedUserName;
+
+  if (newTargetId || newTargetName) {
+    let target = newTargetId && newTargetId !== 'other' ? db.getUserById(newTargetId) : null;
+    const targetName = target ? target.fullName : (newTargetName || 'Counterparty');
+    const targetAvatar = target ? target.avatarUrl : '';
+
+    if (commitment.creatorRole === 'promisor') {
+      commitment.requesterId = target ? target.id : `ext_${Date.now()}`;
+      commitment.requesterName = targetName;
+      commitment.requesterAvatar = targetAvatar;
+      commitment.promisedUserId = commitment.requesterId;
+      commitment.promisedUserName = targetName;
+      commitment.promisedUserAvatar = targetAvatar;
+    } else {
+      commitment.committerId = target ? target.id : `ext_${Date.now()}`;
+      commitment.committerName = targetName;
+      commitment.committerAvatar = targetAvatar;
+    }
+  }
+
+  const updated = db.updateCommitment(id, commitment);
+  res.json({ commitment: updated, message: 'Commitment updated successfully' });
 });
 
 app.post('/api/commitments', (req: Request, res: Response) => {
