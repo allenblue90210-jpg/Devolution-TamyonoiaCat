@@ -1010,6 +1010,16 @@
   "disputes": [],
   "notifications": [
     {
+      "id": "notif_1792668690867",
+      "userId": "usr_allen_001",
+      "type": "receipt_action",
+      "title": "New Timed Commitment Promised to You",
+      "message": "Allen Kinetic made a time-locked promise to you: 'Return to sender '. Deadline: 10/22/2026, 1:31:00 PM.",
+      "link": "/commitments",
+      "isRead": false,
+      "createdAt": "2026-10-22T11:31:30.874Z"
+    },
+    {
       "id": "notif_1792614068753",
       "userId": "usr_sarah_002",
       "type": "receipt_action",
@@ -1178,6 +1188,37 @@
     }
   },
   "commitments": [
+    {
+      "id": "TC-1296",
+      "title": "Return to sender ",
+      "description": "by tomorrow ",
+      "category": "Vehicle & Transportation",
+      "requesterId": "usr_allen_001",
+      "requesterName": "Allen Okoro",
+      "requesterAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+      "committerId": "usr_allen_006",
+      "committerName": "Allen Kinetic",
+      "committerAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+      "promisedUserId": "usr_allen_001",
+      "promisedUserName": "Allen Okoro",
+      "promisedUserAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+      "creatorRole": "promisor",
+      "deadline": "2026-10-22T13:31:00.000Z",
+      "committerPledgeNote": "this guy",
+      "status": "active",
+      "trustRewardPoints": 25,
+      "penaltyRateDailyPercent": 30,
+      "penaltyCurrentDeductionPercent": 0,
+      "isOverdue": false,
+      "daysOverdue": 0,
+      "isPublic": true,
+      "impressions": 1,
+      "witnessCount": 0,
+      "positiveImpressions": 0,
+      "hasWitnessed": false,
+      "comments": [],
+      "createdAt": "2026-10-22T11:31:30.865Z"
+    },
     {
       "id": "TC-1887",
       "title": "Handover Lexus LX570 Clean with Full Tank",
