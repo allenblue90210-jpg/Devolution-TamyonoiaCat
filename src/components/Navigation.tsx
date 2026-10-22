@@ -32,6 +32,7 @@ import {
   Camera,
 } from 'lucide-react';
 import tanmiLogo from '../assets/images/tanmi.png';
+import { UserAvatar } from './UserAvatar.js';
 
 interface NavigationProps {
   currentUser: User | null;
