@@ -1010,6 +1010,15 @@
   "disputes": [],
   "notifications": [
     {
+      "id": "notif_1792670344920",
+      "userId": "usr_allen_006",
+      "type": "receipt_action",
+      "title": "Commitment Accepted & Timer Active",
+      "message": "Sarah Adesina accepted the commitment: \"I accept this pact and pledge to return the Land Cruiser V8 on time with full fuel tank.\". Live countdown timer is now running.",
+      "isRead": false,
+      "createdAt": "2026-10-22T11:59:04.920Z"
+    },
+    {
       "id": "notif_1792670339552",
       "userId": "usr_sarah_002",
       "type": "receipt_action",
@@ -1204,7 +1213,8 @@
       "promisedUserAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
       "creatorRole": "requester",
       "deadline": "2026-10-24T11:58:59.481Z",
-      "status": "pending_acceptance",
+      "committerPledgeNote": "I accept this pact and pledge to return the Land Cruiser V8 on time with full fuel tank.",
+      "status": "active",
       "trustRewardPoints": 50,
       "penaltyRateDailyPercent": 30,
       "penaltyCurrentDeductionPercent": 0,
