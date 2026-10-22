@@ -913,7 +913,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                         <button
                           onClick={() => {
                             const matched = availableUsers.find(u => u.id === c.committerId) || availableUsers.find(u => u.fullName.toLowerCase() === c.committerName.toLowerCase());
-                            onSelectTab(`profile-${matched?.username || c.committerUsername || 'lola'}`);
+                            onSelectTab(`profile-${matched?.username || c.committerId}`);
                           }}
                           className="font-bold text-slate-900 truncate hover:text-indigo-600 block text-right"
                         >
@@ -1232,7 +1232,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                     <button
                       onClick={() => {
                         const matched = availableUsers.find(u => u.id === c.committerId) || availableUsers.find(u => u.fullName.toLowerCase() === c.committerName.toLowerCase());
-                        onSelectTab(`profile-${matched?.username || c.committerUsername || 'lola'}`);
+                        onSelectTab(`profile-${matched?.username || c.committerId}`);
                       }}
                       className="text-xs text-slate-500 hover:text-slate-800 flex items-center gap-1 ml-auto cursor-pointer"
                     >
