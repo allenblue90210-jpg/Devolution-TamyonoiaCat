@@ -1363,7 +1363,20 @@ class Database {
 
   // Receipts
   public getReceiptsForUser(userId: string): TrustReceipt[] {
-    return this.data.receipts.filter((r) => r.creatorId === userId || r.counterpartyUserId === userId);
+    const user = this.getUserById(userId);
+    return this.data.receipts.filter((r) => {
+      if (r.creatorId === userId || r.counterpartyUserId === userId) return true;
+      if (user) {
+        if (
+          (r.creatorName && r.creatorName.toLowerCase() === user.fullName.toLowerCase()) ||
+          (r.counterpartyName && r.counterpartyName.toLowerCase() === user.fullName.toLowerCase()) ||
+          (r.counterpartyContact && r.counterpartyContact.toLowerCase() === user.email.toLowerCase())
+        ) {
+          return true;
+        }
+      }
+      return false;
+    });
   }
 
   public getReceiptById(id: string): TrustReceipt | undefined {
@@ -1510,9 +1523,20 @@ class Database {
 
   public getCommitmentsForUser(userId: string): TrustCommitment[] {
     this.checkAndUpdateOverdueCommitments();
-    return this.data.commitments.filter(
-      (c) => c.requesterId === userId || c.committerId === userId
-    );
+    const user = this.getUserById(userId);
+    return this.data.commitments.filter((c) => {
+      if (c.requesterId === userId || c.committerId === userId || c.promisedUserId === userId) return true;
+      if (user) {
+        if (
+          (c.committerName && c.committerName.toLowerCase() === user.fullName.toLowerCase()) ||
+          (c.requesterName && c.requesterName.toLowerCase() === user.fullName.toLowerCase()) ||
+          (c.promisedUserName && c.promisedUserName.toLowerCase() === user.fullName.toLowerCase())
+        ) {
+          return true;
+        }
+      }
+      return false;
+    });
   }
 
   public getCommitmentById(id: string): TrustCommitment | undefined {

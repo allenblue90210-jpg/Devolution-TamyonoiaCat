@@ -1236,12 +1236,19 @@ app.delete('/api/relationships/:id', (req: Request, res: Response) => {
 
 app.get('/api/receipts', (req: Request, res: Response) => {
   const userId = getSessionUserId(req);
-  if (req.query.public === 'true') {
-    const publicReceipts = db.getState().receipts.filter((r) => r.isPublic);
-    return res.json({ receipts: publicReceipts });
+  const filter = req.query.filter as string;
+  const all = db.getState().receipts;
+  if (filter === 'all') {
+    return res.json({ receipts: all });
   }
-  const receipts = db.getReceiptsForUser(userId);
-  res.json({ receipts });
+  if (req.query.public === 'true') {
+    return res.json({ receipts: all.filter((r) => r.isPublic) });
+  }
+  const userReceipts = db.getReceiptsForUser(userId);
+  const map = new Map<string, any>();
+  all.filter((r) => r.isPublic).forEach((r) => map.set(r.id, r));
+  userReceipts.forEach((r) => map.set(r.id, r));
+  res.json({ receipts: Array.from(map.values()) });
 });
 
 app.get('/api/receipts/:id', (req: Request, res: Response) => {
