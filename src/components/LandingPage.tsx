@@ -356,8 +356,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <div className="p-2.5 rounded-lg bg-white border border-slate-200 flex items-start gap-2.5">
                       <Receipt className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
                       <div>
-                        <div className="font-semibold text-slate-900">Trust Receipt TR-90214 · ₦4,500,000 NGN</div>
-                        <div className="text-slate-500 text-[11px]">Horizon Freight API · Dual-signed & fulfilled without dispute</div>
+                        <div className="font-semibold text-slate-900">Dual-Signed Trust Ledger</div>
+                        <div className="text-slate-500 text-[11px]">Bilateral receipts and time-locked commitments authenticated by counterparty signature</div>
                       </div>
                     </div>
                   </div>

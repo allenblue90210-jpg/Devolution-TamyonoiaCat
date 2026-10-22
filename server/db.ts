@@ -752,29 +752,13 @@ class Database {
         const raw = fs.readFileSync(DB_FILE, 'utf-8');
         const parsed = JSON.parse(raw);
         let updated = false;
-        if (!parsed.commitments || parsed.commitments.length === 0) {
-          parsed.commitments = getInitialCommitments();
+        if (!parsed.commitments) {
+          parsed.commitments = [];
           updated = true;
-        } else {
-          const initialMap = new Map(getInitialCommitments().map((c) => [c.id, c]));
-          for (const c of parsed.commitments) {
-            if (!c.comments || c.comments.length === 0) {
-              const initC = initialMap.get(c.id);
-              if (initC && initC.comments) {
-                c.comments = initC.comments;
-                updated = true;
-              } else if (!c.comments) {
-                c.comments = [];
-                updated = true;
-              }
-            }
-            if (c.ratingPercent === undefined || c.ratingPercent === null) {
-              const initC = initialMap.get(c.id);
-              c.ratingPercent = initC?.ratingPercent ?? 100;
-              c.ratingBadge = initC?.ratingBadge ?? '100% Exemplary Good Faith';
-              updated = true;
-            }
-          }
+        }
+        if (!parsed.receipts) {
+          parsed.receipts = [];
+          updated = true;
         }
         if (!parsed.goodFaithRatings || parsed.goodFaithRatings.length === 0) {
           parsed.goodFaithRatings = getInitialGoodFaithRatings();
