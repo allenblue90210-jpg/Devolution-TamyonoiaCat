@@ -114,23 +114,33 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
   const [deadlineTime, setDeadlineTime] = useState('18:00');
   const [isPublic, setIsPublic] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [hasUserClearedReceiptCounterparty, setHasUserClearedReceiptCounterparty] = useState(false);
+
+  // Edit Counterparty on existing receipt
+  const [editingReceipt, setEditingReceipt] = useState<TrustReceipt | null>(null);
+  const [editReceiptSearch, setEditReceiptSearch] = useState('');
+  const [editReceiptSelectedUser, setEditReceiptSelectedUser] = useState<any>(null);
+  const [editReceiptExternalName, setEditReceiptExternalName] = useState('');
+  const [isUpdatingReceiptCounterparty, setIsUpdatingReceiptCounterparty] = useState(false);
 
   // Dispute modal state
   const [showDisputeModal, setShowDisputeModal] = useState(false);
   const [disputeReason, setDisputeReason] = useState('Unfulfilled Deliverables');
   const [disputeDesc, setDisputeDesc] = useState('');
 
-  // Auto-select other user when availableUsers updates
+  // Auto-select other user when create modal opens if not manually cleared
   useEffect(() => {
-    if (availableUsers.length > 0 && !targetCounterpartyId) {
-      const otherUser = availableUsers.find((u) => u.id !== user.id) || availableUsers[0];
-      if (otherUser) {
-        setTargetCounterpartyId(otherUser.id);
-        setCounterpartyName(otherUser.fullName);
-        setCounterpartyContact(otherUser.email || `${otherUser.username}@devolution.network`);
+    if (showCreateModal && !hasUserClearedReceiptCounterparty && !targetCounterpartyId) {
+      if (availableUsers.length > 0) {
+        const otherUser = availableUsers.find((u) => u.id !== user.id) || availableUsers[0];
+        if (otherUser) {
+          setTargetCounterpartyId(otherUser.id);
+          setCounterpartyName(otherUser.fullName);
+          setCounterpartyContact(otherUser.email || `${otherUser.username}@devolution.network`);
+        }
       }
     }
-  }, [availableUsers, user.id, targetCounterpartyId]);
+  }, [showCreateModal, availableUsers, user.id]);
 
   // Initial default deadline: tomorrow 18:00
   useEffect(() => {
@@ -139,6 +149,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
   }, []);
 
   const handleSelectCounterpartyUser = (userId: string) => {
+    setHasUserClearedReceiptCounterparty(false);
     setTargetCounterpartyId(userId);
     if (userId === 'other') {
       setCounterpartyType('external');
