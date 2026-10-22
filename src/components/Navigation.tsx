@@ -662,6 +662,8 @@ export const Navigation: React.FC<NavigationProps> = ({
                   </>
                 )}
               </div>
+            )}
+
             {/* Reputation quick access button - beside profile menu (second end right) */}
             <button
               onClick={() => onSelectTab('reputation')}
@@ -901,9 +903,35 @@ export const Navigation: React.FC<NavigationProps> = ({
           className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
         >
           <LayoutDashboard className={`w-4 h-4 ${currentTab === 'dashboard' ? 'text-indigo-600' : 'text-slate-400'}`} />
-          <span className="text-[10px] text-slate-500 font-normal">Home</span>
+          <span className={`text-[10px] ${currentTab === 'dashboard' ? 'text-indigo-600 font-bold' : 'text-slate-500 font-normal'}`}>Home</span>
         </button>
 
+        <button
+          onClick={() => onSelectTab('commitments')}
+          className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
+        >
+          <Clock className={`w-4 h-4 ${currentTab === 'commitments' ? 'text-indigo-600' : 'text-slate-400'}`} />
+          <span className={`text-[10px] ${currentTab === 'commitments' ? 'text-indigo-600 font-bold' : 'text-slate-500 font-normal'}`}>Commitments</span>
+        </button>
+
+        <button
+          onClick={() => onSelectTab('receipts')}
+          className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
+        >
+          <Receipt className={`w-4 h-4 ${currentTab === 'receipts' ? 'text-indigo-600' : 'text-slate-400'}`} />
+          <span className={`text-[10px] ${currentTab === 'receipts' ? 'text-indigo-600 font-bold' : 'text-slate-500 font-normal'}`}>Receipts</span>
+        </button>
+
+        {/* Reputation - Second End Right */}
+        <button
+          onClick={() => onSelectTab('reputation')}
+          className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
+        >
+          <Sparkles className={`w-4 h-4 ${currentTab === 'reputation' ? 'text-indigo-600' : 'text-slate-400'}`} />
+          <span className={`text-[10px] ${currentTab === 'reputation' ? 'text-indigo-600 font-bold' : 'text-slate-500 font-normal'}`}>Reputation</span>
+        </button>
+
+        {/* Profile - End Right */}
         <button
           onClick={() => {
             if (currentUser) {
@@ -915,31 +943,7 @@ export const Navigation: React.FC<NavigationProps> = ({
           className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
         >
           <UserIcon className={`w-4 h-4 ${currentTab === 'profile' || currentTab.startsWith('profile-') ? 'text-indigo-600' : 'text-slate-400'}`} />
-          <span className="text-[10px] text-slate-500 font-bold text-indigo-600">Profile</span>
-        </button>
-
-        <button
-          onClick={() => onSelectTab('commitments')}
-          className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
-        >
-          <Clock className={`w-4 h-4 ${currentTab === 'commitments' ? 'text-indigo-600' : 'text-slate-400'}`} />
-          <span className="text-[10px] text-slate-500 font-normal">Commitments</span>
-        </button>
-
-        <button
-          onClick={() => onSelectTab('receipts')}
-          className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
-        >
-          <Receipt className={`w-4 h-4 ${currentTab === 'receipts' ? 'text-indigo-600' : 'text-slate-400'}`} />
-          <span className="text-[10px] text-slate-500 font-normal">Receipts</span>
-        </button>
-
-        <button
-          onClick={() => onSelectTab('reputation')}
-          className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
-        >
-          <ShieldCheck className={`w-4 h-4 ${currentTab === 'reputation' ? 'text-indigo-600' : 'text-slate-400'}`} />
-          <span className="text-[10px] text-slate-500 font-normal">Reputation</span>
+          <span className={`text-[10px] ${currentTab === 'profile' || currentTab.startsWith('profile-') ? 'text-indigo-600 font-bold' : 'text-slate-500'}`}>Profile</span>
         </button>
       </nav>
     </>
