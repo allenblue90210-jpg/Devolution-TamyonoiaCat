@@ -671,6 +671,22 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                       <span>Comments ({rc.comments?.length || 0})</span>
                     </button>
 
+                    {rc.status !== 'completed' && rc.status !== 'disputed' && (
+                      <button
+                        type="button"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          await onCompleteReceipt(rc.id);
+                          handleOpenRateModal(rc, e);
+                        }}
+                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                      >
+                        <Check className="w-3.5 h-3.5 text-white" />
+                        <Star className="w-3 h-3 fill-amber-300 text-amber-300" />
+                        <span>Mark Finished & Rate</span>
+                      </button>
+                    )}
+
                     <button
                       type="button"
                       onClick={(e) => handleOpenRateModal(rc, e)}
