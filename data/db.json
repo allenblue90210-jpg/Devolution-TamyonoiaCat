@@ -91,7 +91,8 @@
         "showLocationCityOnly": true,
         "allowDirectVerificationRequests": true
       },
-      "createdAt": "2026-10-19T14:10:58.259Z"
+      "createdAt": "2026-10-19T14:10:58.259Z",
+      "passwordHash": "1880c0255fe729d7cc0d2cfc4644f98cb6a3225dd0c4216bc07bb4b5b0fc92f1"
     },
     {
       "id": "usr_allen_004",
