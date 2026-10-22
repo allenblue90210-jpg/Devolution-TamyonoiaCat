@@ -313,6 +313,12 @@ export const api = {
       body: JSON.stringify(data),
     });
   },
+  async updateReceipt(id: string, data: any): Promise<{ receipt: TrustReceipt; message: string }> {
+    return request(`/api/receipts/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
   async confirmReceipt(id: string): Promise<{ receipt: TrustReceipt; message: string }> {
     return request(`/api/receipts/${id}/confirm`, {
       method: 'POST',
@@ -399,6 +405,12 @@ export const api = {
     return request(`/api/commitments/${id}`, {
       method: 'PATCH',
       body: JSON.stringify({ isPublic }),
+    });
+  },
+  async updateCommitment(id: string, data: any): Promise<{ commitment: TrustCommitment; message: string }> {
+    return request(`/api/commitments/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
     });
   },
   async getCommitment(id: string): Promise<{ commitment: TrustCommitment }> {
