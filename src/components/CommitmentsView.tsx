@@ -63,6 +63,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
   const [targetCommitterId, setTargetCommitterId] = useState('');
   const [externalCommitterName, setExternalCommitterName] = useState('');
   const [counterpartySearch, setCounterpartySearch] = useState('');
+  const [hasManuallyClearedCounterparty, setHasManuallyClearedCounterparty] = useState(false);
   const [selectedCounterpartyUser, setSelectedCounterpartyUser] = useState<{
     id: string;
     username: string;
@@ -76,6 +77,13 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
   const [deadlineTime, setDeadlineTime] = useState('02:00');
   const [rewardPoints, setRewardPoints] = useState(25);
   const [submitting, setSubmitting] = useState(false);
+
+  // Edit / Reassign Counterparty on existing commitment
+  const [editingCommitment, setEditingCommitment] = useState<TrustCommitment | null>(null);
+  const [editCounterpartySearch, setEditCounterpartySearch] = useState('');
+  const [editSelectedUser, setEditSelectedUser] = useState<any>(null);
+  const [editExternalName, setEditExternalName] = useState('');
+  const [isUpdatingCounterparty, setIsUpdatingCounterparty] = useState(false);
 
   // Form State for Accepting / Writing Pledge
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
@@ -167,14 +175,20 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
     tomorrow.setDate(tomorrow.getDate() + 1);
     const dateStr = tomorrow.toISOString().split('T')[0];
     setDeadlineDate(dateStr);
-    if (availableUsers.length > 0 && !selectedCounterpartyUser && !targetCommitterId) {
-      const otherUser = availableUsers.find((u) => u.id !== currentUser?.id) || availableUsers[0];
-      if (otherUser) {
-        setTargetCommitterId(otherUser.id);
-        setSelectedCounterpartyUser(otherUser);
+  }, []);
+
+  // Initialize default counterparty only when modal opens and user hasn't cleared it
+  useEffect(() => {
+    if (showCreateModal && !hasManuallyClearedCounterparty && !selectedCounterpartyUser && !targetCommitterId) {
+      if (availableUsers.length > 0) {
+        const otherUser = availableUsers.find((u) => u.id !== currentUser?.id) || availableUsers[0];
+        if (otherUser) {
+          setTargetCommitterId(otherUser.id);
+          setSelectedCounterpartyUser(otherUser);
+        }
       }
     }
-  }, [availableUsers, currentUser, selectedCounterpartyUser, targetCommitterId]);
+  }, [showCreateModal, availableUsers, currentUser]);
 
   const setCommitmentDeadlinePreset = (preset: '2h' | '6h' | 'tomorrow_2am' | '24h' | '3d' | '7d') => {
     const d = new Date();
