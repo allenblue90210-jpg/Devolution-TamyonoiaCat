@@ -19,6 +19,7 @@ import {
   ChevronDown,
   ChevronUp,
   Camera,
+  Key,
 } from 'lucide-react';
 
 interface SettingsViewProps {
@@ -44,6 +45,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
   const [gitSyncing, setGitSyncing] = useState(false);
   const [gitMessage, setGitMessage] = useState<string | null>(null);
   const [customCommit, setCustomCommit] = useState('');
+  const [gitTokenInput, setGitTokenInput] = useState('');
+  const [isSavingToken, setIsSavingToken] = useState(false);
 
   // Supabase Cloud Backend State
   const [supabaseStatus, setSupabaseStatus] = useState<any>(null);
@@ -212,6 +215,23 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
       setGitMessage(err.message || 'Failed to pull updates from repository');
     } finally {
       setGitSyncing(false);
+    }
+  };
+
+  const handleSaveGitToken = async () => {
+    setIsSavingToken(true);
+    setGitMessage(null);
+    try {
+      const res = await api.setGitToken(gitTokenInput.trim());
+      setGitTokenInput('');
+      const updatedStatus = await api.getGitStatus();
+      setGitStatus(updatedStatus);
+      setGitMessage(res.message || 'GitHub token saved successfully!');
+      setTimeout(() => setGitMessage(null), 5000);
+    } catch (err: any) {
+      setGitMessage(err.message || 'Failed to configure GitHub token');
+    } finally {
+      setIsSavingToken(false);
     }
   };
 
@@ -780,6 +800,61 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
               <span className="text-slate-500">CLI Commands:</span>
               <code className="text-[11px] bg-slate-200/70 px-1.5 py-0.5 rounded text-slate-800">npm run sync</code>
             </div>
+          </div>
+        </div>
+
+        {/* GitHub Authentication / Access Token */}
+        <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 space-y-2.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 font-semibold text-slate-700">
+              <Key className="w-3.5 h-3.5 text-indigo-600" />
+              <span>GitHub Authentication & Push Access</span>
+            </div>
+            {gitStatus?.hasToken ? (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                <Check className="w-3 h-3 text-emerald-600" />
+                Authenticated ({gitStatus.tokenMasked})
+              </span>
+            ) : (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                Token Required for Push
+              </span>
+            )}
+          </div>
+          <p className="text-slate-500 text-[11px] leading-relaxed">
+            To allow automatic pushing to <span className="font-mono text-slate-700">allenblue90210-jpg/Devolution-TamyonoiaCat</span> whenever you make updates, enter a GitHub Personal Access Token (classic or fine-grained with <code className="bg-slate-200/70 px-1 py-0.5 rounded text-slate-800">repo</code> permissions).
+          </p>
+          <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
+            <input
+              type="password"
+              value={gitTokenInput}
+              onChange={(e) => setGitTokenInput(e.target.value)}
+              placeholder={gitStatus?.hasToken ? "Enter new token to replace existing..." : "ghp_xxxxxxxxxxxxxxxxxxxx"}
+              className="flex-1 w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
+            />
+            <button
+              onClick={handleSaveGitToken}
+              disabled={isSavingToken || !gitTokenInput.trim()}
+              className="w-full sm:w-auto px-4 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer shrink-0 shadow-xs"
+            >
+              <Key className="w-3.5 h-3.5" />
+              <span>{isSavingToken ? 'Saving...' : 'Save & Authenticate'}</span>
+            </button>
+            {gitStatus?.hasToken && (
+              <button
+                onClick={async () => {
+                  setGitTokenInput('');
+                  await api.setGitToken('');
+                  const updated = await api.getGitStatus();
+                  setGitStatus(updated);
+                  setGitMessage('GitHub token cleared.');
+                }}
+                className="w-full sm:w-auto px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg border border-slate-200 transition-colors"
+                title="Remove token"
+              >
+                Clear
+              </button>
+            )}
           </div>
         </div>
 

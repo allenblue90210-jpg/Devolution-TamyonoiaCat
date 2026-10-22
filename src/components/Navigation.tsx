@@ -354,8 +354,14 @@ export const Navigation: React.FC<NavigationProps> = ({
                         </span>
                       </div>
                       <div className="flex justify-between items-center text-[11px]">
+                        <span className="text-slate-400">GitHub Push:</span>
+                        <span className={gitStatus?.hasToken ? 'text-emerald-600 font-medium' : 'text-amber-600 font-medium'}>
+                          {gitStatus?.hasToken ? `Enabled (${gitStatus.tokenMasked})` : 'Set token in Settings'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-[11px]">
                         <span className="text-slate-400">Auto-Sync:</span>
-                        <span className="text-slate-600">Active (polls remote & pushes every 30s)</span>
+                        <span className="text-slate-600">Active (continuous on data update)</span>
                       </div>
                     </div>
 

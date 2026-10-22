@@ -2364,6 +2364,10 @@ async function getGitRepoStatus() {
       // ignore
     }
 
+    const rawToken = getResolvedGitHubToken();
+    const hasGitHubToken = Boolean(rawToken);
+    const tokenMasked = rawToken ? `${rawToken.substring(0, 4)}••••${rawToken.slice(-4)}` : null;
+
     return {
       clean: statusOut.trim().length === 0,
       uncommittedCount: statusOut.trim() ? statusOut.trim().split('\n').length : 0,
@@ -2380,8 +2384,13 @@ async function getGitRepoStatus() {
       lastSyncTime,
       lastSyncStatus,
       lastSyncMessage,
+      hasToken: hasGitHubToken,
+      tokenMasked,
     };
   } catch (err: any) {
+    const rawToken = getResolvedGitHubToken();
+    const hasGitHubToken = Boolean(rawToken);
+    const tokenMasked = rawToken ? `${rawToken.substring(0, 4)}••••${rawToken.slice(-4)}` : null;
     return {
       clean: true,
       uncommittedCount: 0,
@@ -2398,6 +2407,8 @@ async function getGitRepoStatus() {
       lastSyncTime,
       lastSyncStatus,
       lastSyncMessage: err.message,
+      hasToken: hasGitHubToken,
+      tokenMasked,
     };
   }
 }
@@ -2428,12 +2439,14 @@ async function performGitSync(customMessage?: string) {
     }
 
     // 2. Check for local modifications and commit
+    let committed = false;
     try {
       const { stdout: statusOut } = await execAsync('git status --porcelain');
       if (statusOut.trim().length > 0) {
         const msg = customMessage || `chore(sync): automated continuous sync [${new Date().toISOString()}]`;
         await execAsync('git add -A');
         await execAsync(`git commit -m "${msg.replace(/"/g, '\\"')}"`);
+        committed = true;
       }
     } catch (commitErr: any) {
       console.warn('[Git Sync Commit Notice]:', commitErr.message);
@@ -2441,6 +2454,7 @@ async function performGitSync(customMessage?: string) {
 
     // 3. Check if local is ahead of remote and needs pushing
     const hasGitHubToken = Boolean(getResolvedGitHubToken());
+    let pushed = false;
     if (hasGitHubToken) {
       try {
         const { stdout: unpushedCountOut } = await execAsync('git rev-list origin/main..HEAD --count');
@@ -2449,6 +2463,7 @@ async function performGitSync(customMessage?: string) {
           console.log(`[Git Sync] Pushing ${localAhead} commit(s) to remote GitHub repository...`);
           try {
             await execAsync('git push origin main');
+            pushed = true;
             console.log('[Git Sync] Successfully pushed to origin/main');
           } catch (firstPushErr: any) {
             console.log('[Git Sync] First push attempt had conflict or remote update, reconciling...');
@@ -2456,6 +2471,7 @@ async function performGitSync(customMessage?: string) {
               await execAsync('git fetch origin main');
               await execAsync('git pull origin main --no-edit');
               await execAsync('git push origin main');
+              pushed = true;
               console.log('[Git Sync] Successfully reconciled and pushed to origin/main');
             } catch (retryErr: any) {
               console.warn('[Git Sync Notice]: Sync reconciliation completed with notice:', retryErr.message);
@@ -2469,12 +2485,24 @@ async function performGitSync(customMessage?: string) {
 
     lastSyncTime = new Date().toISOString();
     lastSyncStatus = 'synced';
-    lastSyncMessage = pulledCount > 0 ? `Pulled ${pulledCount} update(s) from GitHub` : 'Synchronized with GitHub';
+    if (pushed) {
+      lastSyncMessage = 'Committed and pushed latest updates to GitHub';
+    } else if (pulledCount > 0) {
+      lastSyncMessage = `Pulled ${pulledCount} update(s) from GitHub`;
+    } else if (committed) {
+      lastSyncMessage = hasGitHubToken
+        ? 'Workspace committed and synced'
+        : 'Committed locally. Configure GitHub Access Token to enable remote push.';
+    } else {
+      lastSyncMessage = 'Repository is fully synchronized';
+    }
+
     const status = await getGitRepoStatus();
     return { ...status, pulledCount };
   } catch (err: any) {
     lastSyncStatus = 'error';
     lastSyncMessage = err.message || 'Sync failed';
+    const rawToken = getResolvedGitHubToken();
     return {
       clean: true,
       uncommittedCount: 0,
@@ -2487,14 +2515,14 @@ async function performGitSync(customMessage?: string) {
       lastSyncStatus,
       lastSyncMessage,
       pulledCount: 0,
+      hasToken: Boolean(rawToken),
+      tokenMasked: rawToken ? `${rawToken.substring(0, 4)}••••${rawToken.slice(-4)}` : null,
     };
   }
 }
 
 let syncDebounceTimer: NodeJS.Timeout | null = null;
 export function triggerGitSyncDebounced(reason = 'data updated') {
-  const hasGitHubToken = Boolean(getResolvedGitHubToken());
-  if (!hasGitHubToken) return;
   if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
   syncDebounceTimer = setTimeout(async () => {
     try {
@@ -2502,7 +2530,7 @@ export function triggerGitSyncDebounced(reason = 'data updated') {
     } catch (err: any) {
       console.warn('[Auto-sync trigger notice]:', err.message);
     }
-  }, 4000);
+  }, 2500);
 }
 
 let supabaseDebounceTimer: NodeJS.Timeout | null = null;
@@ -2521,15 +2549,52 @@ export function triggerSupabaseSyncDebounced(reason = 'data updated') {
   }, 5000);
 }
 
-// Automatically sync to Supabase when database data changes (if configured)
+// Automatically sync to GitHub and Supabase when database data changes
 db.onSave(() => {
+  triggerGitSyncDebounced('database state updated');
   triggerSupabaseSyncDebounced('database state updated');
 });
 
+// Periodic continuous sync check to catch any file or state updates
+setInterval(async () => {
+  try {
+    const { stdout: statusOut } = await execAsync('git status --porcelain');
+    if (statusOut.trim().length > 0) {
+      await performGitSync('chore(sync): automated continuous sync of workspace updates');
+    }
+  } catch {
+    // ignore
+  }
+}, 45000);
 
 app.get('/api/git/status', async (_req: Request, res: Response) => {
   const status = await getGitRepoStatus();
   res.json(status);
+});
+
+app.post('/api/git/token', async (req: Request, res: Response) => {
+  try {
+    const { token } = req.body || {};
+    const tokenFile = path.resolve(process.cwd(), '.github_token');
+    if (!token || typeof token !== 'string' || token.trim().length === 0) {
+      if (fs.existsSync(tokenFile)) {
+        fs.unlinkSync(tokenFile);
+      }
+      await initGitConfig();
+      return res.json({ success: true, message: 'GitHub token removed' });
+    }
+    const cleanToken = token.trim();
+    fs.writeFileSync(tokenFile, cleanToken, 'utf-8');
+    await initGitConfig();
+    const syncResult = await performGitSync('chore(sync): authenticate git remote and sync');
+    res.json({
+      success: true,
+      message: 'GitHub Personal Access Token configured successfully and repository synchronized.',
+      ...syncResult,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to save GitHub token' });
+  }
 });
 
 app.post('/api/git/sync', async (req: Request, res: Response) => {

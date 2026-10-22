@@ -504,8 +504,21 @@ export const api = {
     lastSyncStatus: 'synced' | 'syncing' | 'error';
     lastSyncMessage: string | null;
     pulledCount?: number;
+    hasToken?: boolean;
+    tokenMasked?: string | null;
   }> {
     return request('/api/git/status');
+  },
+  async setGitToken(token: string): Promise<{
+    success: boolean;
+    message: string;
+    hasToken?: boolean;
+    tokenMasked?: string | null;
+  }> {
+    return request('/api/git/token', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    });
   },
   async syncGitRepo(commitMessage?: string): Promise<{
     success: boolean;
@@ -520,6 +533,8 @@ export const api = {
     lastSyncStatus: 'synced' | 'syncing' | 'error';
     lastSyncMessage: string | null;
     pulledCount?: number;
+    hasToken?: boolean;
+    tokenMasked?: string | null;
   }> {
     return request('/api/git/sync', {
       method: 'POST',
@@ -539,6 +554,8 @@ export const api = {
     lastSyncStatus: 'synced' | 'syncing' | 'error';
     lastSyncMessage: string | null;
     pulledCount?: number;
+    hasToken?: boolean;
+    tokenMasked?: string | null;
   }> {
     return request('/api/git/pull', {
       method: 'POST',
