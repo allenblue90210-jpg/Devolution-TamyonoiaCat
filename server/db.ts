@@ -1027,7 +1027,17 @@ class Database {
   }
 
   public addReceipt(receipt: TrustReceipt): TrustReceipt {
-    this.data.receipts.push(receipt);
+    if (!receipt.history) {
+      receipt.history = [];
+    }
+    if (receipt.history.length === 0) {
+      receipt.history.push({
+        timestamp: receipt.createdAt || new Date().toISOString(),
+        actor: receipt.creatorName || 'Trust Creator',
+        event: `Dual-signed trust receipt recorded on ledger (${receipt.isPublic ? 'Public Ledger' : 'Private Bilateral'})`,
+      });
+    }
+    this.data.receipts.unshift(receipt);
     this.persist();
     return receipt;
   }
@@ -1035,7 +1045,23 @@ class Database {
   public updateReceipt(id: string, updates: Partial<TrustReceipt>): TrustReceipt | null {
     const idx = this.data.receipts.findIndex((r) => r.id === id);
     if (idx === -1) return null;
-    this.data.receipts[idx] = { ...this.data.receipts[idx], ...updates };
+    const current = this.data.receipts[idx];
+    const history = current.history ? [...current.history] : [];
+    if (updates.status && updates.status !== current.status) {
+      history.push({
+        timestamp: new Date().toISOString(),
+        actor: 'Network Ledger',
+        event: `Receipt status changed to "${updates.status}"`,
+      });
+    }
+    if (updates.isPublic !== undefined && updates.isPublic !== current.isPublic) {
+      history.push({
+        timestamp: new Date().toISOString(),
+        actor: 'Network Ledger',
+        event: `Receipt visibility changed to ${updates.isPublic ? 'Public Ledger' : 'Private Bilateral'}`,
+      });
+    }
+    this.data.receipts[idx] = { ...current, ...updates, history };
     this.persist();
     return this.data.receipts[idx];
   }
