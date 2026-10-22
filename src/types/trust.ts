@@ -202,6 +202,11 @@ export interface TrustCommitment {
   ratingsList?: PactRating[];
   averageRating?: number;
   ratingsCount?: number;
+  history?: Array<{
+    timestamp: string;
+    actor: string;
+    event: string;
+  }>;
   createdAt: string;
   completedAt?: string | null;
 }
