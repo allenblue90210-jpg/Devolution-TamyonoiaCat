@@ -380,7 +380,7 @@ function getInitialData(): DatabaseSchema {
     },
     {
       id: 'evi_02',
-      userId: 'usr_allen_001',
+      userId: 'usr_allen_006',
       title: 'Primary Mobile Ownership (+234 803 491 8821)',
       category: 'contact',
       evidenceType: 'Carrier Network HLR & SMS Dual-Challenge',
@@ -404,7 +404,7 @@ function getInitialData(): DatabaseSchema {
     },
     {
       id: 'evi_03',
-      userId: 'usr_allen_001',
+      userId: 'usr_allen_006',
       title: 'Corporate Affairs Commission (CAC) Registration',
       category: 'business',
       evidenceType: 'Official Entity Registration Certificate (RC-1849204)',
@@ -428,7 +428,7 @@ function getInitialData(): DatabaseSchema {
     },
     {
       id: 'evi_04',
-      userId: 'usr_allen_001',
+      userId: 'usr_allen_006',
       title: 'B.Sc. Computer Engineering — University of Lagos',
       category: 'credential',
       evidenceType: 'Accredited Higher Education Degree Certificate',
@@ -452,7 +452,7 @@ function getInitialData(): DatabaseSchema {
     },
     {
       id: 'evi_05',
-      userId: 'usr_allen_001',
+      userId: 'usr_allen_006',
       title: 'AWS Certified Solutions Architect — Professional',
       category: 'credential',
       evidenceType: 'Industry Professional Certification',
@@ -476,7 +476,7 @@ function getInitialData(): DatabaseSchema {
     },
     {
       id: 'evi_06',
-      userId: 'usr_allen_001',
+      userId: 'usr_allen_006',
       title: 'Commercial Office Lease & Physical Presence',
       category: 'location',
       evidenceType: 'Registered Office Lease & Verified Geolocation Check',
