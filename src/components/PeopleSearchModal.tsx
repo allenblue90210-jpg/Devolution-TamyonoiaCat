@@ -14,6 +14,7 @@ import {
   UserCheck,
   Sparkles,
 } from 'lucide-react';
+import { UserAvatar } from './UserAvatar.js';
 
 interface PeopleSearchModalProps {
   isOpen: boolean;
@@ -208,18 +209,12 @@ export const PeopleSearchModal: React.FC<PeopleSearchModalProps> = ({
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   {/* User Avatar + Identity Info */}
                   <div className="flex items-start gap-3.5">
-                    {person.avatarUrl ? (
-                      <img
-                        src={person.avatarUrl}
-                        alt={person.fullName}
-                        referrerPolicy="no-referrer"
-                        className="w-13 h-13 rounded-full object-cover border border-slate-200 shrink-0"
-                      />
-                    ) : (
-                      <div className="w-13 h-13 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-lg border border-indigo-200 shrink-0">
-                        {person.fullName.charAt(0)}
-                      </div>
-                    )}
+                    <UserAvatar
+                      src={person.avatarUrl}
+                      name={person.fullName}
+                      className="w-13 h-13 rounded-full border border-slate-200 shrink-0"
+                      iconClassName="w-6 h-6 text-slate-500"
+                    />
 
                     <div className="space-y-1">
                       <div className="flex flex-wrap items-center gap-2">

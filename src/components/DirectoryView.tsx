@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api.js';
 import { Search, ShieldCheck, Building2, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { UserAvatar } from './UserAvatar.js';
 
 interface DirectoryViewProps {
   onSelectProfile: (username: string) => void;
@@ -127,18 +128,12 @@ export const DirectoryView: React.FC<DirectoryViewProps> = ({ onSelectProfile, o
             >
               <div className="space-y-3">
                 <div className="flex items-start gap-3.5">
-                  {p.avatarUrl ? (
-                    <img
-                      src={p.avatarUrl}
-                      alt={p.fullName}
-                      referrerPolicy="no-referrer"
-                      className="w-12 h-12 rounded-full object-cover border border-slate-200"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-base border border-slate-200">
-                      {p.fullName.charAt(0)}
-                    </div>
-                  )}
+                  <UserAvatar
+                    src={p.avatarUrl}
+                    name={p.fullName}
+                    className="w-12 h-12 rounded-full border border-slate-200"
+                    iconClassName="w-6 h-6 text-slate-500"
+                  />
                   <div>
                     <div className="flex items-center gap-1.5 font-bold text-slate-900 text-sm">
                       <span>{p.fullName}</span>
