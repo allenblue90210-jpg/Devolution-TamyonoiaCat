@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import {
   User,
   EvidenceItem,
@@ -17,6 +18,9 @@ import {
   ReceiptComment,
   RememberRecord,
   RememberCorroboration,
+  RecordedLedgerEntry,
+  LedgerStats,
+  LedgerEntryType,
 } from '../src/types/trust.js';
 
 interface DatabaseSchema {
@@ -33,12 +37,253 @@ interface DatabaseSchema {
   goodFaithRatings?: GoodFaithRating[];
   impressions?: Record<string, { impressions: number; witnessCount: number }>;
   rememberRecords?: RememberRecord[];
+  recordedLedger?: RecordedLedgerEntry[];
 }
 
 const DB_FILE = path.resolve(process.cwd(), 'data', 'db.json');
 
+function generateRecordHash(sequence: number, entryType: string, targetId: string, timestamp: string, actor: string): string {
+  return crypto
+    .createHash('sha256')
+    .update(`${sequence}:${entryType}:${targetId}:${actor}:${timestamp}:devolution-verifiable-ledger`)
+    .digest('hex');
+}
+
 function getInitialCommitments(): TrustCommitment[] {
-  return [];
+  return [
+    {
+      id: 'TC-9041',
+      title: 'Decentralized Edge Node Hardware Handover & Deployment',
+      description: 'Physical handover and cryptographic commissioning of 2x Dell PowerEdge R650 cluster nodes at the Victoria Island primary datacenter.',
+      category: 'Equipment & Machinery',
+      requesterId: 'usr_sarah_02',
+      requesterName: 'Sarah Jenkins',
+      committerId: 'usr_allen_006',
+      committerName: 'Allen Kinetic',
+      promisedUserId: 'usr_sarah_02',
+      promisedUserName: 'Sarah Jenkins',
+      creatorRole: 'promisor',
+      deadline: new Date(Date.now() + 86400000 * 2).toISOString(),
+      committerPledgeNote: 'Hardware verified, benchmarked, and ready for signed chain-of-custody delivery by 14:00 UTC.',
+      status: 'active',
+      trustRewardPoints: 50,
+      penaltyRateDailyPercent: 30,
+      penaltyCurrentDeductionPercent: 0,
+      isOverdue: false,
+      daysOverdue: 0,
+      isPublic: true,
+      impressions: 24,
+      witnessCount: 5,
+      positiveImpressions: 12,
+      createdAt: '2026-10-21T09:30:00.000Z',
+      history: [
+        {
+          timestamp: '2026-10-21T09:30:00.000Z',
+          actor: 'Allen Kinetic',
+          event: 'Commitment dropped and registered on Public Verifiable Ledger',
+        },
+      ],
+    },
+    {
+      id: 'TC-9042',
+      title: 'Smart Settlement Protocol Security & SLA Audit Report',
+      description: 'Formal verification, deterministic state fuzzing, and complete architectural sign-off for inter-node settlement.',
+      category: 'Professional Milestone',
+      requesterId: 'usr_david_03',
+      requesterName: 'David Chen',
+      committerId: 'usr_allen_006',
+      committerName: 'Allen Kinetic',
+      promisedUserId: 'usr_david_03',
+      promisedUserName: 'David Chen',
+      creatorRole: 'promisor',
+      deadline: '2026-10-20T18:00:00.000Z',
+      status: 'completed',
+      trustRewardPoints: 100,
+      penaltyRateDailyPercent: 30,
+      penaltyCurrentDeductionPercent: 0,
+      isOverdue: false,
+      daysOverdue: 0,
+      checkedOutByCommitterAt: '2026-10-20T16:45:00.000Z',
+      checkedOutByRequesterAt: '2026-10-20T17:10:00.000Z',
+      linkedReceiptId: 'TR-89240',
+      isPublic: true,
+      impressions: 48,
+      witnessCount: 9,
+      positiveImpressions: 22,
+      ratingPercent: 100,
+      ratingBadge: '100% Flawless Honor',
+      completedAt: '2026-10-20T17:10:00.000Z',
+      createdAt: '2026-10-15T11:00:00.000Z',
+      history: [
+        {
+          timestamp: '2026-10-15T11:00:00.000Z',
+          actor: 'Allen Kinetic',
+          event: 'Commitment dropped and registered on Public Verifiable Ledger',
+        },
+        {
+          timestamp: '2026-10-20T17:10:00.000Z',
+          actor: 'David Chen',
+          event: 'Counterparty verified fulfillment and generated Trust Receipt TR-89240',
+        },
+      ],
+    },
+  ];
+}
+
+function getInitialReceipts(): TrustReceipt[] {
+  return [
+    {
+      id: 'TR-89240',
+      creatorId: 'usr_allen_006',
+      creatorName: 'Allen Kinetic',
+      counterpartyName: 'David Chen',
+      counterpartyContact: 'david.chen@koralabs.io',
+      counterpartyUserId: 'usr_david_03',
+      interactionCategory: 'Service Contract',
+      title: 'Smart Settlement Protocol Security & SLA Audit Report Delivery',
+      description: 'Dual-attested fulfillment of cryptographic smart settlement protocol verification and 99.999% SLA architecture delivery.',
+      transactionValue: '$32,000 USD',
+      status: 'completed',
+      completionConditions: 'Deterministic formal verification tests passing with zero high/critical vulnerabilities.',
+      isFulfillmentConfirmed: true,
+      deadline: '2026-10-20T18:00:00.000Z',
+      isOverdue: false,
+      evidenceAttachments: [
+        {
+          name: 'settlement_audit_report_v1.4.pdf',
+          date: '2026-10-20',
+          size: '4.2 MB',
+        },
+      ],
+      history: [
+        {
+          timestamp: '2026-10-20T17:10:00.000Z',
+          actor: 'Network Ledger',
+          event: 'Dual-signed trust receipt recorded on Public Ledger',
+        },
+      ],
+      isPublic: true,
+      createdAt: '2026-10-20T17:10:00.000Z',
+      completedAt: '2026-10-20T17:10:00.000Z',
+    },
+    {
+      id: 'TR-89241',
+      creatorId: 'usr_david_03',
+      creatorName: 'David Chen',
+      counterpartyName: 'Allen Kinetic',
+      counterpartyContact: 'allenkinetic006@gmail.com',
+      counterpartyUserId: 'usr_allen_006',
+      interactionCategory: 'Freelance Project',
+      title: 'High-Throughput Payment Engine Re-architecture',
+      description: 'End-to-end performance optimization and distributed transaction queue implementation for sub-10ms payment routing.',
+      transactionValue: '$24,500 USD',
+      status: 'completed',
+      completionConditions: 'Load test sustained at 25,000 TPS with zero transaction loss.',
+      isFulfillmentConfirmed: true,
+      evidenceAttachments: [
+        {
+          name: 'benchmark_telemetry_25ktps.json',
+          date: '2026-09-15',
+          size: '1.8 MB',
+        },
+      ],
+      history: [
+        {
+          timestamp: '2026-09-15T14:20:00.000Z',
+          actor: 'Network Ledger',
+          event: 'Dual-signed trust receipt recorded on Public Ledger',
+        },
+      ],
+      isPublic: true,
+      createdAt: '2026-09-15T14:20:00.000Z',
+      completedAt: '2026-09-15T14:20:00.000Z',
+    },
+  ];
+}
+
+function buildInitialRecordedLedger(commitments: TrustCommitment[], receipts: TrustReceipt[], rememberRecords: RememberRecord[] = []): RecordedLedgerEntry[] {
+  const entries: RecordedLedgerEntry[] = [];
+  let seq = 1;
+
+  for (const r of receipts) {
+    const timestamp = r.createdAt || new Date().toISOString();
+    entries.push({
+      id: `REC-${String(seq).padStart(5, '0')}`,
+      sequence: seq,
+      recordHash: generateRecordHash(seq, 'RECEIPT_DROPPED', r.id, timestamp, r.creatorName),
+      entryType: r.status === 'completed' ? 'RECEIPT_FULFILLED' : 'RECEIPT_DROPPED',
+      targetId: r.id,
+      targetTitle: r.title,
+      actorId: r.creatorId,
+      actorName: r.creatorName,
+      counterpartyId: r.counterpartyUserId,
+      counterpartyName: r.counterpartyName,
+      category: r.interactionCategory,
+      summary: `Receipt dropped: "${r.title}" (${r.interactionCategory}) between ${r.creatorName} and ${r.counterpartyName}. Status: ${r.status.toUpperCase()}.`,
+      isPublic: r.isPublic,
+      status: r.status,
+      gitSynced: true,
+      timestamp,
+      metadata: {
+        transactionValue: r.transactionValue,
+        completionConditions: r.completionConditions,
+        deadline: r.deadline,
+      },
+    });
+    seq++;
+  }
+
+  for (const c of commitments) {
+    const timestamp = c.createdAt || new Date().toISOString();
+    entries.push({
+      id: `REC-${String(seq).padStart(5, '0')}`,
+      sequence: seq,
+      recordHash: generateRecordHash(seq, 'COMMITMENT_DROPPED', c.id, timestamp, c.committerName),
+      entryType: c.status === 'completed' ? 'COMMITMENT_CHECKED_OUT' : 'COMMITMENT_DROPPED',
+      targetId: c.id,
+      targetTitle: c.title,
+      actorId: c.committerId,
+      actorName: c.committerName,
+      counterpartyId: c.requesterId,
+      counterpartyName: c.requesterName,
+      category: c.category,
+      summary: `Commitment dropped / pledged: "${c.title}" (${c.category}) by ${c.committerName} to ${c.requesterName}. Deadline: ${new Date(c.deadline).toLocaleString()}.`,
+      isPublic: c.isPublic,
+      status: c.status,
+      gitSynced: true,
+      timestamp,
+      metadata: {
+        deadline: c.deadline,
+        trustRewardPoints: c.trustRewardPoints,
+        creatorRole: c.creatorRole,
+      },
+    });
+    seq++;
+  }
+
+  for (const rem of rememberRecords) {
+    const timestamp = rem.createdAt || new Date().toISOString();
+    entries.push({
+      id: `REC-${String(seq).padStart(5, '0')}`,
+      sequence: seq,
+      recordHash: generateRecordHash(seq, 'REMEMBER_DROPPED', rem.id, timestamp, rem.authorName),
+      entryType: 'REMEMBER_DROPPED',
+      targetId: rem.id,
+      targetTitle: rem.title,
+      actorId: rem.authorId,
+      actorName: rem.authorName,
+      counterpartyName: rem.targetName,
+      category: rem.tags[0] || 'Reliability',
+      summary: `Public Remember Record dropped: "${rem.title}" concerning ${rem.targetName}. Veracity Score: ${rem.veracityScore}%.`,
+      isPublic: rem.isPublic,
+      status: rem.status,
+      gitSynced: true,
+      timestamp,
+    });
+    seq++;
+  }
+
+  return entries.reverse(); // newest first
 }
 
 function getInitialData(): DatabaseSchema {
