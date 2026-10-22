@@ -291,8 +291,9 @@ export const api = {
     });
   },
 
-  async getReceipts(): Promise<{ receipts: TrustReceipt[] }> {
-    return request('/api/receipts');
+  async getReceipts(filter?: string): Promise<{ receipts: TrustReceipt[] }> {
+    const q = filter ? `?filter=${encodeURIComponent(filter)}` : '';
+    return request(`/api/receipts${q}`);
   },
   async getPublicReceipts(): Promise<{ receipts: TrustReceipt[] }> {
     return request('/api/receipts?public=true');

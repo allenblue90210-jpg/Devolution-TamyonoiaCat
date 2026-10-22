@@ -8,6 +8,7 @@ import {
   ProfessionalReference,
   InAppNotification,
   ReputationBreakdown,
+  TrustCommitment,
 } from '../types/trust.js';
 import {
   ShieldCheck,
@@ -38,6 +39,7 @@ interface DashboardProps {
   evidence: EvidenceItem[];
   relationships: RelationshipInvite[];
   receipts: TrustReceipt[];
+  commitments?: TrustCommitment[];
   references: ProfessionalReference[];
   notifications: InAppNotification[];
   reputation: ReputationBreakdown | null;
@@ -56,6 +58,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   evidence,
   relationships,
   receipts,
+  commitments = [],
   references,
   notifications,
   reputation,
@@ -630,6 +633,173 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </button>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Dedicated Section: Public Commitments & Bilateral Trust Receipts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Active Commitments Card */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4 shadow-2xs">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <Clock className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-slate-900">Active Commitments & Pacts</h2>
+                <p className="text-[11px] text-slate-500">Time-locked promises with active deadline timers</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => onNavigateTab('commitments')}
+                className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1 cursor-pointer"
+              >
+                <span>View Board ({commitments.length})</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {commitments.length === 0 ? (
+              <div className="py-6 text-center text-xs text-slate-500 space-y-2">
+                <p>No active commitments currently logged.</p>
+                <button
+                  onClick={() => onNavigateTab('commitments')}
+                  className="px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg text-xs font-semibold"
+                >
+                  Post First Commitment
+                </button>
+              </div>
+            ) : (
+              commitments.slice(0, 3).map((cmt) => (
+                <div
+                  key={cmt.id}
+                  onClick={() => onNavigateTab('commitments')}
+                  className="p-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50/70 transition-all text-xs space-y-1.5 cursor-pointer"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="font-mono font-bold text-indigo-700 text-[11px] shrink-0">{cmt.id}</span>
+                      <span className="font-bold text-slate-900 truncate">{cmt.title}</span>
+                    </div>
+                    <span
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold shrink-0 ${
+                        cmt.status === 'completed'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : cmt.status === 'overdue' || cmt.isOverdue
+                          ? 'bg-red-100 text-red-800 animate-pulse'
+                          : 'bg-indigo-100 text-indigo-800'
+                      }`}
+                    >
+                      {cmt.status === 'completed'
+                        ? 'Completed'
+                        : cmt.status === 'overdue' || cmt.isOverdue
+                        ? 'OVERDUE'
+                        : 'Active Timer'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px] text-slate-500 pt-0.5">
+                    <span className="truncate">
+                      Counterparty: <strong className="text-slate-700">{cmt.promisedUserName || cmt.requesterName || cmt.committerName}</strong>
+                    </span>
+                    <span className="font-mono text-[10px] shrink-0">
+                      Due: {new Date(cmt.deadline).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <button
+            onClick={() => onNavigateTab('commitments')}
+            className="w-full py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold rounded-lg text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Post Public Commitment</span>
+          </button>
+        </div>
+
+        {/* Bilateral Trust Receipts Card */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4 shadow-2xs">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <Receipt className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-slate-900">Documented Trust Receipts</h2>
+                <p className="text-[11px] text-slate-500">Dual-signed transaction milestones on the ledger</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => onNavigateTab('receipts')}
+                className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1 cursor-pointer"
+              >
+                <span>View All ({receipts.length})</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {receipts.length === 0 ? (
+              <div className="py-6 text-center text-xs text-slate-500 space-y-2">
+                <p>No trust receipts found.</p>
+                <button
+                  onClick={onOpenNewReceiptModal}
+                  className="px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg text-xs font-semibold"
+                >
+                  Issue First Receipt
+                </button>
+              </div>
+            ) : (
+              receipts.slice(0, 3).map((rc) => (
+                <div
+                  key={rc.id}
+                  onClick={() => onNavigateTab('receipts')}
+                  className="p-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50/70 transition-all text-xs space-y-1.5 cursor-pointer"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="font-mono font-bold text-indigo-700 text-[11px] shrink-0">{rc.id}</span>
+                      <span className="font-bold text-slate-900 truncate">{rc.title}</span>
+                    </div>
+                    <span
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold shrink-0 ${
+                        rc.status === 'completed'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : 'bg-amber-100 text-amber-800'
+                      }`}
+                    >
+                      {rc.status === 'completed' ? 'Fulfilled' : 'Pending Signature'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px] text-slate-500 pt-0.5">
+                    <span className="truncate">
+                      Counterparty: <strong className="text-slate-700">{rc.counterpartyName}</strong>
+                    </span>
+                    <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 shrink-0">
+                      {rc.interactionCategory}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <button
+            onClick={onOpenNewReceiptModal}
+            className="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold rounded-lg text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Issue Timed Trust Receipt</span>
+          </button>
         </div>
       </div>
 
