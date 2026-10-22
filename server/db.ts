@@ -658,7 +658,7 @@ function getInitialData(): DatabaseSchema {
     },
   ];
 
-  const receipts: TrustReceipt[] = [];
+  const receipts: TrustReceipt[] = getInitialReceipts();
 
   const references: ProfessionalReference[] = [
     {
