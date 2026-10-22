@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, TrustCommitment, CommitmentCategory } from '../types/trust.js';
 import { api } from '../services/api.js';
+import { UserAvatar } from './UserAvatar.js';
 import {
   Clock,
   ShieldCheck,

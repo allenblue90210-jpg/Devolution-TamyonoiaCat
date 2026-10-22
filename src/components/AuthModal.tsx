@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { api } from '../services/api.js';
 import { User, AccountType, UserSummary } from '../types/trust.js';
 import { ShieldCheck, X, CheckCircle2, AlertCircle, Building2, User as UserIcon, LogOut, Eye, EyeOff, Key, Database, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
+import { UserAvatar } from './UserAvatar.js';
 
 interface AuthModalProps {
   onClose: () => void;
@@ -165,17 +166,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {currentUser && onLogout && mode === 'signin' && (
           <div className="p-3 bg-indigo-50/70 border border-indigo-200/80 rounded-xl flex items-center justify-between text-xs">
             <div className="flex items-center gap-2.5 min-w-0">
-              {currentUser.avatarUrl ? (
-                <img
-                  src={currentUser.avatarUrl}
-                  alt={currentUser.fullName}
-                  className="w-8 h-8 rounded-full object-cover shrink-0"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-xs shrink-0">
-                  {currentUser.fullName.charAt(0)}
-                </div>
-              )}
+              <UserAvatar
+                src={currentUser.avatarUrl}
+                name={currentUser.fullName}
+                className="w-8 h-8 rounded-full shrink-0"
+                iconClassName="w-4 h-4 text-slate-500"
+              />
               <div className="truncate">
                 <div className="text-[10px] text-indigo-700 font-semibold uppercase tracking-wider">
                   Active Session:
@@ -264,13 +260,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      {u.avatarUrl ? (
-                        <img src={u.avatarUrl} alt={u.fullName} className="w-7 h-7 rounded-full object-cover shrink-0 border border-slate-200" />
-                      ) : (
-                        <div className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs shrink-0">
-                          {u.fullName.charAt(0)}
-                        </div>
-                      )}
+                      <UserAvatar
+                        src={u.avatarUrl}
+                        name={u.fullName}
+                        className="w-7 h-7 rounded-full shrink-0 border border-slate-200"
+                        iconClassName="w-3.5 h-3.5 text-slate-500"
+                      />
                       <div className="truncate">
                         <div className="flex items-center gap-1.5">
                           <span className="font-bold text-slate-900 truncate">{u.fullName}</span>
