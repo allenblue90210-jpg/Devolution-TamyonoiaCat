@@ -91,6 +91,7 @@ export interface ReceiptRating {
   authorAvatar?: string;
   rating: number; // 1 to 5 stars
   badge?: string; // e.g. "Full Fulfillment Verified", "Reliability Confirmed"
+  goodFaithBadge?: string;
   comment: string;
   createdAt: string;
 }

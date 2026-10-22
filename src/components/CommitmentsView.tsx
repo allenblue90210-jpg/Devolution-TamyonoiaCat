@@ -1909,6 +1909,8 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
             </form>
           </div>
         </div>
+      )}
+
       {/* Mark Task Finished & Rate Counterparty Modal */}
       {finishingCommitment && (() => {
         const otherParty = getCounterpartyForTask(finishingCommitment);
