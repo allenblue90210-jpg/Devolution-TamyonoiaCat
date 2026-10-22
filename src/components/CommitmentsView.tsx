@@ -1276,6 +1276,95 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                     </div>
                   )}
 
+                  {/* Completed Task: Prominent Attested Rating & Signoff Display */}
+                  {c.status === 'completed' && (
+                    <div className="mt-2.5 p-4 rounded-xl bg-gradient-to-r from-emerald-50/90 via-teal-50/60 to-emerald-50/90 border-2 border-emerald-300 space-y-3 shadow-xs animate-in fade-in duration-200">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-emerald-200/80">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                            <CheckCircle2 className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <div className="text-xs font-extrabold text-emerald-950 flex items-center gap-2 flex-wrap">
+                              <span>Finished & Verified Attested</span>
+                              <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-600 text-white shadow-2xs">
+                                {c.ratingPercent ?? 100}% Full Honor
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-emerald-800">
+                              Mutual signoff completed and attested on public trust ledger
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Star Rating Display */}
+                        <div className="flex items-center gap-1.5 bg-white/95 px-3 py-1.5 rounded-lg border border-emerald-200 shrink-0 shadow-2xs">
+                          <div className="flex items-center gap-0.5">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`w-4 h-4 ${
+                                  star <= Math.round(c.averageRating || 5)
+                                    ? 'text-amber-500 fill-amber-500'
+                                    : 'text-slate-200'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className="font-mono font-bold text-xs text-slate-900">
+                            {(c.averageRating || 5).toFixed(1)}★
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Rating Badge & Counterparty Attribution */}
+                      <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="inline-flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-md border border-slate-200 font-bold text-slate-800 text-[11px]">
+                            <Award className="w-3.5 h-3.5 text-amber-500" />
+                            <span>{c.ratingBadge || '100% Exemplary Good Faith Handover'}</span>
+                          </span>
+                          <span className="text-[11px] text-slate-600">
+                            Counterparty: <strong className="text-slate-900">{getCounterpartyForTask(c).name}</strong>
+                          </span>
+                        </div>
+
+                        {c.linkedReceiptId && (
+                          <button
+                            type="button"
+                            onClick={() => onSelectTab('receipts')}
+                            className="text-[11px] font-bold text-indigo-700 hover:text-indigo-900 bg-white hover:bg-indigo-50 px-2.5 py-1 rounded-md border border-indigo-200 flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                          >
+                            <FileText className="w-3.5 h-3.5 text-indigo-600" />
+                            <span>Trust Receipt #{c.linkedReceiptId}</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Review Commentary / Feedback Display */}
+                      {(() => {
+                        const latestRating = c.ratingsList && c.ratingsList.length > 0
+                          ? c.ratingsList[c.ratingsList.length - 1]
+                          : null;
+                        const reviewText = latestRating?.comment;
+                        if (reviewText) {
+                          return (
+                            <div className="bg-white/90 p-2.5 rounded-lg border border-emerald-200 text-xs space-y-1">
+                              <div className="text-[10px] uppercase font-bold text-slate-400">
+                                Recorded Peer Review Note
+                              </div>
+                              <p className="text-slate-800 italic text-[11px] leading-relaxed">
+                                "{reviewText}"
+                              </p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </div>
+                  )}
+
                   {/* PUBLIC IMPRESSIONS & OBSERVER WITNESS ROW — LOCATED DIRECTLY BELOW THE GREEN BUTTON(S) */}
                   {c.isPublic && (
                     <div className="mt-2 flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 rounded-lg bg-emerald-50/70 border border-emerald-200 text-xs shadow-2xs">
@@ -2128,6 +2217,120 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
           </div>
         );
       })()}
+
+      {/* Task Finished & Rating Recorded Celebration Modal */}
+      {justFinishedPact && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border-2 border-emerald-400 space-y-4 my-auto">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Task Finished & Rating Recorded</h3>
+                  <p className="text-[11px] text-slate-500">Dual-signed signoff attested on open ledger</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setJustFinishedPact(null)}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-indigo-700 font-bold">{justFinishedPact.commitmentId}</span>
+                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                  +{justFinishedPact.pointsAwarded} Trust Points Boost
+                </span>
+              </div>
+              <div className="font-bold text-slate-900 text-sm">{justFinishedPact.title}</div>
+            </div>
+
+            {/* Prominent Rating Card Display */}
+            <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-200 space-y-3 shadow-2xs">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-950">Attested Rating</span>
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-600 text-white shadow-2xs">
+                  {justFinishedPact.ratingPercent}% Full Honor
+                </span>
+              </div>
+
+              {/* Star Rating Display */}
+              <div className="flex items-center justify-center gap-1.5 py-1 bg-white/80 rounded-lg border border-emerald-100">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className={`w-7 h-7 ${
+                      star <= justFinishedPact.starRating
+                        ? 'text-amber-500 fill-amber-500'
+                        : 'text-slate-200'
+                    }`}
+                  />
+                ))}
+                <span className="ml-2 font-mono font-bold text-slate-800 text-base">
+                  {justFinishedPact.starRating}.0★
+                </span>
+              </div>
+
+              {/* Badge & Counterparty */}
+              <div className="space-y-2 pt-1 text-xs">
+                <div className="flex items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 font-bold text-slate-800 text-[11px]">
+                  <Award className="w-4 h-4 text-amber-500 shrink-0" />
+                  <span>{justFinishedPact.badge}</span>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  {justFinishedPact.ratedUserAvatar ? (
+                    <img src={justFinishedPact.ratedUserAvatar} alt="" className="w-6 h-6 rounded-full object-cover border" />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center">
+                      {justFinishedPact.ratedUserName.charAt(0)}
+                    </div>
+                  )}
+                  <span className="text-slate-600 text-[11px]">
+                    Rated Counterparty: <strong className="text-slate-900">{justFinishedPact.ratedUserName}</strong>
+                  </span>
+                </div>
+              </div>
+
+              {justFinishedPact.comment && (
+                <div className="bg-white/90 p-2.5 rounded-lg border border-emerald-200 text-xs">
+                  <div className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">Your Review Feedback</div>
+                  <p className="text-slate-800 italic text-[11px] leading-relaxed">
+                    "{justFinishedPact.comment}"
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between gap-2.5 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => {
+                  setJustFinishedPact(null);
+                  onSelectTab('receipts');
+                }}
+                className="flex-1 py-2 px-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-lg text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+              >
+                <FileText className="w-3.5 h-3.5 text-indigo-600" />
+                <span>View Receipt #{justFinishedPact.receiptId}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setJustFinishedPact(null)}
+                className="py-2 px-5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs cursor-pointer shadow-xs transition-colors"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Change / Reassign Counterparty Modal */}
       {editingCommitment && (
