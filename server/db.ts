@@ -45,8 +45,8 @@ function getInitialCommitments(): TrustCommitment[] {
       description: 'Custody loan pact: Field spectrometer rig and optical sensors loaned to User B (Sarah) for cleanroom mineral testing. Pledged to be returned with zero scratch calibration by deadline.',
       category: 'Other',
       otherCategoryDetails: 'Specialty Research Equipment Custody & Calibration Pact',
-      requesterId: 'usr_allen_001',
-      requesterName: 'Allen Okoro',
+      requesterId: 'usr_allen_006',
+      requesterName: 'Allen Kinetic',
       requesterAvatar: '/src/assets/images/avatar_founder_1792334631930.jpg',
       committerId: 'usr_1792419058259_ehg5',
       committerName: 'Lola',
@@ -82,8 +82,8 @@ function getInitialCommitments(): TrustCommitment[] {
         {
           id: 'pcmt_9482_2',
           commitmentId: 'TC-9482',
-          authorId: 'usr_allen_001',
-          authorName: 'Allen Okoro',
+          authorId: 'usr_allen_006',
+          authorName: 'Allen Kinetic',
           authorRole: 'Requester',
           text: 'Confirmed. Pelican case seal was intact upon handover. Look forward to return on schedule.',
           ratingPercent: 100,
@@ -97,8 +97,8 @@ function getInitialCommitments(): TrustCommitment[] {
       title: 'Mercedes-Benz C300 Return & Handover',
       description: 'Vehicle loaner agreement: User A (Allen) loaning Mercedes C300 to User B (Sarah) for regional tech summit transit. Promised to be returned and parked at Lekki Phase 1 secure garage by 2:00 AM.',
       category: 'Vehicle & Transportation',
-      requesterId: 'usr_allen_001',
-      requesterName: 'Allen Okoro',
+      requesterId: 'usr_allen_006',
+      requesterName: 'Allen Kinetic',
       requesterAvatar: '/src/assets/images/avatar_founder_1792334631930.jpg',
       committerId: 'usr_1792419058259_ehg5',
       committerName: 'Lola',
@@ -124,8 +124,8 @@ function getInitialCommitments(): TrustCommitment[] {
         {
           id: 'pcmt_8012_1',
           commitmentId: 'TC-8012',
-          authorId: 'usr_allen_001',
-          authorName: 'Allen Okoro',
+          authorId: 'usr_allen_006',
+          authorName: 'Allen Kinetic',
           authorRole: 'Requester',
           text: 'Vehicle keys and registration slip handed over at Lekki Phase 1 office. Fuel tank topped off.',
           ratingPercent: 100,
@@ -161,8 +161,8 @@ function getInitialCommitments(): TrustCommitment[] {
       category: 'Professional Milestone',
       requesterId: 'usr_1792423308615_lq64',
       requesterName: 'wolf',
-      committerId: 'usr_allen_001',
-      committerName: 'Allen Okoro',
+      committerId: 'usr_allen_006',
+      committerName: 'Allen Kinetic',
       committerAvatar: '/src/assets/images/avatar_founder_1792334631930.jpg',
       deadline: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
       committerPledgeNote: 'Completed 4 hours ahead of schedule. All health endpoints verified green.',
@@ -185,8 +185,8 @@ function getInitialCommitments(): TrustCommitment[] {
         {
           id: 'pcmt_7041_1',
           commitmentId: 'TC-7041',
-          authorId: 'usr_allen_001',
-          authorName: 'Allen Okoro',
+          authorId: 'usr_allen_006',
+          authorName: 'Allen Kinetic',
           authorRole: 'Committer',
           text: 'Cutover finished with 0ms downtime. Replication lag is 0.02ms across AWS eu-west-1 and af-south-1.',
           ratingPercent: 100,
@@ -211,8 +211,8 @@ function getInitialCommitments(): TrustCommitment[] {
       title: 'Industrial 3D Calibration Tooling Rig Return',
       description: 'Temporary loan of high-precision CNC tool head and laser calibration jig.',
       category: 'Equipment & Machinery',
-      requesterId: 'usr_allen_001',
-      requesterName: 'Allen Okoro',
+      requesterId: 'usr_allen_006',
+      requesterName: 'Allen Kinetic',
       requesterAvatar: '/src/assets/images/avatar_founder_1792334631930.jpg',
       committerId: 'usr_1792423308615_lq64',
       committerName: 'wolf',
@@ -237,8 +237,8 @@ function getInitialCommitments(): TrustCommitment[] {
         {
           id: 'pcmt_9023_1',
           commitmentId: 'TC-9023',
-          authorId: 'usr_allen_001',
-          authorName: 'Allen Okoro',
+          authorId: 'usr_allen_006',
+          authorName: 'Allen Kinetic',
           authorRole: 'Requester',
           text: 'Pact posted. CNC rig is clean and stored in shipping crate at warehouse bay 4.',
           ratingPercent: 100,
@@ -364,7 +364,7 @@ function getInitialData(): DatabaseSchema {
         {
           id: 'aud_1',
           timestamp: '2025-11-14T09:28:00.000Z',
-          actor: 'Allen Okoro',
+          actor: 'Allen Kinetic',
           action: 'Verification Initiated',
           note: 'Submitted secure identity check via certified identity verification provider.',
         },
@@ -503,7 +503,7 @@ function getInitialData(): DatabaseSchema {
   const relationships: RelationshipInvite[] = [
     {
       id: 'rel_01',
-      inviterId: 'usr_allen_001',
+      inviterId: 'usr_allen_006',
       recipientName: 'Lola',
       recipientContact: '+234 802 555 0192',
       relationshipCategory: 'Colleague',
@@ -521,7 +521,7 @@ function getInitialData(): DatabaseSchema {
     },
     {
       id: 'rel_02',
-      inviterId: 'usr_allen_001',
+      inviterId: 'usr_allen_006',
       recipientName: 'wolf',
       recipientContact: '+234 809 333 7741',
       relationshipCategory: 'Client',
@@ -539,7 +539,7 @@ function getInitialData(): DatabaseSchema {
     },
     {
       id: 'rel_03',
-      inviterId: 'usr_allen_001',
+      inviterId: 'usr_allen_006',
       recipientName: 'Emeka Okafor, Esq.',
       recipientContact: '+234 803 771 9920',
       relationshipCategory: 'Business Partner',
@@ -557,7 +557,7 @@ function getInitialData(): DatabaseSchema {
     },
     {
       id: 'rel_04',
-      inviterId: 'usr_allen_001',
+      inviterId: 'usr_allen_006',
       recipientName: 'Chidi Okoro',
       recipientContact: '+234 805 112 3344',
       relationshipCategory: 'Child / Family Member',
@@ -572,7 +572,7 @@ function getInitialData(): DatabaseSchema {
     },
     {
       id: 'rel_05',
-      inviterId: 'usr_allen_001',
+      inviterId: 'usr_allen_006',
       recipientName: 'Dr. Marcus Vance',
       recipientContact: 'm.vance@unilag.edu.ng',
       relationshipCategory: 'Employer / Supervisor',
@@ -590,7 +590,7 @@ function getInitialData(): DatabaseSchema {
     },
     {
       id: 'rel_06',
-      inviterId: 'usr_allen_001',
+      inviterId: 'usr_allen_006',
       recipientName: 'Tunde Adeleke',
       recipientContact: '+234 818 200 9090',
       relationshipCategory: 'Friend',
@@ -607,7 +607,7 @@ function getInitialData(): DatabaseSchema {
     },
     {
       id: 'rel_07',
-      inviterId: 'usr_allen_001',
+      inviterId: 'usr_allen_006',
       recipientName: 'Amina Mohammed',
       recipientContact: 'amina.m@fintechsummit.africa',
       relationshipCategory: 'Business Associate',
@@ -625,8 +625,8 @@ function getInitialData(): DatabaseSchema {
   const receipts: TrustReceipt[] = [
     {
       id: 'TR-95412',
-      creatorId: 'usr_allen_001',
-      creatorName: 'Allen Okoro',
+      creatorId: 'usr_allen_006',
+      creatorName: 'Allen Kinetic',
       counterpartyName: 'wolf (Horizon Global Freight)',
       counterpartyContact: '+234 809 112 4000',
       counterpartyUserId: 'usr_1792423308615_lq64',
@@ -642,9 +642,9 @@ function getInitialData(): DatabaseSchema {
         { name: 'ip_assignment_and_escrow_release.pdf', date: '2026-03-12', size: '420 KB' },
       ],
       history: [
-        { timestamp: '2026-03-10T10:00:00.000Z', actor: 'Allen Okoro', event: 'Escrow Transfer Terms Defined' },
+        { timestamp: '2026-03-10T10:00:00.000Z', actor: 'Allen Kinetic', event: 'Escrow Transfer Terms Defined' },
         { timestamp: '2026-03-11T14:30:00.000Z', actor: 'wolf', event: 'Cryptographic Deliverable Verified' },
-        { timestamp: '2026-03-12T16:00:00.000Z', actor: 'Allen Okoro & wolf', event: 'Dual-Signed Mutual Completion & Trust Receipt Finalized' },
+        { timestamp: '2026-03-12T16:00:00.000Z', actor: 'Allen Kinetic & wolf', event: 'Dual-Signed Mutual Completion & Trust Receipt Finalized' },
       ],
       isPublic: true,
       createdAt: '2026-03-10T10:00:00.000Z',
@@ -652,8 +652,8 @@ function getInitialData(): DatabaseSchema {
     },
     {
       id: 'TR-90214',
-      creatorId: 'usr_allen_001',
-      creatorName: 'Allen Okoro',
+      creatorId: 'usr_allen_006',
+      creatorName: 'Allen Kinetic',
       counterpartyName: 'wolf (Horizon Global Freight)',
       counterpartyContact: '+234 809 333 7741',
       counterpartyUserId: 'usr_1792423308615_lq64',
@@ -669,7 +669,7 @@ function getInitialData(): DatabaseSchema {
         { name: 'Final_UAT_Signoff_Horizon.pdf', date: '2025-08-30', size: '280 KB' },
       ],
       history: [
-        { timestamp: '2025-06-15T09:00:00.000Z', actor: 'Allen Okoro', event: 'Trust Receipt Created' },
+        { timestamp: '2025-06-15T09:00:00.000Z', actor: 'Allen Kinetic', event: 'Trust Receipt Created' },
         { timestamp: '2025-06-16T11:20:00.000Z', actor: 'wolf', event: 'Counterparty Confirmed Terms' },
         { timestamp: '2025-08-30T17:00:00.000Z', actor: 'wolf', event: 'Milestone Fulfillment Dual-Signed & Completed' },
       ],
@@ -679,8 +679,8 @@ function getInitialData(): DatabaseSchema {
     },
     {
       id: 'TR-84920',
-      creatorId: 'usr_allen_001',
-      creatorName: 'Allen Okoro',
+      creatorId: 'usr_allen_006',
+      creatorName: 'Allen Kinetic',
       counterpartyName: 'Kora Labs (David Chen, VP Eng)',
       counterpartyContact: 'david@koralabs.io',
       counterpartyUserId: null,
@@ -695,7 +695,7 @@ function getInitialData(): DatabaseSchema {
         { name: 'Master_Consulting_Agreement_Executed.pdf', date: '2025-10-01', size: '510 KB' },
       ],
       history: [
-        { timestamp: '2025-10-01T10:00:00.000Z', actor: 'Allen Okoro', event: 'Trust Receipt Drafted' },
+        { timestamp: '2025-10-01T10:00:00.000Z', actor: 'Allen Kinetic', event: 'Trust Receipt Drafted' },
         { timestamp: '2025-10-02T14:15:00.000Z', actor: 'David Chen', event: 'Counterparty Executed & Confirmed Terms' },
       ],
       isPublic: true,
@@ -703,8 +703,8 @@ function getInitialData(): DatabaseSchema {
     },
     {
       id: 'TR-77102',
-      creatorId: 'usr_allen_001',
-      creatorName: 'Allen Okoro',
+      creatorId: 'usr_allen_006',
+      creatorName: 'Allen Kinetic',
       counterpartyName: 'Altus Advisory Partners (Emeka Okafor, Esq.)',
       counterpartyContact: '+234 803 771 9920',
       counterpartyUserId: null,
@@ -719,7 +719,7 @@ function getInitialData(): DatabaseSchema {
         { name: 'Service_Completion_Certificate_Altus.pdf', date: '2025-05-10', size: '315 KB' },
       ],
       history: [
-        { timestamp: '2025-03-20T08:00:00.000Z', actor: 'Allen Okoro', event: 'Receipt Created' },
+        { timestamp: '2025-03-20T08:00:00.000Z', actor: 'Allen Kinetic', event: 'Receipt Created' },
         { timestamp: '2025-03-22T09:30:00.000Z', actor: 'Emeka Okafor', event: 'Terms Confirmed' },
         { timestamp: '2025-05-10T16:00:00.000Z', actor: 'Emeka Okafor', event: 'Fulfillment Acknowledged & Closed' },
       ],
@@ -732,7 +732,7 @@ function getInitialData(): DatabaseSchema {
   const references: ProfessionalReference[] = [
     {
       id: 'ref_01',
-      subjectUserId: 'usr_allen_001',
+      subjectUserId: 'usr_allen_006',
       authorName: 'Lola',
       authorTitle: 'Senior Cloud Solutions Architect',
       authorCompany: 'CloudWorks NG',
@@ -746,7 +746,7 @@ function getInitialData(): DatabaseSchema {
     },
     {
       id: 'ref_02',
-      subjectUserId: 'usr_allen_001',
+      subjectUserId: 'usr_allen_006',
       authorName: 'wolf',
       authorTitle: 'Chief Operating Officer',
       authorCompany: 'Horizon Global Freight Services Ltd',
@@ -761,7 +761,7 @@ function getInitialData(): DatabaseSchema {
     },
     {
       id: 'ref_03',
-      subjectUserId: 'usr_allen_001',
+      subjectUserId: 'usr_allen_006',
       authorName: 'David Chen',
       authorTitle: 'VP of Engineering',
       authorCompany: 'Kora Labs (San Francisco & Lagos)',
@@ -780,7 +780,7 @@ function getInitialData(): DatabaseSchema {
   const notifications: InAppNotification[] = [
     {
       id: 'notif_01',
-      userId: 'usr_allen_001',
+      userId: 'usr_allen_006',
       type: 'evidence_status',
       title: 'Identity Attestation Verified',
       message: 'Your NIMC National Identity record and 3D liveness match were successfully validated.',
@@ -790,7 +790,7 @@ function getInitialData(): DatabaseSchema {
     },
     {
       id: 'notif_02',
-      userId: 'usr_allen_001',
+      userId: 'usr_allen_006',
       type: 'endorsement_received',
       title: 'New Endorsement from Lola',
       message: 'Lola has confirmed your colleague relationship and provided a personal endorsement.',
@@ -800,7 +800,7 @@ function getInitialData(): DatabaseSchema {
     },
     {
       id: 'notif_03',
-      userId: 'usr_allen_001',
+      userId: 'usr_allen_006',
       type: 'receipt_action',
       title: 'Trust Receipt Milestone Fulfilled',
       message: 'wolf acknowledged final fulfillment of Trust Receipt TR-90214.',
@@ -813,7 +813,7 @@ function getInitialData(): DatabaseSchema {
   const businesses: BusinessEntity[] = [
     {
       id: 'biz_01',
-      ownerUserId: 'usr_allen_001',
+      ownerUserId: 'usr_allen_006',
       name: 'Aegis Tech Systems Ltd',
       registrationNumber: 'RC-1849204',
       jurisdiction: 'Federal Republic of Nigeria',
@@ -823,8 +823,8 @@ function getInitialData(): DatabaseSchema {
       headquarters: '14 Adeola Odeku St, Victoria Island, Lagos',
       teamMembers: [
         {
-          userId: 'usr_allen_001',
-          name: 'Allen Okoro',
+          userId: 'usr_allen_006',
+          name: 'Allen Kinetic',
           role: 'Owner',
           email: 'allen.okoro@example.com',
         },
@@ -842,7 +842,7 @@ function getInitialData(): DatabaseSchema {
   const impressions = getInitialImpressions();
 
   return {
-    users: [allenUser, sarahUser, fatimaUser],
+    users: [allenUser, lolaUser, wolfUser],
     evidence,
     relationships,
     receipts,
@@ -864,8 +864,8 @@ function getInitialGoodFaithRatings(): GoodFaithRating[] {
   return [
     {
       id: 'gfr_001',
-      targetUserId: 'usr_allen_001',
-      targetUsername: 'allenokoro',
+      targetUserId: 'usr_allen_006',
+      targetUsername: 'allenkinetic006',
       authorId: 'usr_1792419058259_ehg5',
       authorName: 'Lola',
       authorAvatar: '/src/assets/images/avatar_sarah_1792334645228.jpg',
@@ -880,8 +880,8 @@ function getInitialGoodFaithRatings(): GoodFaithRating[] {
     },
     {
       id: 'gfr_002',
-      targetUserId: 'usr_allen_001',
-      targetUsername: 'allenokoro',
+      targetUserId: 'usr_allen_006',
+      targetUsername: 'allenkinetic006',
       authorId: 'usr_1792423308615_lq64',
       authorName: 'wolf',
       authorAvatar: '/src/assets/images/avatar_fatima_1792334658112.jpg',
@@ -912,9 +912,9 @@ function getInitialGoodFaithRatings(): GoodFaithRating[] {
     {
       id: 'gfr_004',
       targetUserId: 'usr_1792419058259_ehg5',
-      targetUsername: 'sarah_adesina',
-      authorId: 'usr_allen_001',
-      authorName: 'Allen Okoro',
+      targetUsername: 'lola',
+      authorId: 'usr_allen_006',
+      authorName: 'Allen Kinetic',
       authorAvatar: '/src/assets/images/avatar_founder_1792334631930.jpg',
       authorTitle: 'Principal Architect · Aegis Systems',
       rating: 5,
@@ -931,12 +931,12 @@ function getInitialGoodFaithRatings(): GoodFaithRating[] {
 function getInitialImpressions(): Record<string, { impressions: number; witnessCount: number }> {
   return {
     network: { impressions: 4890, witnessCount: 560 },
-    usr_allen_001: { impressions: 2420, witnessCount: 310 },
-    allenokoro: { impressions: 2420, witnessCount: 310 },
+    usr_allen_006: { impressions: 2420, witnessCount: 310 },
+    allenkinetic006: { impressions: 2420, witnessCount: 310 },
     usr_1792419058259_ehg5: { impressions: 1380, witnessCount: 195 },
-    sarah_adesina: { impressions: 1380, witnessCount: 195 },
+    lola: { impressions: 1380, witnessCount: 195 },
     usr_1792423308615_lq64: { impressions: 1890, witnessCount: 240 },
-    fatimabello: { impressions: 1890, witnessCount: 240 },
+    kai: { impressions: 1890, witnessCount: 240 },
   };
 }
 
@@ -947,8 +947,8 @@ function getInitialRememberRecords(): RememberRecord[] {
       authorId: 'usr_1792419058259_ehg5',
       authorName: 'Lola',
       authorAvatar: '/src/assets/images/avatar_sarah_1792334645228.jpg',
-      targetId: 'usr_allen_001',
-      targetName: 'Allen Okoro (Aegis Systems Ltd)',
+      targetId: 'usr_allen_006',
+      targetName: 'Allen Kinetic (Aegis Systems Ltd)',
       targetAvatar: '/src/assets/images/avatar_founder_1792334631930.jpg',
       title: 'High-Availability FinTech Gateway Contract Execution & SLA Reliability',
       description: 'Documenting the verified execution of the 180-day mission-critical transaction settlement protocol. All high-security cryptographic requirements were met with 100% on-time milestone delivery and zero data loss.',
@@ -1001,8 +1001,8 @@ function getInitialRememberRecords(): RememberRecord[] {
     },
     {
       id: 'REM-7724',
-      authorId: 'usr_allen_001',
-      authorName: 'Allen Okoro',
+      authorId: 'usr_allen_006',
+      authorName: 'Allen Kinetic',
       authorAvatar: '/src/assets/images/avatar_founder_1792334631930.jpg',
       targetName: 'Apex Continental Hardware Ltd (Unregistered Shell)',
       title: 'Counterfeit Corporate Identity & Wire Redirection Fraud Attempt',
@@ -1065,8 +1065,8 @@ function getInitialRememberRecords(): RememberRecord[] {
       authorId: 'usr_1792423308615_lq64',
       authorName: 'wolf',
       authorAvatar: '/src/assets/images/avatar_fatima_1792334658112.jpg',
-      targetId: 'usr_allen_001',
-      targetName: 'Allen Okoro',
+      targetId: 'usr_allen_006',
+      targetName: 'Allen Kinetic',
       targetAvatar: '/src/assets/images/avatar_founder_1792334631930.jpg',
       title: 'Commercial Office Tenancy Settlement & Security Deposit Clearance',
       description: 'Tenancy exit and asset handover conducted in impeccable good faith. Property returned in pristine condition with zero damage, all estate dues and electricity tariffs fully cleared prior to walkthrough.',
@@ -1133,8 +1133,8 @@ function getInitialRememberRecords(): RememberRecord[] {
         },
       ],
       attachedReviewer: {
-        userId: 'usr_allen_001',
-        name: 'Allen Okoro',
+        userId: 'usr_allen_006',
+        name: 'Allen Kinetic',
         avatarUrl: '/src/assets/images/avatar_founder_1792334631930.jpg',
         headline: 'Principal Systems Architect & Warehouse IT Lead',
         qualificationNote: 'Oversees the facility access control database, IoT dock sensors, and cryptographic sign-in ledger.',

@@ -101,10 +101,10 @@ function getSessionUserId(req: Request): string {
   if (db.getUserById('usr_allen_006')) {
     return 'usr_allen_006';
   }
-  if (db.getUserById('usr_allen_004')) {
-    return 'usr_allen_004';
+  if (db.getUserById('usr_allen_nuclear')) {
+    return 'usr_allen_nuclear';
   }
-  return 'usr_allen_001';
+  return 'usr_allen_006';
 }
 
 /* ==========================================================================
