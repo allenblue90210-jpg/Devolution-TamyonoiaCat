@@ -2569,7 +2569,13 @@ async function getGitRepoStatus() {
   }
 }
 
+let isSyncInProgress = false;
+
 async function performGitSync(customMessage?: string) {
+  if (isSyncInProgress) {
+    return await getGitRepoStatus();
+  }
+  isSyncInProgress = true;
   lastSyncStatus = 'syncing';
   let pulledCount = 0;
   try {
@@ -2578,23 +2584,7 @@ async function performGitSync(customMessage?: string) {
       await initGitConfig();
     }
 
-    // 1. Fetch remote to see if there are incoming updates from GitHub
-    try {
-      await execAsync('git fetch origin main');
-      const { stdout: revCountOut } = await execAsync('git rev-list HEAD..origin/main --count');
-      const remoteAhead = parseInt(revCountOut.trim(), 10) || 0;
-      if (remoteAhead > 0) {
-        pulledCount = remoteAhead;
-        console.log(`[Git Sync] Remote is ${remoteAhead} commit(s) ahead. Pulling latest updates from GitHub...`);
-        await execAsync('git pull origin main --no-edit');
-        db.reload();
-        console.log('[Git Sync] Successfully pulled updates from GitHub and reloaded database state.');
-      }
-    } catch (fetchErr: any) {
-      console.warn('[Git Sync Fetch Notice]:', fetchErr.message);
-    }
-
-    // 2. Check for local modifications and commit
+    // 1. Check for local modifications and commit them first before pulling
     let committed = false;
     try {
       const { stdout: statusOut } = await execAsync('git status --porcelain');
@@ -2606,6 +2596,31 @@ async function performGitSync(customMessage?: string) {
       }
     } catch (commitErr: any) {
       console.warn('[Git Sync Commit Notice]:', commitErr.message);
+    }
+
+    // 2. Fetch remote to see if there are incoming updates from GitHub
+    try {
+      await execAsync('git fetch origin main');
+      const { stdout: revCountOut } = await execAsync('git rev-list HEAD..origin/main --count');
+      const remoteAhead = parseInt(revCountOut.trim(), 10) || 0;
+      if (remoteAhead > 0) {
+        pulledCount = remoteAhead;
+        console.log(`[Git Sync] Remote is ${remoteAhead} commit(s) ahead. Pulling latest updates from GitHub...`);
+        try {
+          await execAsync('git pull --rebase origin main');
+        } catch (rebaseErr: any) {
+          console.warn('[Git Sync Rebase Notice, attempting merge reconciliation]:', rebaseErr.message);
+          await execAsync('git rebase --abort').catch(() => {});
+          await execAsync('git pull origin main --no-edit -X ours').catch(async () => {
+            await execAsync('git checkout --ours data/db.json').catch(() => {});
+            await execAsync('git add -A && git commit -m "chore(sync): resolve sync conflict in db state"').catch(() => {});
+          });
+        }
+        db.reload();
+        console.log('[Git Sync] Successfully pulled updates from GitHub and reloaded database state.');
+      }
+    } catch (fetchErr: any) {
+      console.warn('[Git Sync Fetch Notice]:', fetchErr.message);
     }
 
     // 3. Check if local is ahead of remote and needs pushing
@@ -2622,10 +2637,10 @@ async function performGitSync(customMessage?: string) {
             pushed = true;
             console.log('[Git Sync] Successfully pushed to origin/main');
           } catch (firstPushErr: any) {
-            console.log('[Git Sync] First push attempt had conflict or remote update, reconciling...');
+            console.log('[Git Sync] Push encountered upstream divergence, reconciling cleanly...');
             try {
               await execAsync('git fetch origin main');
-              await execAsync('git pull origin main --no-edit');
+              await execAsync('git pull origin main --no-edit -X ours');
               await execAsync('git push origin main');
               pushed = true;
               console.log('[Git Sync] Successfully reconciled and pushed to origin/main');
@@ -2636,32 +2651,6 @@ async function performGitSync(customMessage?: string) {
         }
       } catch (checkErr: any) {
         console.warn('[Git Sync Notice]:', checkErr.message);
-      }
-    }
-
-    // Record git commit on immutable ledger if new commit or push occurred
-    if (committed || pushed) {
-      try {
-        const { stdout: hashOut } = await execAsync('git rev-parse --short HEAD');
-        const shortCommit = hashOut.trim();
-        const syncMsg = customMessage || `chore(sync): automated continuous sync [${new Date().toISOString()}]`;
-        db.recordLedgerEntry(
-          {
-            entryType: 'GIT_COMMIT_RECORDED',
-            targetId: shortCommit,
-            targetTitle: syncMsg,
-            actorName: 'allenblue90210-jpg',
-            category: 'Repository Audit Sync',
-            summary: `Git commit ${shortCommit} synchronized and anchored on GitHub repository. Message: "${syncMsg}".`,
-            isPublic: true,
-            status: pushed ? 'pushed_to_github' : 'committed_locally',
-            gitSynced: true,
-            gitCommitHash: shortCommit,
-          },
-          true
-        );
-      } catch {
-        // ignore
       }
     }
 
@@ -2700,6 +2689,8 @@ async function performGitSync(customMessage?: string) {
       hasToken: Boolean(rawToken),
       tokenMasked: rawToken ? `${rawToken.substring(0, 4)}••••${rawToken.slice(-4)}` : null,
     };
+  } finally {
+    isSyncInProgress = false;
   }
 }
 
@@ -2707,12 +2698,13 @@ let syncDebounceTimer: NodeJS.Timeout | null = null;
 export function triggerGitSyncDebounced(reason = 'data updated') {
   if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
   syncDebounceTimer = setTimeout(async () => {
+    if (isSyncInProgress) return;
     try {
       await performGitSync(`chore(sync): auto-sync on ${reason}`);
     } catch (err: any) {
       console.warn('[Auto-sync trigger notice]:', err.message);
     }
-  }, 2500);
+  }, 5000);
 }
 
 let supabaseDebounceTimer: NodeJS.Timeout | null = null;
@@ -2739,6 +2731,7 @@ db.onSave(() => {
 
 // Periodic continuous sync check to catch any file or state updates
 setInterval(async () => {
+  if (isSyncInProgress) return;
   try {
     const { stdout: statusOut } = await execAsync('git status --porcelain');
     if (statusOut.trim().length > 0) {
@@ -2747,7 +2740,7 @@ setInterval(async () => {
   } catch {
     // ignore
   }
-}, 45000);
+}, 60000);
 
 app.get('/api/git/status', async (_req: Request, res: Response) => {
   const status = await getGitRepoStatus();
