@@ -33,6 +33,7 @@ import {
   Briefcase,
   ChevronRight,
 } from 'lucide-react';
+import { UserAvatar } from './UserAvatar.js';
 
 interface PublicLedgerScreenProps {
   currentUser: User | null;
@@ -577,18 +578,12 @@ export const PublicLedgerScreen: React.FC<PublicLedgerScreenProps> = ({
               >
                 <div className="space-y-3">
                   <div className="flex items-start gap-3.5">
-                    {person.avatarUrl ? (
-                      <img
-                        src={person.avatarUrl}
-                        alt={person.fullName}
-                        referrerPolicy="no-referrer"
-                        className="w-12 h-12 rounded-xl object-cover border border-slate-100 shadow-2xs"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold text-base border border-indigo-100">
-                        {person.fullName.charAt(0)}
-                      </div>
-                    )}
+                    <UserAvatar
+                      src={person.avatarUrl}
+                      name={person.fullName}
+                      className="w-12 h-12 rounded-xl border border-slate-100 shadow-2xs"
+                      iconClassName="w-6 h-6 text-slate-500"
+                    />
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
@@ -1141,18 +1136,12 @@ export const PublicLedgerScreen: React.FC<PublicLedgerScreenProps> = ({
                   className="p-2.5 rounded-lg border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50/40 transition-colors flex items-center justify-between cursor-pointer"
                 >
                   <div className="flex items-center gap-2.5">
-                    {p.avatarUrl ? (
-                      <img
-                        src={p.avatarUrl}
-                        alt={p.fullName}
-                        referrerPolicy="no-referrer"
-                        className="w-8 h-8 rounded-lg object-cover"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">
-                        {p.fullName.charAt(0)}
-                      </div>
-                    )}
+                    <UserAvatar
+                      src={p.avatarUrl}
+                      name={p.fullName}
+                      className="w-8 h-8 rounded-lg"
+                      iconClassName="w-4 h-4 text-slate-500"
+                    />
                     <div>
                       <div className="font-bold text-slate-900 text-xs flex items-center gap-1">
                         <span>{p.fullName}</span>

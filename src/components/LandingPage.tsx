@@ -26,6 +26,7 @@ import {
 import { api } from '../services/api.js';
 import { GoodFaithRating } from '../types/trust.js';
 import { GoodFaithReviewModal } from './GoodFaithReviewModal.js';
+import { UserAvatar } from './UserAvatar.js';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -300,10 +301,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                 <div className="py-4 space-y-4">
                   <div className="flex items-center gap-4">
-                    <img
-                      src="/src/assets/images/avatar_founder_1792334631930.jpg"
-                      alt="Allen Kinetic"
-                      className="w-14 h-14 rounded-full object-cover border border-slate-200"
+                    <UserAvatar
+                      src=""
+                      name="Allen Kinetic"
+                      className="w-14 h-14 rounded-full border border-slate-200"
+                      iconClassName="w-7 h-7 text-slate-500"
                     />
                     <div>
                       <div className="text-base font-bold text-slate-900 flex items-center gap-1.5">
