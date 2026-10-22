@@ -178,7 +178,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   const primaryNavLinks = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'profile', label: 'Profile', icon: UserIcon },
-    { id: 'commitments', label: 'Pacts', icon: Clock },
+    { id: 'commitments', label: 'Commitments', icon: Clock },
     { id: 'relationships', label: 'Verification', icon: Users },
     { id: 'receipts', label: 'Receipts', icon: Receipt },
     { id: 'public-ledger', label: 'Ledger', icon: Globe },
@@ -885,7 +885,7 @@ export const Navigation: React.FC<NavigationProps> = ({
           className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
         >
           <Clock className={`w-4 h-4 ${currentTab === 'commitments' ? 'text-indigo-600' : 'text-slate-400'}`} />
-          <span className="text-[10px] text-slate-500 font-normal">Pacts</span>
+          <span className="text-[10px] text-slate-500 font-normal">Commitments</span>
         </button>
 
         <button
