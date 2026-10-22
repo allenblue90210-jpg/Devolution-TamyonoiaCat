@@ -5,6 +5,8 @@ import {
   TrustReceipt,
   User,
   CommitmentCategory,
+  RecordedLedgerEntry,
+  LedgerStats,
 } from '../types/trust.js';
 import {
   Globe,
@@ -32,6 +34,13 @@ import {
   MapPin,
   Briefcase,
   ChevronRight,
+  GitBranch,
+  Copy,
+  CheckCheck,
+  RefreshCw,
+  FileText,
+  Database,
+  Bookmark,
 } from 'lucide-react';
 import { UserAvatar } from './UserAvatar.js';
 
@@ -50,10 +59,15 @@ export const PublicLedgerScreen: React.FC<PublicLedgerScreenProps> = ({
   onRefreshData,
   onBack,
 }) => {
-  const [activeTab, setActiveTab] = useState<'people' | 'commitments' | 'receipts' | 'overview'>('people');
+  const [activeTab, setActiveTab] = useState<'recorded_ledger' | 'people' | 'commitments' | 'receipts' | 'overview'>('recorded_ledger');
   const [people, setPeople] = useState<any[]>([]);
   const [commitments, setCommitments] = useState<TrustCommitment[]>([]);
   const [receipts, setReceipts] = useState<TrustReceipt[]>([]);
+  const [ledgerRecords, setLedgerRecords] = useState<RecordedLedgerEntry[]>([]);
+  const [ledgerStats, setLedgerStats] = useState<LedgerStats | null>(null);
+  const [ledgerTypeFilter, setLedgerTypeFilter] = useState<'all' | 'receipts' | 'commitments' | 'public' | 'git'>('all');
+  const [copiedHash, setCopiedHash] = useState<string | null>(null);
+  const [isSyncingGit, setIsSyncingGit] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
 
   // Sub-filters
@@ -97,16 +111,18 @@ export const PublicLedgerScreen: React.FC<PublicLedgerScreenProps> = ({
     return () => clearInterval(timer);
   }, []);
 
-  // Fetch People, Commitments, and Receipts
+  // Fetch People, Commitments, Receipts, and Immutable Recorded Ledger
   const loadAllData = async () => {
     setLoading(true);
     try {
-      const [profilesRes, comRes, myComRes, recRes, myRecRes] = await Promise.all([
+      const [profilesRes, comRes, myComRes, recRes, myRecRes, ledgerRes, statsRes] = await Promise.all([
         api.getProfiles({ q: '' }),
         api.getPublicCommitments(),
         currentUser ? api.getCommitments('mine') : Promise.resolve({ commitments: [] }),
         api.getPublicReceipts(),
         currentUser ? api.getReceipts() : Promise.resolve({ receipts: [] }),
+        api.getLedgerRecords(),
+        api.getLedgerStats(),
       ]);
 
       setPeople(profilesRes.profiles || []);
@@ -122,10 +138,36 @@ export const PublicLedgerScreen: React.FC<PublicLedgerScreenProps> = ({
       (recRes.receipts || []).forEach((r) => recMap.set(r.id, r));
       (myRecRes.receipts || []).forEach((r) => recMap.set(r.id, r));
       setReceipts(Array.from(recMap.values()));
+
+      setLedgerRecords(ledgerRes.records || []);
+      setLedgerStats(statsRes.stats || null);
     } catch (err) {
       console.error('Failed to load public ledger screen data:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCopyHash = (hash: string) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(hash);
+    }
+    setCopiedHash(hash);
+    setTimeout(() => setCopiedHash(null), 2500);
+  };
+
+  const handleSyncGitNow = async () => {
+    setIsSyncingGit(true);
+    try {
+      await api.syncGit('chore(sync): manual sync from Recorded Public Ledger view');
+      setToastMessage('Repository synchronized and committed to GitHub successfully.');
+      setTimeout(() => setToastMessage(null), 4000);
+      await loadAllData();
+      if (onRefreshData) onRefreshData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to sync repository');
+    } finally {
+      setIsSyncingGit(false);
     }
   };
 
