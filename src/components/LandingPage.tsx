@@ -898,52 +898,58 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               Verifiable Commercial Milestones
             </h2>
             <h3 className="text-3xl font-bold text-slate-900 tracking-tight text-balance">
-              Trust Receipts: Document agreements, deliveries, and settlement with counterparty confirmation.
+              Trust Receipts & Commitments: Document real agreements, deliveries, and settlements with counterparty confirmation.
             </h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-xl border border-slate-200 space-y-3">
-              <div className="text-xs font-mono text-indigo-600 font-semibold">TR-90214</div>
-              <h4 className="text-base font-bold text-slate-900">Multimodal Freight Tracking Microservice</h4>
-              <p className="text-xs text-slate-600">
-                Counterparty: Horizon Global Freight Services Ltd. Delivery of staging cluster, unit test coverage over 90%, and 30-day production monitoring.
+              <div className="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                <Receipt className="w-5 h-5" />
+              </div>
+              <h4 className="text-base font-bold text-slate-900">Dual-Signed Trust Receipts</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Issue cryptographic receipts for software handovers, equipment custody, consulting sprints, and financial settlements with mutual counterparty sign-off.
               </p>
               <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span className="font-semibold text-slate-900 font-mono tabular-nums">₦ 4,500,000 NGN</span>
+                <span className="text-slate-500 font-medium">Bilateral Attestation</span>
                 <span className="text-emerald-700 font-medium flex items-center gap-1">
                   <Check className="w-3.5 h-3.5" />
-                  <span>Dual Signed & Fulfilled</span>
+                  <span>Dual Signed</span>
                 </span>
               </div>
             </div>
 
             <div className="bg-white p-6 rounded-xl border border-slate-200 space-y-3">
-              <div className="text-xs font-mono text-indigo-600 font-semibold">TR-84920</div>
-              <h4 className="text-base font-bold text-slate-900">Security Audit & SOC2 Preparation</h4>
-              <p className="text-xs text-slate-600">
-                Counterparty: Kora Labs. Static analysis, AWS IAM privilege reduction, and terraform drift detection for high-compliance environment.
+              <div className="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                <Clock className="w-5 h-5" />
+              </div>
+              <h4 className="text-base font-bold text-slate-900">Timed Commitment Pacts</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Establish time-locked delivery pacts with live countdown timers, counterparty check-out milestones, and automated reputation rewards upon verified on-time completion.
               </p>
               <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span className="font-semibold text-slate-900 font-mono tabular-nums">$3,800 USD</span>
+                <span className="text-slate-500 font-medium">Overdue Protection</span>
                 <span className="text-indigo-700 font-medium flex items-center gap-1">
                   <Check className="w-3.5 h-3.5" />
-                  <span>Confirmed & In-Progress</span>
+                  <span>Automated Accountability</span>
                 </span>
               </div>
             </div>
 
             <div className="bg-white p-6 rounded-xl border border-slate-200 space-y-3">
-              <div className="text-xs font-mono text-indigo-600 font-semibold">TR-77102</div>
-              <h4 className="text-base font-bold text-slate-900">Legal Document Automation System</h4>
-              <p className="text-xs text-slate-600">
-                Counterparty: Altus Advisory Partners. Automated contract generation and audit preservation system with role-based document access.
+              <div className="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <h4 className="text-base font-bold text-slate-900">Cryptographic Audit Ledger</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Every event, modification, witness note, and fulfillment check-out is immutable and permanently timestamped, generating portable proof of professional integrity.
               </p>
               <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span className="font-semibold text-slate-900 font-mono tabular-nums">₦ 2,200,000 NGN</span>
+                <span className="text-slate-500 font-medium">Open Ledger Proof</span>
                 <span className="text-emerald-700 font-medium flex items-center gap-1">
                   <Check className="w-3.5 h-3.5" />
-                  <span>Dual Signed & Fulfilled</span>
+                  <span>Publicly Auditable</span>
                 </span>
               </div>
             </div>

@@ -415,6 +415,90 @@ function getInitialData(): DatabaseSchema {
 
   const receipts: TrustReceipt[] = [];
 
+  const references: ProfessionalReference[] = [
+    {
+      id: 'ref_01',
+      subjectUserId: 'usr_allen_006',
+      authorName: 'Lola',
+      authorTitle: 'Senior Cloud Solutions Architect',
+      authorCompany: 'CloudWorks NG',
+      authorRelationship: 'Colleague',
+      referenceType: 'relationship_confirmed',
+      context: 'Collaborated on distributed transaction queues and event-driven settlement engines',
+      content:
+        'Allen is an engineer of exceptional clarity and integrity. He is relentless about validating edge cases, guarantees deterministic transaction handling, and works with complete transparency. Any organization or partner relying on his technical commitments will find him dependable.',
+      status: 'active',
+      createdAt: '2025-09-02T16:25:00.000Z',
+    },
+    {
+      id: 'ref_02',
+      subjectUserId: 'usr_allen_006',
+      authorName: 'David Chen',
+      authorTitle: 'VP of Engineering',
+      authorCompany: 'Kora Labs (San Francisco & Lagos)',
+      authorRelationship: 'Employer / Supervisor',
+      referenceType: 'relationship_confirmed',
+      context: 'Supervised Allen during high-concurrency cloud payment microservice refactoring',
+      content:
+        'Allen ranks among the top 1% of systems engineers I have managed. He has a rare blend of deep technical mastery, ethical maturity, and calm problem-solving under tight regulatory deadlines.',
+      status: 'active',
+      createdAt: '2025-04-18T14:00:00.000Z',
+    },
+  ];
+
+  const disputes: DisputeReport[] = [];
+
+  const notifications: InAppNotification[] = [
+    {
+      id: 'notif_01',
+      userId: 'usr_allen_006',
+      type: 'evidence_status',
+      title: 'Identity Attestation Verified',
+      message: 'Your NIMC National Identity record and 3D liveness match were successfully validated.',
+      link: '/evidence',
+      isRead: true,
+      createdAt: '2025-11-14T09:30:00.000Z',
+    },
+    {
+      id: 'notif_02',
+      userId: 'usr_allen_006',
+      type: 'endorsement_received',
+      title: 'New Endorsement from Lola',
+      message: 'Lola has confirmed your colleague relationship and provided a personal endorsement.',
+      link: '/relationships',
+      isRead: false,
+      createdAt: '2025-09-02T16:20:00.000Z',
+    },
+  ];
+
+  const businesses: BusinessEntity[] = [
+    {
+      id: 'biz_01',
+      ownerUserId: 'usr_allen_006',
+      name: 'Aegis Tech Systems Ltd',
+      registrationNumber: 'RC-1849204',
+      jurisdiction: 'Federal Republic of Nigeria',
+      incorporationDate: '2021-04-14',
+      status: 'verified',
+      industry: 'Enterprise Software & Cloud Systems',
+      headquarters: '14 Adeola Odeku St, Victoria Island, Lagos',
+      teamMembers: [
+        {
+          userId: 'usr_allen_006',
+          name: 'Allen Kinetic',
+          role: 'Owner',
+          email: 'allen.okoro@example.com',
+        },
+        {
+          userId: 'usr_1792419058259_ehg5',
+          name: 'Lola',
+          role: 'Admin',
+          email: 'sarah.adesina@cloudworks.ng',
+        },
+      ],
+    },
+  ];
+
   const goodFaithRatings = getInitialGoodFaithRatings();
   const impressions = getInitialImpressions();
 
