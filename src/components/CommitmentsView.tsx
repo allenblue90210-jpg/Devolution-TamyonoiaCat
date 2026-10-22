@@ -896,7 +896,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                       <div className="min-w-0">
                         <div className="text-[10px] uppercase font-semibold text-slate-400">Requester (User A)</div>
                         <button
-                          onClick={() => onSelectTab(`profile-${c.requesterId === 'usr_allen_001' ? 'allenokoro' : c.requesterId}`)}
+                          onClick={() => onSelectTab(`profile-${c.requesterId}`)}
                           className="font-bold text-slate-900 truncate hover:text-indigo-600 block text-left"
                         >
                           {c.requesterName}

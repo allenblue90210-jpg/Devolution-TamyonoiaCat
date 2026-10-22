@@ -172,7 +172,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <span>Time-Locked Commitments</span>
                 </button>
                 <button
-                  onClick={() => onExploreProfile('allenokoro')}
+                  onClick={() => onExploreProfile('allenkinetic006')}
                   className="px-5 py-3 text-sm font-semibold text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
                 >
                   View Verified Profile

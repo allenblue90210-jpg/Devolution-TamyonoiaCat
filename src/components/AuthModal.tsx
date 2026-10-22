@@ -345,7 +345,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 required
                 value={login}
                 onChange={(e) => setLogin(e.target.value)}
-                placeholder="allenokoro or email@domain.com"
+                placeholder="allenkinetic006 or email@domain.com"
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               />
             </div>

@@ -2358,7 +2358,7 @@ app.post('/api/remember', (req: Request, res: Response) => {
     incidentDate: incidentDate || new Date().toISOString().split('T')[0],
     evidenceItems: Array.isArray(evidenceItems) ? evidenceItems : [],
     attachedReviewer: {
-      userId: reviewerUser?.id || attachedReviewer?.userId || 'usr_sarah_002',
+      userId: reviewerUser?.id || attachedReviewer?.userId || 'usr_1792419058259_ehg5',
       name: reviewerUser?.fullName || attachedReviewer?.name || 'Designated Reviewer',
       avatarUrl: reviewerUser?.avatarUrl || attachedReviewer?.avatarUrl,
       headline: reviewerUser?.headline || attachedReviewer?.headline || 'Independent Technical & Compliance Auditor',
