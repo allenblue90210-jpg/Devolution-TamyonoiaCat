@@ -1010,6 +1010,15 @@
   "disputes": [],
   "notifications": [
     {
+      "id": "notif_1792670349908",
+      "userId": "usr_allen_006",
+      "type": "receipt_action",
+      "title": "Commitment Ready for Dual Checkout",
+      "message": "Sarah Adesina has marked 'Return Toyota Land Cruiser V8 Fully Refueled' as fulfilled/delivered. Please confirm checkout to finalize trust score boost.",
+      "isRead": false,
+      "createdAt": "2026-10-22T11:59:09.908Z"
+    },
+    {
       "id": "notif_1792670344920",
       "userId": "usr_allen_006",
       "type": "receipt_action",
@@ -1214,7 +1223,7 @@
       "creatorRole": "requester",
       "deadline": "2026-10-24T11:58:59.481Z",
       "committerPledgeNote": "I accept this pact and pledge to return the Land Cruiser V8 on time with full fuel tank.",
-      "status": "active",
+      "status": "fulfilled_pending_checkout",
       "trustRewardPoints": 50,
       "penaltyRateDailyPercent": 30,
       "penaltyCurrentDeductionPercent": 0,
@@ -1226,7 +1235,8 @@
       "positiveImpressions": 0,
       "hasWitnessed": false,
       "comments": [],
-      "createdAt": "2026-10-22T11:58:59.549Z"
+      "createdAt": "2026-10-22T11:58:59.549Z",
+      "checkedOutByCommitterAt": "2026-10-22T11:59:09.906Z"
     },
     {
       "id": "TC-1887",
