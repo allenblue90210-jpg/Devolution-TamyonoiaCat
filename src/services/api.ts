@@ -561,6 +561,9 @@ export const api = {
       body: JSON.stringify({ commitMessage }),
     });
   },
+  async syncGit(commitMessage?: string) {
+    return this.triggerGitSync(commitMessage);
+  },
   async pullGitRepo(): Promise<{
     success: boolean;
     clean: boolean;

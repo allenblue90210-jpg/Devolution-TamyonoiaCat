@@ -22,6 +22,7 @@ export function isRealAvatarUrl(url?: string | null): boolean {
 
 interface UserAvatarProps {
   src?: string | null;
+  avatarUrl?: string | null;
   name?: string;
   className?: string;
   iconClassName?: string;
@@ -30,19 +31,21 @@ interface UserAvatarProps {
 
 export const UserAvatar: React.FC<UserAvatarProps> = ({
   src,
+  avatarUrl,
   name,
   className = 'w-8 h-8 rounded-full',
   iconClassName,
   alt = 'Profile',
 }) => {
   const [hasError, setHasError] = useState(false);
+  const effectiveSrc = src || avatarUrl;
 
-  const valid = !hasError && isRealAvatarUrl(src);
+  const valid = !hasError && isRealAvatarUrl(effectiveSrc);
 
-  if (valid && src) {
+  if (valid && effectiveSrc) {
     return (
       <img
-        src={src}
+        src={effectiveSrc}
         alt={alt || name || 'User profile'}
         onError={() => setHasError(true)}
         className={`${className} object-cover`}
