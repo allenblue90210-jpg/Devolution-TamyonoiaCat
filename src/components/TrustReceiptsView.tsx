@@ -318,11 +318,12 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
     const selectedUser = availableUsers.find((u) => u.id === targetCounterpartyId);
 
     try {
+      const safeContact = counterpartyContact.trim() || `${counterpartyName.toLowerCase().replace(/\s+/g, '.')}@devolution.network`;
       await onCreateReceipt({
         counterpartyUserId: targetCounterpartyId && targetCounterpartyId !== 'other' ? targetCounterpartyId : undefined,
         counterpartyAvatar: selectedUser?.avatarUrl,
         counterpartyName: counterpartyName.trim(),
-        counterpartyContact: counterpartyContact.trim(),
+        counterpartyContact: safeContact,
         deadline: formattedDeadline,
         interactionCategory,
         otherCategoryDetails: interactionCategory === 'Other' ? otherCategoryDetails : undefined,
@@ -352,6 +353,44 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
       alert(err.message || 'Failed to create trust receipt.');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleUpdateReceiptCounterparty = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingReceipt) return;
+
+    const chosen = editReceiptSelectedUser;
+    const isOther = chosen?.id === 'other' || (!chosen && editReceiptExternalName.trim());
+    const finalName = chosen && chosen.id !== 'other'
+      ? chosen.fullName
+      : (editReceiptExternalName.trim() || editReceiptSearch.trim());
+
+    if (!finalName) {
+      alert('Please select a network member or enter an external counterparty name.');
+      return;
+    }
+
+    try {
+      setIsUpdatingReceiptCounterparty(true);
+      await api.updateReceipt(editingReceipt.id, {
+        counterpartyUserId: isOther ? 'other' : chosen?.id,
+        counterpartyName: finalName,
+        counterpartyContact: chosen?.email || `${finalName.toLowerCase().replace(/\s+/g, '.')}@devolution.network`,
+        counterpartyAvatar: chosen?.avatarUrl || '',
+      });
+
+      setEditingReceipt(null);
+      setEditReceiptSelectedUser(null);
+      setEditReceiptSearch('');
+      setEditReceiptExternalName('');
+      setToastMessage(`Counterparty updated to "${finalName}" successfully!`);
+      setTimeout(() => setToastMessage(null), 4000);
+      if (onRefreshAllData) onRefreshAllData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to update counterparty');
+    } finally {
+      setIsUpdatingReceiptCounterparty(false);
     }
   };
 
@@ -869,7 +908,23 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                   <span className="font-medium text-slate-800">{selectedReceipt.creatorName}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block">Promised Counterparty:</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-400 block">Promised Counterparty:</span>
+                    {selectedReceipt.status === 'pending' && selectedReceipt.creatorId === user.id && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingReceipt(selectedReceipt);
+                          setEditReceiptSelectedUser(null);
+                          setEditReceiptSearch('');
+                          setEditReceiptExternalName('');
+                        }}
+                        className="text-[10px] text-indigo-600 hover:text-indigo-800 font-semibold hover:underline cursor-pointer"
+                      >
+                        Change Counterparty
+                      </button>
+                    )}
+                  </div>
                   <span className="font-medium text-slate-800 flex items-center gap-1.5 mt-0.5">
                     {selectedReceipt.counterpartyAvatar && (
                       <img
@@ -1202,6 +1257,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                             <button
                               type="button"
                               onClick={() => {
+                                setHasUserClearedReceiptCounterparty(true);
                                 setTargetCounterpartyId('');
                                 setCounterpartyName('');
                                 setCounterpartyContact('');
@@ -1222,8 +1278,9 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                             type="text"
                             value={receiptCounterpartySearch}
                             onChange={(e) => setReceiptCounterpartySearch(e.target.value)}
-                            placeholder="Search counterparty by name, @username, or email..."
-                            className="w-full pl-9 pr-8 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white text-xs"
+                            placeholder="Search people by name, @username, or email..."
+                            className="w-full pl-9 pr-8 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white text-xs text-slate-900"
+                            autoFocus
                           />
                           {receiptCounterpartySearch && (
                             <button
@@ -1236,8 +1293,12 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                           )}
                         </div>
 
-                        {/* Search Suggestions */}
-                        <div className="max-h-40 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-xs divide-y divide-slate-100 text-xs">
+                        {/* Search Suggestions with all available people */}
+                        <div className="max-h-56 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-xs divide-y divide-slate-100 text-xs">
+                          <div className="px-3 py-1.5 bg-slate-50 text-[10px] font-semibold text-slate-500 uppercase tracking-wider flex items-center justify-between">
+                            <span>Select Network Member</span>
+                            <span>Click row to assign</span>
+                          </div>
                           {availableUsers
                             .filter((u) => {
                               if (u.id === user.id) return false;
@@ -1246,31 +1307,30 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                               return (
                                 u.fullName.toLowerCase().includes(q) ||
                                 u.username.toLowerCase().includes(q) ||
-                                (u as any).email?.toLowerCase().includes(q)
+                                ((u as any).email && (u as any).email.toLowerCase().includes(q))
                               );
                             })
-                            .slice(0, 6)
                             .map((u) => (
                               <button
                                 key={u.id}
                                 type="button"
                                 onClick={() => handleSelectCounterpartyUser(u.id)}
-                                className="w-full p-2.5 flex items-center justify-between hover:bg-indigo-50/70 text-left transition-colors cursor-pointer"
+                                className="w-full p-2.5 flex items-center justify-between hover:bg-indigo-50/80 text-left transition-colors cursor-pointer group"
                               >
-                                <div className="flex items-center gap-2 min-w-0">
+                                <div className="flex items-center gap-2.5 min-w-0">
                                   {u.avatarUrl ? (
                                     <img
                                       src={u.avatarUrl}
                                       alt={u.fullName}
-                                      className="w-6 h-6 rounded-full object-cover shrink-0 border border-slate-200"
+                                      className="w-7 h-7 rounded-full object-cover shrink-0 border border-slate-200"
                                     />
                                   ) : (
-                                    <div className="w-6 h-6 rounded-full bg-slate-100 text-slate-700 font-bold flex items-center justify-center shrink-0 text-[10px]">
+                                    <div className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center shrink-0 text-xs">
                                       {u.fullName.charAt(0)}
                                     </div>
                                   )}
                                   <div className="min-w-0">
-                                    <span className="font-semibold text-slate-900 truncate block">
+                                    <span className="font-semibold text-slate-900 truncate block group-hover:text-indigo-600">
                                       {u.fullName}
                                     </span>
                                     <span className="text-[10px] text-slate-500 font-mono block">
@@ -1278,7 +1338,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                                     </span>
                                   </div>
                                 </div>
-                                <span className="text-[10px] text-indigo-600 font-semibold shrink-0">
+                                <span className="text-[11px] text-indigo-600 font-semibold px-2 py-1 rounded bg-indigo-50 group-hover:bg-indigo-600 group-hover:text-white transition-colors shrink-0">
                                   Select
                                 </span>
                               </button>
