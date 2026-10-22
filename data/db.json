@@ -1010,6 +1010,16 @@
   "disputes": [],
   "notifications": [
     {
+      "id": "notif_1792670339552",
+      "userId": "usr_sarah_002",
+      "type": "receipt_action",
+      "title": "New Commitment Request Received",
+      "message": "Allen Kinetic created a commitment pact: 'Return Toyota Land Cruiser V8 Fully Refueled'. Sign your pledge and confirmed delivery time.",
+      "link": "/commitments",
+      "isRead": false,
+      "createdAt": "2026-10-22T11:58:59.552Z"
+    },
+    {
       "id": "notif_1792614068753",
       "userId": "usr_sarah_002",
       "type": "receipt_action",
@@ -1178,6 +1188,36 @@
     }
   },
   "commitments": [
+    {
+      "id": "TC-7871",
+      "title": "Return Toyota Land Cruiser V8 Fully Refueled",
+      "description": "User B (Sarah Adesina) returning loaned Toyota Land Cruiser V8 with full tank and clean handover to Allen Okoro at Lekki Phase 1.",
+      "category": "Vehicle & Transportation",
+      "requesterId": "usr_allen_006",
+      "requesterName": "Allen Kinetic",
+      "requesterAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+      "committerId": "usr_sarah_002",
+      "committerName": "Sarah Adesina",
+      "committerAvatar": "/src/assets/images/avatar_consultant_1792334644466.jpg",
+      "promisedUserId": "usr_allen_006",
+      "promisedUserName": "Allen Kinetic",
+      "promisedUserAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+      "creatorRole": "requester",
+      "deadline": "2026-10-24T11:58:59.481Z",
+      "status": "pending_acceptance",
+      "trustRewardPoints": 50,
+      "penaltyRateDailyPercent": 30,
+      "penaltyCurrentDeductionPercent": 0,
+      "isOverdue": false,
+      "daysOverdue": 0,
+      "isPublic": true,
+      "impressions": 1,
+      "witnessCount": 0,
+      "positiveImpressions": 0,
+      "hasWitnessed": false,
+      "comments": [],
+      "createdAt": "2026-10-22T11:58:59.549Z"
+    },
     {
       "id": "TC-1887",
       "title": "Handover Lexus LX570 Clean with Full Tank",
