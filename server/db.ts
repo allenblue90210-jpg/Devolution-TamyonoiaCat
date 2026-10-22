@@ -1294,6 +1294,28 @@ class Database {
       });
     }
     this.data.receipts.unshift(receipt);
+
+    // Record receipt dropped on permanent immutable ledger
+    this.recordLedgerEntry({
+      entryType: 'RECEIPT_DROPPED',
+      targetId: receipt.id,
+      targetTitle: receipt.title,
+      actorId: receipt.creatorId,
+      actorName: receipt.creatorName,
+      counterpartyId: receipt.counterpartyUserId,
+      counterpartyName: receipt.counterpartyName,
+      counterpartyAvatar: receipt.counterpartyAvatar,
+      category: receipt.interactionCategory,
+      summary: `Receipt dropped: "${receipt.title}" (${receipt.interactionCategory}) between ${receipt.creatorName} and ${receipt.counterpartyName}. Status: ${receipt.status.toUpperCase()}.`,
+      isPublic: receipt.isPublic,
+      status: receipt.status,
+      metadata: {
+        transactionValue: receipt.transactionValue,
+        completionConditions: receipt.completionConditions,
+        deadline: receipt.deadline,
+      },
+    });
+
     this.persist();
     return receipt;
   }
@@ -1309,12 +1331,51 @@ class Database {
         actor: 'Network Ledger',
         event: `Receipt status changed to "${updates.status}"`,
       });
+
+      const entryType: LedgerEntryType =
+        updates.status === 'confirmed'
+          ? 'RECEIPT_CONFIRMED'
+          : updates.status === 'completed'
+          ? 'RECEIPT_FULFILLED'
+          : updates.status === 'disputed'
+          ? 'RECEIPT_DISPUTED'
+          : updates.status === 'cancelled'
+          ? 'RECEIPT_DROPPED_CANCELLED'
+          : 'RECEIPT_DROPPED';
+
+      this.recordLedgerEntry({
+        entryType,
+        targetId: current.id,
+        targetTitle: current.title,
+        actorId: current.creatorId,
+        actorName: current.creatorName,
+        counterpartyId: current.counterpartyUserId,
+        counterpartyName: current.counterpartyName,
+        counterpartyAvatar: current.counterpartyAvatar,
+        category: current.interactionCategory,
+        summary: `Receipt #${current.id} status changed to "${updates.status.toUpperCase()}". ${updates.status === 'cancelled' ? 'Dropped & archived with full audit verification.' : 'State updated and confirmed on ledger.'}`,
+        isPublic: updates.isPublic !== undefined ? updates.isPublic : current.isPublic,
+        status: updates.status,
+      });
     }
     if (updates.isPublic !== undefined && updates.isPublic !== current.isPublic) {
       history.push({
         timestamp: new Date().toISOString(),
         actor: 'Network Ledger',
         event: `Receipt visibility changed to ${updates.isPublic ? 'Public Ledger' : 'Private Bilateral'}`,
+      });
+      this.recordLedgerEntry({
+        entryType: 'PUBLIC_RECORD_DROPPED',
+        targetId: current.id,
+        targetTitle: current.title,
+        actorId: current.creatorId,
+        actorName: current.creatorName,
+        counterpartyId: current.counterpartyUserId,
+        counterpartyName: current.counterpartyName,
+        category: current.interactionCategory,
+        summary: `Receipt #${current.id} visibility updated to ${updates.isPublic ? 'Public' : 'Private'} on ledger.`,
+        isPublic: updates.isPublic,
+        status: current.status,
       });
     }
     this.data.receipts[idx] = { ...current, ...updates, history };
@@ -1480,6 +1541,29 @@ class Database {
       event: `Commitment pact recorded on ledger (${commitment.isPublic ? 'Public Ledger' : 'Private Bilateral'})`,
     });
     this.data.commitments.unshift(commitment);
+
+    // Record commit dropped on permanent immutable ledger
+    this.recordLedgerEntry({
+      entryType: 'COMMITMENT_DROPPED',
+      targetId: commitment.id,
+      targetTitle: commitment.title,
+      actorId: commitment.committerId,
+      actorName: commitment.committerName,
+      actorAvatar: commitment.committerAvatar,
+      counterpartyId: commitment.requesterId,
+      counterpartyName: commitment.requesterName,
+      counterpartyAvatar: commitment.requesterAvatar,
+      category: commitment.category,
+      summary: `Commitment dropped / pledged: "${commitment.title}" (${commitment.category}) by ${commitment.committerName} to ${commitment.requesterName}. Deadline: ${new Date(commitment.deadline).toLocaleString()}.`,
+      isPublic: commitment.isPublic,
+      status: commitment.status,
+      metadata: {
+        deadline: commitment.deadline,
+        trustRewardPoints: commitment.trustRewardPoints,
+        creatorRole: commitment.creatorRole,
+      },
+    });
+
     this.persist();
     return commitment;
   }
@@ -1495,12 +1579,52 @@ class Database {
         actor: 'Network Ledger',
         event: `Status changed to "${updates.status}"`,
       });
+
+      const entryType: LedgerEntryType =
+        updates.status === 'active'
+          ? 'COMMITMENT_ACCEPTED'
+          : updates.status === 'fulfilled_pending_checkout'
+          ? 'COMMITMENT_FULFILLED'
+          : updates.status === 'completed'
+          ? 'COMMITMENT_CHECKED_OUT'
+          : updates.status === 'cancelled'
+          ? 'COMMITMENT_DROPPED_CANCELLED'
+          : 'COMMITMENT_DROPPED';
+
+      this.recordLedgerEntry({
+        entryType,
+        targetId: current.id,
+        targetTitle: current.title,
+        actorId: current.committerId,
+        actorName: current.committerName,
+        actorAvatar: current.committerAvatar,
+        counterpartyId: current.requesterId,
+        counterpartyName: current.requesterName,
+        counterpartyAvatar: current.requesterAvatar,
+        category: current.category,
+        summary: `Commitment #${current.id} status changed to "${updates.status.toUpperCase()}". ${updates.status === 'cancelled' ? 'Commitment dropped/cancelled and permanently preserved on audit ledger.' : 'Recorded and validated on ledger.'}`,
+        isPublic: updates.isPublic !== undefined ? updates.isPublic : current.isPublic,
+        status: updates.status,
+      });
     }
     if (updates.isPublic !== undefined && updates.isPublic !== current.isPublic) {
       history.push({
         timestamp: new Date().toISOString(),
         actor: 'Network Ledger',
         event: `Visibility changed to ${updates.isPublic ? 'Public Ledger' : 'Private Bilateral'}`,
+      });
+      this.recordLedgerEntry({
+        entryType: 'PUBLIC_RECORD_DROPPED',
+        targetId: current.id,
+        targetTitle: current.title,
+        actorId: current.committerId,
+        actorName: current.committerName,
+        counterpartyId: current.requesterId,
+        counterpartyName: current.requesterName,
+        category: current.category,
+        summary: `Commitment #${current.id} visibility updated to ${updates.isPublic ? 'Public' : 'Private'} on ledger.`,
+        isPublic: updates.isPublic,
+        status: current.status,
       });
     }
     if (updates.linkedReceiptId && updates.linkedReceiptId !== current.linkedReceiptId) {
