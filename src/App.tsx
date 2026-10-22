@@ -11,6 +11,7 @@ import {
   ReputationBreakdown,
   RelationshipCategory,
   UserSummary,
+  TrustCommitment,
 } from './types/trust.js';
 import { Navigation } from './components/Navigation.js';
 import { LandingPage } from './components/LandingPage.js';
@@ -42,6 +43,7 @@ export default function App() {
   const [evidence, setEvidence] = useState<EvidenceItem[]>([]);
   const [relationships, setRelationships] = useState<RelationshipInvite[]>([]);
   const [receipts, setReceipts] = useState<TrustReceipt[]>([]);
+  const [commitments, setCommitments] = useState<TrustCommitment[]>([]);
   const [references, setReferences] = useState<ProfessionalReference[]>([]);
   const [notifications, setNotifications] = useState<InAppNotification[]>([]);
   const [reputation, setReputation] = useState<ReputationBreakdown | null>(null);
@@ -131,13 +133,14 @@ export default function App() {
 
       const activeUserId = userRes?.user?.id || currentUser?.id;
       if (activeUserId) {
-        const [eviRes, relRes, recRes, refRes, notifRes, repRes] = await Promise.all([
+        const [eviRes, relRes, recRes, refRes, notifRes, repRes, cmtRes] = await Promise.all([
           api.getEvidence().catch(() => ({ evidence: [] })),
           api.getRelationships().catch(() => ({ relationships: [] })),
-          api.getReceipts().catch(() => ({ receipts: [] })),
+          api.getReceipts('all').catch(() => ({ receipts: [] })),
           api.getReferences().catch(() => ({ references: [] })),
           api.getNotifications().catch(() => ({ notifications: [] })),
           api.getReputation(activeUserId).catch(() => ({ breakdown: null })),
+          api.getCommitments('all').catch(() => ({ commitments: [] })),
         ]);
 
         if (eviRes?.evidence) setEvidence(eviRes.evidence);
@@ -146,6 +149,7 @@ export default function App() {
         if (refRes?.references) setReferences(refRes.references);
         if (notifRes?.notifications) setNotifications(notifRes.notifications);
         if (repRes?.breakdown) setReputation(repRes.breakdown);
+        if (cmtRes?.commitments) setCommitments(cmtRes.commitments);
       }
     } catch (err) {
       console.warn('Notice refreshing platform data:', err);
@@ -180,6 +184,7 @@ export default function App() {
     setEvidence([]);
     setRelationships([]);
     setReceipts([]);
+    setCommitments([]);
     setReferences([]);
     setNotifications([]);
     setReputation(null);
@@ -323,6 +328,7 @@ export default function App() {
             evidence={evidence}
             relationships={relationships}
             receipts={receipts}
+            commitments={commitments}
             references={references}
             notifications={notifications}
             reputation={reputation}
