@@ -1868,6 +1868,124 @@ class Database {
       ratingsCount: ratings.length,
     };
   }
+
+  // Immutable Recorded Ledger Methods
+  public recordLedgerEntry(
+    entry: {
+      entryType: LedgerEntryType;
+      targetId: string;
+      targetTitle: string;
+      actorId?: string;
+      actorName: string;
+      actorAvatar?: string;
+      counterpartyId?: string | null;
+      counterpartyName?: string;
+      counterpartyAvatar?: string;
+      category: string;
+      summary: string;
+      isPublic: boolean;
+      status: string;
+      gitSynced?: boolean;
+      gitCommitHash?: string;
+      metadata?: Record<string, any>;
+    },
+    silent = false
+  ): RecordedLedgerEntry {
+    if (!this.data.recordedLedger) {
+      this.data.recordedLedger = [];
+    }
+    const sequence = this.data.recordedLedger.length + 1;
+    const timestamp = new Date().toISOString();
+    const id = `REC-${String(sequence).padStart(5, '0')}`;
+    const recordHash = generateRecordHash(sequence, entry.entryType, entry.targetId, timestamp, entry.actorName);
+
+    const newEntry: RecordedLedgerEntry = {
+      id,
+      sequence,
+      recordHash,
+      entryType: entry.entryType,
+      targetId: entry.targetId,
+      targetTitle: entry.targetTitle,
+      actorId: entry.actorId,
+      actorName: entry.actorName,
+      actorAvatar: entry.actorAvatar,
+      counterpartyId: entry.counterpartyId,
+      counterpartyName: entry.counterpartyName,
+      counterpartyAvatar: entry.counterpartyAvatar,
+      category: entry.category,
+      summary: entry.summary,
+      isPublic: entry.isPublic,
+      status: entry.status,
+      gitSynced: entry.gitSynced ?? true,
+      gitCommitHash: entry.gitCommitHash,
+      metadata: entry.metadata,
+      timestamp,
+    };
+
+    this.data.recordedLedger.unshift(newEntry);
+    this.persist(!silent);
+    return newEntry;
+  }
+
+  public getRecordedLedger(options?: {
+    type?: string;
+    isPublicOnly?: boolean;
+    targetId?: string;
+    search?: string;
+    limit?: number;
+  }): RecordedLedgerEntry[] {
+    if (!this.data.recordedLedger) {
+      this.data.recordedLedger = [];
+    }
+    let entries = [...this.data.recordedLedger];
+    if (options?.isPublicOnly) {
+      entries = entries.filter((e) => e.isPublic);
+    }
+    if (options?.type && options.type !== 'all') {
+      entries = entries.filter((e) => e.entryType === options.type);
+    }
+    if (options?.targetId) {
+      entries = entries.filter((e) => e.targetId === options.targetId);
+    }
+    if (options?.search) {
+      const q = options.search.toLowerCase().trim();
+      entries = entries.filter(
+        (e) =>
+          e.id.toLowerCase().includes(q) ||
+          e.targetId.toLowerCase().includes(q) ||
+          e.targetTitle.toLowerCase().includes(q) ||
+          e.actorName.toLowerCase().includes(q) ||
+          (e.counterpartyName && e.counterpartyName.toLowerCase().includes(q)) ||
+          e.summary.toLowerCase().includes(q) ||
+          e.recordHash.toLowerCase().includes(q)
+      );
+    }
+    if (options?.limit && options.limit > 0) {
+      entries = entries.slice(0, options.limit);
+    }
+    return entries;
+  }
+
+  public getLedgerStats(): LedgerStats {
+    if (!this.data.recordedLedger) {
+      this.data.recordedLedger = [];
+    }
+    const total = this.data.recordedLedger.length;
+    const receiptsDropped = this.data.recordedLedger.filter((e) => e.entryType.startsWith('RECEIPT_')).length;
+    const commitsDropped = this.data.recordedLedger.filter((e) => e.entryType.startsWith('COMMITMENT_')).length;
+    const publicRecords = this.data.recordedLedger.filter((e) => e.isPublic).length;
+    const gitCommits = this.data.recordedLedger.filter((e) => e.entryType === 'GIT_COMMIT_RECORDED').length;
+    const lastRecordedAt = this.data.recordedLedger[0]?.timestamp || new Date().toISOString();
+
+    return {
+      totalRecorded: total,
+      receiptsDropped,
+      commitsDropped,
+      publicRecords,
+      gitCommits,
+      lastRecordedAt,
+    };
+  }
 }
 
 export const db = new Database();
