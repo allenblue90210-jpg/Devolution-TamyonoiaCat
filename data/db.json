@@ -559,103 +559,7 @@
       "createdAt": "2026-03-01T09:00:00.000Z"
     }
   ],
-  "receipts": [
-    {
-      "id": "TR-63487",
-      "creatorId": "usr_allen_006",
-      "creatorName": "Allen Kinetic",
-      "counterpartyName": "Lola",
-      "counterpartyContact": "allenkinetic001@gmail.com",
-      "counterpartyUserId": "usr_1792419058259_ehg5",
-      "counterpartyAvatar": "",
-      "interactionCategory": "Freelance Project",
-      "title": "Verifiable Settlement Protocol Delivery",
-      "description": "Cryptographic delivery of distributed settlement contracts.",
-      "transactionValue": "$18,500 USD",
-      "status": "pending",
-      "completionConditions": "Verified audit logs passing zero-knowledge verification.",
-      "isFulfillmentConfirmed": false,
-      "deadline": null,
-      "isOverdue": false,
-      "evidenceAttachments": [],
-      "history": [
-        {
-          "timestamp": "2026-10-22T18:29:05.462Z",
-          "actor": "Allen Kinetic",
-          "event": "Trust Receipt Created & Awaiting Counterparty Confirmation"
-        }
-      ],
-      "comments": [],
-      "isPublic": true,
-      "createdAt": "2026-10-22T18:29:05.462Z"
-    },
-    {
-      "id": "TR-89240",
-      "creatorId": "usr_allen_006",
-      "creatorName": "Allen Kinetic",
-      "counterpartyName": "David Chen",
-      "counterpartyContact": "david.chen@koralabs.io",
-      "counterpartyUserId": "usr_david_03",
-      "interactionCategory": "Service Contract",
-      "title": "Smart Settlement Protocol Security & SLA Audit Report Delivery",
-      "description": "Dual-attested fulfillment of cryptographic smart settlement protocol verification and 99.999% SLA architecture delivery.",
-      "transactionValue": "$32,000 USD",
-      "status": "completed",
-      "completionConditions": "Deterministic formal verification tests passing with zero high/critical vulnerabilities.",
-      "isFulfillmentConfirmed": true,
-      "deadline": "2026-10-20T18:00:00.000Z",
-      "isOverdue": false,
-      "evidenceAttachments": [
-        {
-          "name": "settlement_audit_report_v1.4.pdf",
-          "date": "2026-10-20",
-          "size": "4.2 MB"
-        }
-      ],
-      "history": [
-        {
-          "timestamp": "2026-10-20T17:10:00.000Z",
-          "actor": "Network Ledger",
-          "event": "Dual-signed trust receipt recorded on Public Ledger"
-        }
-      ],
-      "isPublic": true,
-      "createdAt": "2026-10-20T17:10:00.000Z",
-      "completedAt": "2026-10-20T17:10:00.000Z"
-    },
-    {
-      "id": "TR-89241",
-      "creatorId": "usr_david_03",
-      "creatorName": "David Chen",
-      "counterpartyName": "Allen Kinetic",
-      "counterpartyContact": "allenkinetic006@gmail.com",
-      "counterpartyUserId": "usr_allen_006",
-      "interactionCategory": "Freelance Project",
-      "title": "High-Throughput Payment Engine Re-architecture",
-      "description": "End-to-end performance optimization and distributed transaction queue implementation for sub-10ms payment routing.",
-      "transactionValue": "$24,500 USD",
-      "status": "completed",
-      "completionConditions": "Load test sustained at 25,000 TPS with zero transaction loss.",
-      "isFulfillmentConfirmed": true,
-      "evidenceAttachments": [
-        {
-          "name": "benchmark_telemetry_25ktps.json",
-          "date": "2026-09-15",
-          "size": "1.8 MB"
-        }
-      ],
-      "history": [
-        {
-          "timestamp": "2026-09-15T14:20:00.000Z",
-          "actor": "Network Ledger",
-          "event": "Dual-signed trust receipt recorded on Public Ledger"
-        }
-      ],
-      "isPublic": true,
-      "createdAt": "2026-09-15T14:20:00.000Z",
-      "completedAt": "2026-09-15T14:20:00.000Z"
-    }
-  ],
+  "receipts": [],
   "references": [
     {
       "id": "ref_01",
@@ -783,84 +687,7 @@
       "expiresAt": 1792338999019
     }
   },
-  "commitments": [
-    {
-      "id": "TC-9041",
-      "title": "Decentralized Edge Node Hardware Handover & Deployment",
-      "description": "Physical handover and cryptographic commissioning of 2x Dell PowerEdge R650 cluster nodes at the Victoria Island primary datacenter.",
-      "category": "Equipment & Machinery",
-      "requesterId": "usr_sarah_02",
-      "requesterName": "Sarah Jenkins",
-      "committerId": "usr_allen_006",
-      "committerName": "Allen Kinetic",
-      "promisedUserId": "usr_sarah_02",
-      "promisedUserName": "Sarah Jenkins",
-      "creatorRole": "promisor",
-      "deadline": "2026-10-24T18:28:55.682Z",
-      "committerPledgeNote": "Hardware verified, benchmarked, and ready for signed chain-of-custody delivery by 14:00 UTC.",
-      "status": "active",
-      "trustRewardPoints": 50,
-      "penaltyRateDailyPercent": 30,
-      "penaltyCurrentDeductionPercent": 0,
-      "isOverdue": false,
-      "daysOverdue": 0,
-      "isPublic": true,
-      "impressions": 24,
-      "witnessCount": 5,
-      "positiveImpressions": 12,
-      "createdAt": "2026-10-21T09:30:00.000Z",
-      "history": [
-        {
-          "timestamp": "2026-10-21T09:30:00.000Z",
-          "actor": "Allen Kinetic",
-          "event": "Commitment dropped and registered on Public Verifiable Ledger"
-        }
-      ]
-    },
-    {
-      "id": "TC-9042",
-      "title": "Smart Settlement Protocol Security & SLA Audit Report",
-      "description": "Formal verification, deterministic state fuzzing, and complete architectural sign-off for inter-node settlement.",
-      "category": "Professional Milestone",
-      "requesterId": "usr_david_03",
-      "requesterName": "David Chen",
-      "committerId": "usr_allen_006",
-      "committerName": "Allen Kinetic",
-      "promisedUserId": "usr_david_03",
-      "promisedUserName": "David Chen",
-      "creatorRole": "promisor",
-      "deadline": "2026-10-20T18:00:00.000Z",
-      "status": "completed",
-      "trustRewardPoints": 100,
-      "penaltyRateDailyPercent": 30,
-      "penaltyCurrentDeductionPercent": 0,
-      "isOverdue": false,
-      "daysOverdue": 0,
-      "checkedOutByCommitterAt": "2026-10-20T16:45:00.000Z",
-      "checkedOutByRequesterAt": "2026-10-20T17:10:00.000Z",
-      "linkedReceiptId": "TR-89240",
-      "isPublic": true,
-      "impressions": 48,
-      "witnessCount": 9,
-      "positiveImpressions": 22,
-      "ratingPercent": 100,
-      "ratingBadge": "100% Flawless Honor",
-      "completedAt": "2026-10-20T17:10:00.000Z",
-      "createdAt": "2026-10-15T11:00:00.000Z",
-      "history": [
-        {
-          "timestamp": "2026-10-15T11:00:00.000Z",
-          "actor": "Allen Kinetic",
-          "event": "Commitment dropped and registered on Public Verifiable Ledger"
-        },
-        {
-          "timestamp": "2026-10-20T17:10:00.000Z",
-          "actor": "David Chen",
-          "event": "Counterparty verified fulfillment and generated Trust Receipt TR-89240"
-        }
-      ]
-    }
-  ],
+  "commitments": [],
   "goodFaithRatings": [
     {
       "id": "gfr_003",
@@ -1154,6 +981,22 @@
   ],
   "recordedLedger": [
     {
+      "id": "REC-00014",
+      "sequence": 14,
+      "recordHash": "6dfeb3b2549dd511842516099ee461c5655eeb92a2f7f904343f719b581728bb",
+      "entryType": "GIT_COMMIT_RECORDED",
+      "targetId": "0872d40",
+      "targetTitle": "chore(sync): automated continuous sync of workspace updates",
+      "actorName": "allenblue90210-jpg",
+      "category": "Repository Audit Sync",
+      "summary": "Git commit 0872d40 synchronized and anchored on GitHub repository. Message: \"chore(sync): automated continuous sync of workspace updates\".",
+      "isPublic": true,
+      "status": "pushed_to_github",
+      "gitSynced": true,
+      "gitCommitHash": "0872d40",
+      "timestamp": "2026-10-22T18:45:26.990Z"
+    },
+    {
       "id": "REC-00013",
       "sequence": 13,
       "recordHash": "63b180e55a21382faf9c0d0c7a24058d6a8950a17a2a247bc572b5779c1a3b60",
@@ -1216,30 +1059,6 @@
       "gitSynced": true,
       "gitCommitHash": "b239060",
       "timestamp": "2026-10-22T18:29:10.151Z"
-    },
-    {
-      "id": "REC-00009",
-      "sequence": 9,
-      "recordHash": "d62e38b8bf6ce9b3db2d6b8fa5d1eab8ddc34d232d58528aee86f501dafeb112",
-      "entryType": "RECEIPT_DROPPED",
-      "targetId": "TR-63487",
-      "targetTitle": "Verifiable Settlement Protocol Delivery",
-      "actorId": "usr_allen_006",
-      "actorName": "Allen Kinetic",
-      "counterpartyId": "usr_1792419058259_ehg5",
-      "counterpartyName": "Lola",
-      "counterpartyAvatar": "",
-      "category": "Freelance Project",
-      "summary": "Receipt dropped: \"Verifiable Settlement Protocol Delivery\" (Freelance Project) between Allen Kinetic and Lola. Status: PENDING.",
-      "isPublic": true,
-      "status": "pending",
-      "gitSynced": true,
-      "metadata": {
-        "transactionValue": "$18,500 USD",
-        "completionConditions": "Verified audit logs passing zero-knowledge verification.",
-        "deadline": null
-      },
-      "timestamp": "2026-10-22T18:29:05.463Z"
     },
     {
       "id": "REC-00008",
@@ -1308,97 +1127,6 @@
       "status": "verified",
       "gitSynced": true,
       "timestamp": "2026-08-16T09:00:00.000Z"
-    },
-    {
-      "id": "REC-00004",
-      "sequence": 4,
-      "recordHash": "e234a53687054093720c7dbbb59bcdc9cf7640025051a68f5528b612507d8e07",
-      "entryType": "COMMITMENT_CHECKED_OUT",
-      "targetId": "TC-9042",
-      "targetTitle": "Smart Settlement Protocol Security & SLA Audit Report",
-      "actorId": "usr_allen_006",
-      "actorName": "Allen Kinetic",
-      "counterpartyId": "usr_david_03",
-      "counterpartyName": "David Chen",
-      "category": "Professional Milestone",
-      "summary": "Commitment dropped / pledged: \"Smart Settlement Protocol Security & SLA Audit Report\" (Professional Milestone) by Allen Kinetic to David Chen. Deadline: 10/20/2026, 6:00:00 PM.",
-      "isPublic": true,
-      "status": "completed",
-      "gitSynced": true,
-      "timestamp": "2026-10-15T11:00:00.000Z",
-      "metadata": {
-        "deadline": "2026-10-20T18:00:00.000Z",
-        "trustRewardPoints": 100,
-        "creatorRole": "promisor"
-      }
-    },
-    {
-      "id": "REC-00003",
-      "sequence": 3,
-      "recordHash": "a164962adf75d814f7419e188bf2c7484722bf95d723590948782eaea7a85698",
-      "entryType": "COMMITMENT_DROPPED",
-      "targetId": "TC-9041",
-      "targetTitle": "Decentralized Edge Node Hardware Handover & Deployment",
-      "actorId": "usr_allen_006",
-      "actorName": "Allen Kinetic",
-      "counterpartyId": "usr_sarah_02",
-      "counterpartyName": "Sarah Jenkins",
-      "category": "Equipment & Machinery",
-      "summary": "Commitment dropped / pledged: \"Decentralized Edge Node Hardware Handover & Deployment\" (Equipment & Machinery) by Allen Kinetic to Sarah Jenkins. Deadline: 10/24/2026, 6:28:55 PM.",
-      "isPublic": true,
-      "status": "active",
-      "gitSynced": true,
-      "timestamp": "2026-10-21T09:30:00.000Z",
-      "metadata": {
-        "deadline": "2026-10-24T18:28:55.682Z",
-        "trustRewardPoints": 50,
-        "creatorRole": "promisor"
-      }
-    },
-    {
-      "id": "REC-00002",
-      "sequence": 2,
-      "recordHash": "3ae4878f6e75bdc95cd0b5dc2847ea70742d31ec665f3a671c9f96332311f6f8",
-      "entryType": "RECEIPT_FULFILLED",
-      "targetId": "TR-89241",
-      "targetTitle": "High-Throughput Payment Engine Re-architecture",
-      "actorId": "usr_david_03",
-      "actorName": "David Chen",
-      "counterpartyId": "usr_allen_006",
-      "counterpartyName": "Allen Kinetic",
-      "category": "Freelance Project",
-      "summary": "Receipt dropped: \"High-Throughput Payment Engine Re-architecture\" (Freelance Project) between David Chen and Allen Kinetic. Status: COMPLETED.",
-      "isPublic": true,
-      "status": "completed",
-      "gitSynced": true,
-      "timestamp": "2026-09-15T14:20:00.000Z",
-      "metadata": {
-        "transactionValue": "$24,500 USD",
-        "completionConditions": "Load test sustained at 25,000 TPS with zero transaction loss."
-      }
-    },
-    {
-      "id": "REC-00001",
-      "sequence": 1,
-      "recordHash": "ae021b67004ecc1470218a1842750e82a107e0ee8e5563abe2e2b98c16436e89",
-      "entryType": "RECEIPT_FULFILLED",
-      "targetId": "TR-89240",
-      "targetTitle": "Smart Settlement Protocol Security & SLA Audit Report Delivery",
-      "actorId": "usr_allen_006",
-      "actorName": "Allen Kinetic",
-      "counterpartyId": "usr_david_03",
-      "counterpartyName": "David Chen",
-      "category": "Service Contract",
-      "summary": "Receipt dropped: \"Smart Settlement Protocol Security & SLA Audit Report Delivery\" (Service Contract) between Allen Kinetic and David Chen. Status: COMPLETED.",
-      "isPublic": true,
-      "status": "completed",
-      "gitSynced": true,
-      "timestamp": "2026-10-20T17:10:00.000Z",
-      "metadata": {
-        "transactionValue": "$32,000 USD",
-        "completionConditions": "Deterministic formal verification tests passing with zero high/critical vulnerabilities.",
-        "deadline": "2026-10-20T18:00:00.000Z"
-      }
     }
   ]
 }

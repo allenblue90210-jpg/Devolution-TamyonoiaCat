@@ -942,12 +942,25 @@ class Database {
         const raw = fs.readFileSync(DB_FILE, 'utf-8');
         const parsed = JSON.parse(raw);
         let updated = false;
-        if (!parsed.commitments || parsed.commitments.length === 0) {
-          parsed.commitments = getInitialCommitments();
+        if (!parsed.commitments) {
+          parsed.commitments = [];
           updated = true;
         }
-        if (!parsed.receipts || parsed.receipts.length === 0) {
-          parsed.receipts = getInitialReceipts();
+        if (!parsed.receipts) {
+          parsed.receipts = [];
+          updated = true;
+        }
+        const mockPactOrReceiptIds = new Set(['TC-9041', 'TC-9042', 'TR-89240', 'TR-89241', 'TR-63487']);
+        if (parsed.commitments && parsed.commitments.some((c: any) => mockPactOrReceiptIds.has(c.id))) {
+          parsed.commitments = parsed.commitments.filter((c: any) => !mockPactOrReceiptIds.has(c.id));
+          updated = true;
+        }
+        if (parsed.receipts && parsed.receipts.some((r: any) => mockPactOrReceiptIds.has(r.id))) {
+          parsed.receipts = parsed.receipts.filter((r: any) => !mockPactOrReceiptIds.has(r.id));
+          updated = true;
+        }
+        if (parsed.recordedLedger && parsed.recordedLedger.some((l: any) => mockPactOrReceiptIds.has(l.targetId))) {
+          parsed.recordedLedger = parsed.recordedLedger.filter((l: any) => !mockPactOrReceiptIds.has(l.targetId));
           updated = true;
         }
         if (!parsed.goodFaithRatings || parsed.goodFaithRatings.length === 0) {
