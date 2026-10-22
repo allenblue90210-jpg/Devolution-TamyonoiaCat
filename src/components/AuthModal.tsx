@@ -37,20 +37,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!login) return;
+    if (!login.trim()) {
+      setError('Please enter your username or registered email.');
+      return;
+    }
+    if (!password) {
+      setError('Please enter your password.');
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
-      let res;
-      if (login.includes('@')) {
-        res = await api.loginWithSupabaseEmail(login, password);
-      } else {
-        res = await api.signIn(login, password);
-      }
+      const res = await api.signIn(login.trim(), password);
       onSuccess(res.user);
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Sign in failed.');
+      setError(err.message || 'Sign in failed. Only registered accounts can log in.');
     } finally {
       setLoading(false);
     }
@@ -59,7 +61,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName || !username || !email) return;
-    if (password && password.length < 6) {
+    if (!password || password.length < 6) {
       setError('Password must be at least 6 characters.');
       return;
     }
@@ -209,6 +211,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
               <input
                 type={showPassword ? 'text' : 'password'}
+                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"

@@ -124,101 +124,46 @@ app.get('/api/auth/me', (req: Request, res: Response) => {
 });
 
 app.post('/api/auth/assign-real-user', (req: Request, res: Response) => {
-  const targetEmail = req.body.email || 'allenkinetic006@gmail.com';
-  let user = db.getUserByEmail(targetEmail);
+  const targetEmail = (req.body.email || '').trim().toLowerCase();
+  const user = db.getState().users.find((u) => u.email && u.email.toLowerCase() === targetEmail);
   if (!user) {
-    user = {
-      id: 'usr_allen_006',
-      email: targetEmail,
-      username: 'allenkinetic006',
-      fullName: 'Allen Kinetic',
-      accountType: 'personal',
-      avatarUrl: '',
-      headline: 'Devolution Network Architect & Verified Trustee',
-      bio: 'Verified digital reputation and evidence-based relationship anchor on Devolution network.',
-      category: 'Software Engineering',
-      country: 'Nigeria',
-      city: 'Lagos',
-      phone: '+234 803 000 0004',
-      phoneVerified: true,
-      emailVerified: true,
-      identityStatus: 'verified',
-      identityMethod: 'Government ID & Biometric Verification',
-      identityVerifiedAt: new Date().toISOString(),
-      businessVerificationStatus: 'unverified',
-      privacySettings: {
-        showRelationshipCounts: true,
-        showCategoryBreakdown: true,
-        showPublicEndorsers: true,
-        showTrustReceipts: true,
-        showCredentials: true,
-        showLocationCityOnly: true,
-        allowDirectVerificationRequests: true,
-      },
-      createdAt: new Date().toISOString(),
-    };
-    db.createUser(user);
-    syncUserToSupabase(user).catch(() => {});
+    return res.status(401).json({ error: 'This email is not registered. Please sign up to create an account.' });
   }
-  res.json({ user, message: `Active session assigned to real user: ${user.email}` });
+  res.json({ user, message: `Active session assigned to: ${user.email}` });
 });
 
 app.post('/api/auth/supabase-login', async (req: Request, res: Response) => {
   const { email, password } = req.body;
-  if (!email) {
+  if (!email || typeof email !== 'string' || !email.trim()) {
     return res.status(400).json({ error: 'Email address is required.' });
+  }
+
+  const query = email.trim().toLowerCase();
+  const user = db.getState().users.find((u) => u.email && u.email.toLowerCase() === query);
+
+  if (!user) {
+    return res.status(401).json({ error: 'This email is not registered. Please sign up to create an account.' });
+  }
+
+  if (!password || typeof password !== 'string') {
+    return res.status(400).json({ error: 'Password is required to sign in.' });
   }
 
   // Attempt Supabase Auth verification if client is configured
   let supabaseResult: any = null;
-  if (password) {
-    supabaseResult = await supabaseAuthSignIn(email, password);
+  try {
+    supabaseResult = await supabaseAuthSignIn(query, password);
+  } catch {
+    // ignore
   }
 
-  let user = db.getUserByEmail(email);
-
-  if (!user) {
-    // Automatically provision real user account
-    const username = email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '');
-    const passwordHash = password ? crypto.createHash('sha256').update(password).digest('hex') : undefined;
-    user = {
-      id: `usr_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-      email,
-      username: username || `user_${Date.now()}`,
-      fullName: username.charAt(0).toUpperCase() + username.slice(1),
-      accountType: 'personal',
-      avatarUrl: '',
-      headline: 'Verified Real User',
-      bio: '',
-      category: 'Independent Professional',
-      country: 'Nigeria',
-      city: 'Lagos',
-      phone: '',
-      phoneVerified: false,
-      emailVerified: true,
-      identityStatus: 'verified',
-      identityMethod: supabaseResult?.success ? 'Supabase Auth' : 'Verified Real Email',
-      identityVerifiedAt: new Date().toISOString(),
-      businessVerificationStatus: 'unverified',
-      passwordHash,
-      privacySettings: {
-        showRelationshipCounts: true,
-        showCategoryBreakdown: true,
-        showPublicEndorsers: true,
-        showTrustReceipts: true,
-        showCredentials: true,
-        showLocationCityOnly: true,
-        allowDirectVerificationRequests: true,
-      },
-      createdAt: new Date().toISOString(),
-    };
-    db.createUser(user);
-    syncUserToSupabase(user).catch(() => {});
-  } else if (password && user.passwordHash) {
-    const inputHash = crypto.createHash('sha256').update(password).digest('hex');
+  const inputHash = crypto.createHash('sha256').update(password).digest('hex');
+  if (user.passwordHash) {
     if (user.passwordHash !== inputHash && !supabaseResult?.success) {
-      return res.status(401).json({ error: 'Incorrect password for this email.' });
+      return res.status(401).json({ error: 'Incorrect password. Please verify your credentials and try again.' });
     }
+  } else {
+    db.updateUser(user.id, { passwordHash: inputHash });
   }
 
   res.json({
@@ -226,22 +171,27 @@ app.post('/api/auth/supabase-login', async (req: Request, res: Response) => {
     supabaseSession: supabaseResult?.session,
     message: supabaseResult?.success
       ? `Authenticated via Supabase Auth as ${user.email}`
-      : `Signed in as real user: ${user.email}`,
+      : `Signed in as: ${user.email}`,
   });
 });
 
 app.post('/api/auth/send-magic-link', async (req: Request, res: Response) => {
   const { email } = req.body;
-  if (!email) {
+  if (!email || typeof email !== 'string' || !email.trim()) {
     return res.status(400).json({ error: 'Email address is required.' });
   }
-  const otpRes = await supabaseAuthSendOtp(email);
+  const query = email.trim().toLowerCase();
+  const user = db.getState().users.find((u) => u.email && u.email.toLowerCase() === query);
+  if (!user) {
+    return res.status(401).json({ error: 'This email is not registered. Please sign up first.' });
+  }
+  const otpRes = await supabaseAuthSendOtp(query);
   if (otpRes.success) {
     return res.json({ success: true, message: otpRes.message });
   }
   res.json({
     success: true,
-    message: `Verification link dispatched to ${email}. You can also sign in directly with password or click instant sign-in.`,
+    message: `Verification link dispatched to ${query}.`,
   });
 });
 
@@ -250,35 +200,34 @@ app.post('/api/auth/logout', (_req: Request, res: Response) => {
 });
 
 app.post('/api/auth/signin', (req: Request, res: Response) => {
-  const { login, password, targetUserId } = req.body;
-  const effectiveUserId =
-    targetUserId ||
-    (password && typeof password === 'string' && password.startsWith('usr_') ? password : undefined) ||
-    (login && typeof login === 'string' && login.startsWith('usr_') && !login.includes('@') ? login : undefined);
+  const { login, password } = req.body;
 
-  if (effectiveUserId) {
-    const user = db.getUserById(effectiveUserId);
-    if (user) return res.json({ user, message: 'Switched session profile' });
+  if (!login || typeof login !== 'string' || !login.trim()) {
+    return res.status(400).json({ error: 'Username or registered email is required.' });
   }
 
-  if (!login) {
-    return res.status(400).json({ error: 'Username or email required' });
+  if (!password || typeof password !== 'string') {
+    return res.status(400).json({ error: 'Password is required to sign in.' });
   }
-  const user = db.getUserByUsername(login) || db.getUserByEmail(login);
+
+  const query = login.trim().toLowerCase();
+  const user = db.getState().users.find((u) =>
+    (u.email && u.email.toLowerCase() === query) ||
+    (u.username && u.username.toLowerCase() === query)
+  );
+
   if (!user) {
-    return res.status(401).json({ error: 'Invalid credentials. User not found.' });
+    return res.status(401).json({ error: 'This account is not registered. Please sign up first to create an account.' });
   }
 
-  // Password verification
-  if (user.passwordHash && password) {
-    const inputHash = crypto.createHash('sha256').update(password).digest('hex');
+  const inputHash = crypto.createHash('sha256').update(password).digest('hex');
+  if (user.passwordHash) {
     if (user.passwordHash !== inputHash) {
-      return res.status(401).json({ error: 'Incorrect password. Please try again.' });
+      return res.status(401).json({ error: 'Incorrect password. Please verify your credentials and try again.' });
     }
-  } else if (!user.passwordHash && password) {
-    // Set password on first signin for existing/demo accounts
-    const initialHash = crypto.createHash('sha256').update(password).digest('hex');
-    db.updateUser(user.id, { passwordHash: initialHash });
+  } else {
+    // Anchor password on first login for accounts created prior to password requirement
+    db.updateUser(user.id, { passwordHash: inputHash });
   }
 
   res.json({ user, message: 'Authentication successful' });

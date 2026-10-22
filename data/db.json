@@ -213,7 +213,8 @@
         "showLocationCityOnly": true,
         "allowDirectVerificationRequests": true
       },
-      "createdAt": "2026-10-19T14:50:38.248Z"
+      "createdAt": "2026-10-19T14:50:38.248Z",
+      "passwordHash": "8ecd67dceb90a898b1f94bddf570ce1c23629cd328140d81f1e02e43d42eb44e"
     },
     {
       "id": "usr_1792422084800_eiva",
