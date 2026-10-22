@@ -532,6 +532,21 @@ export const PublicLedgerScreen: React.FC<PublicLedgerScreenProps> = ({
       <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
           <button
+            onClick={() => setActiveTab('recorded_ledger')}
+            className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+              activeTab === 'recorded_ledger'
+                ? 'bg-emerald-600 text-white shadow-2xs'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            <ShieldCheck className="w-4 h-4" />
+            <span>Recorded Ledger</span>
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-white/20 text-current">
+              {filteredLedgerRecords.length}
+            </span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('people')}
             className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
               activeTab === 'people'
