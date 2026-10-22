@@ -99,6 +99,91 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
   // State for Dual Checkout Rating Selection (100% or 50%)
   const [checkoutRatings, setCheckoutRatings] = useState<Record<string, 100 | 50>>({});
 
+  // Finish & Rate Modal State for ongoing tasks
+  const [finishingCommitment, setFinishingCommitment] = useState<TrustCommitment | null>(null);
+  const [finishStarRating, setFinishStarRating] = useState<number>(5);
+  const [finishRatingPercent, setFinishRatingPercent] = useState<100 | 50>(100);
+  const [finishRatingBadge, setFinishRatingBadge] = useState<string>('100% Exemplary Good Faith Handover');
+  const [finishComment, setFinishComment] = useState<string>('');
+  const [isSubmittingFinish, setIsSubmittingFinish] = useState(false);
+
+  const getCounterpartyForTask = (c: TrustCommitment) => {
+    if (c.committerId && c.committerId !== currentUser?.id) {
+      return {
+        id: c.committerId,
+        name: c.committerName || 'Committer',
+        avatar: c.committerAvatar,
+        role: 'Committer / Performer',
+      };
+    }
+    if (c.requesterId && c.requesterId !== currentUser?.id) {
+      return {
+        id: c.requesterId,
+        name: c.requesterName || 'Task Requester',
+        avatar: c.requesterAvatar,
+        role: 'Task Requester / Creator',
+      };
+    }
+    if (c.promisedUserId && c.promisedUserId !== currentUser?.id) {
+      return {
+        id: c.promisedUserId,
+        name: c.promisedUserName || c.committerName || 'Promised Counterparty',
+        avatar: c.promisedUserAvatar || c.committerAvatar,
+        role: 'Promised Counterparty',
+      };
+    }
+    return {
+      id: c.committerId || 'counterparty',
+      name: c.committerName || c.promisedUserName || 'Counterparty',
+      avatar: c.committerAvatar,
+      role: 'Counterparty',
+    };
+  };
+
+  const handleOpenFinishModal = (c: TrustCommitment) => {
+    setFinishingCommitment(c);
+    setFinishStarRating(5);
+    setFinishRatingPercent(100);
+    setFinishRatingBadge('100% Exemplary Good Faith Handover');
+    setFinishComment('');
+  };
+
+  const handleConfirmFinishAndRate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!finishingCommitment) return;
+    try {
+      setIsSubmittingFinish(true);
+      const otherParty = getCounterpartyForTask(finishingCommitment);
+      const targetUserId = otherParty.id;
+
+      const res = await api.checkoutCommitment(
+        finishingCommitment.id,
+        finishRatingPercent,
+        finishRatingBadge,
+        {
+          starRating: finishStarRating,
+          comment: finishComment,
+          ratedUserId: targetUserId,
+        }
+      );
+
+      setCommitments((prev) =>
+        prev.map((c) => (c.id === finishingCommitment.id ? { ...c, ...res.commitment, status: 'completed' } : c))
+      );
+      setFinishingCommitment(null);
+      setActionSuccessMessage(
+        `Task marked finished! Attested Trust Receipt #${res.receipt.id} generated and ${otherParty.name} received your ${finishStarRating}★ rating (+${res.pointsAwarded} Trust Points)!`
+      );
+      setTimeout(() => setActionSuccessMessage(null), 5000);
+      await loadCommitments();
+      onRefreshAllData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to complete task and submit rating');
+    } finally {
+      setIsSubmittingFinish(false);
+    }
+  };
+
   // Rate Pact Modal State
   const [showRatePactModal, setShowRatePactModal] = useState(false);
   const [ratePactTarget, setRatePactTarget] = useState<TrustCommitment | null>(null);
