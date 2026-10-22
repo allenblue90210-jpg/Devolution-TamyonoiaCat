@@ -394,6 +394,10 @@ export const Navigation: React.FC<NavigationProps> = ({
                         <span className="text-slate-400">Auto-Sync:</span>
                         <span className="text-slate-600">Active (continuous on data update)</span>
                       </div>
+                      <div className="flex justify-between items-center text-[11px]">
+                        <span className="text-slate-400">Ledger Recording:</span>
+                        <span className="text-emerald-600 font-semibold">Active (SHA-256 Verified)</span>
+                      </div>
                     </div>
 
                     {syncMessage && (

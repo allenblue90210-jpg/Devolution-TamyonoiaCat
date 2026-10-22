@@ -643,10 +643,14 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
       {/* Hero Header */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xs">
         <div className="space-y-2 max-w-2xl">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center gap-1">
               <Clock className="w-3 h-3 text-indigo-600" />
               Time-Locked Trust Contracts
+            </span>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+              <ShieldCheck className="w-3 h-3 text-emerald-600" />
+              Always Recorded on Ledger
             </span>
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-700 border border-red-200 flex items-center gap-1">
               <Flame className="w-3 h-3 text-red-600" />
@@ -657,7 +661,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
             Commitments & Escrowed Pacts
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-            Post and accept time-bound commitments with verifiable counterparties (e.g., returning vehicles, delivering equipment, milestone handovers). When completed by the countdown deadline, both parties check out to boost trust ratings. If unfulfilled, an automatic <strong className="text-red-700 font-semibold">-30% daily reputation penalty</strong> is deducted.
+            Post and accept time-bound commitments with verifiable counterparties (e.g., returning vehicles, delivering equipment, milestone handovers). Any commitment dropped, accepted, or fulfilled is permanently cryptographically recorded on the immutable ledger and synced to GitHub.
           </p>
         </div>
 
@@ -667,7 +671,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
             className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4 text-white" />
-            <span>Create New Trust Pact</span>
+            <span>Drop Commitment Pact & Record</span>
           </button>
           <div className="text-[11px] font-semibold text-emerald-800 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 border border-emerald-200">
             <Eye className="w-3.5 h-3.5 text-emerald-600" />

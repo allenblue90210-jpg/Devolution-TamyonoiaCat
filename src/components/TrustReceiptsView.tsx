@@ -489,7 +489,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
             </h2>
           </div>
           <p className="text-xs text-slate-500 max-w-2xl leading-relaxed">
-            Cryptographically anchored milestone receipts and timed commitments. Specify the exact user promised, set live countdown timers, and collaborate via verifiable discussion threads.
+            Cryptographically anchored milestone receipts and timed commitments. Any receipt dropped or confirmed is permanently recorded on the immutable ledger with SHA-256 verification and synchronized to GitHub.
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -498,7 +498,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
             className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>Post Timed Trust Receipt</span>
+            <span>Drop & Record Trust Receipt</span>
           </button>
         </div>
       </div>
