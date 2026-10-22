@@ -1206,13 +1206,15 @@ app.get('/api/receipts', (req: Request, res: Response) => {
   const userId = getSessionUserId(req);
   const filter = req.query.filter as string;
   const all = db.getState().receipts;
-  if (filter === 'all') {
-    return res.json({ receipts: all });
-  }
   if (req.query.public === 'true') {
     return res.json({ receipts: all.filter((r) => r.isPublic) });
   }
-  const userReceipts = db.getReceiptsForUser(userId);
+  if (filter === 'mine') {
+    return res.json({ receipts: db.getReceiptsForUser(userId) });
+  }
+  // Default / "all" filter: return public receipts plus user's own receipts
+  // Never expose private receipts of other users
+  const userReceipts = userId ? db.getReceiptsForUser(userId) : [];
   const map = new Map<string, any>();
   all.filter((r) => r.isPublic).forEach((r) => map.set(r.id, r));
   userReceipts.forEach((r) => map.set(r.id, r));
@@ -1223,6 +1225,13 @@ app.get('/api/receipts/:id', (req: Request, res: Response) => {
   const { id } = req.params;
   const receipt = db.getReceiptById(id);
   if (!receipt) return res.status(404).json({ error: 'Trust receipt not found' });
+  const userId = getSessionUserId(req);
+  if (!receipt.isPublic) {
+    const isParty = receipt.creatorId === userId || receipt.counterpartyUserId === userId;
+    if (!isParty) {
+      return res.status(403).json({ error: 'Access denied. This is a private bilateral receipt.' });
+    }
+  }
   res.json({ receipt });
 });
 
@@ -1676,18 +1685,38 @@ app.get('/api/commitments', (req: Request, res: Response) => {
     }
   });
 
-  if (filter === 'all' || req.query.public === 'true') {
-    if (req.query.public === 'true') {
-      return res.json({ commitments: list.filter((c) => c.isPublic) });
-    }
-    return res.json({ commitments: list });
+  if (req.query.public === 'true') {
+    return res.json({ commitments: list.filter((c) => c.isPublic) });
   }
-  res.json({ commitments: db.getCommitmentsForUser(userId) });
+
+  if (filter === 'mine') {
+    return res.json({ commitments: db.getCommitmentsForUser(userId) });
+  }
+
+  // General / default filter:
+  // Users can ONLY see:
+  // 1. Their own commitments (where they are committer, requester, or promised user)
+  // 2. Commitments explicitly published to the Public Ledger (isPublic === true)
+  // Private commitments of other users are strictly hidden and confidential.
+  const myCommitments = userId ? db.getCommitmentsForUser(userId) : [];
+  const myCommitmentIds = new Set(myCommitments.map((c) => c.id));
+  const visible = list.filter((c) => c.isPublic || myCommitmentIds.has(c.id));
+  res.json({ commitments: visible });
 });
 
 app.get('/api/commitments/:id', (req: Request, res: Response) => {
   const commitment = db.getCommitmentById(req.params.id);
   if (!commitment) return res.status(404).json({ error: 'Commitment not found' });
+  const userId = getSessionUserId(req);
+  if (!commitment.isPublic) {
+    const isParty =
+      commitment.committerId === userId ||
+      commitment.requesterId === userId ||
+      commitment.promisedUserId === userId;
+    if (!isParty) {
+      return res.status(403).json({ error: 'Access denied. This is a private bilateral commitment.' });
+    }
+  }
   res.json({ commitment });
 });
 
