@@ -676,7 +676,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               title="Transparent Multi-Dimensional Reputation & Trust Metrics"
               aria-label="Reputation Breakdown"
             >
-              <Sparkles className={`w-3.5 h-3.5 ${currentTab === 'reputation' ? 'text-amber-600' : 'text-amber-500'}`} />
+              <Shield className={`w-3.5 h-3.5 ${currentTab === 'reputation' ? 'text-amber-600' : 'text-amber-500'}`} />
               <span className="text-xs font-semibold">Reputation</span>
             </button>
 
@@ -928,7 +928,7 @@ export const Navigation: React.FC<NavigationProps> = ({
           onClick={() => onSelectTab('reputation')}
           className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg cursor-pointer select-none outline-none [-webkit-tap-highlight-color:transparent]"
         >
-          <Sparkles className={`w-4 h-4 ${currentTab === 'reputation' ? 'text-indigo-600' : 'text-slate-400'}`} />
+          <Shield className={`w-4 h-4 ${currentTab === 'reputation' ? 'text-indigo-600' : 'text-slate-400'}`} />
           <span className={`text-[10px] ${currentTab === 'reputation' ? 'text-indigo-600 font-bold' : 'text-slate-500 font-normal'}`}>Reputation</span>
         </button>
 
