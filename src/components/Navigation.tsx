@@ -507,18 +507,14 @@ export const Navigation: React.FC<NavigationProps> = ({
               </span>
             </button>
 
-            {/* 2. Prominent Search People Bar / Button */}
+            {/* Search Icon Button */}
             <button
               onClick={onOpenSearch}
-              className="flex items-center gap-2 px-3 py-1.5 text-xs text-slate-600 hover:text-slate-900 bg-slate-100/90 hover:bg-slate-200/80 border border-slate-200 rounded-xl transition-all cursor-pointer group shrink-0 shadow-2xs"
-              title="Search verified people by name, @username, or skills (Cmd+K / Ctrl+K)"
+              className="flex items-center justify-center p-2 rounded-lg border border-slate-200 hover:border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer shrink-0"
+              title="Search verified people (Cmd+K / Ctrl+K)"
               aria-label="Search verified people"
             >
-              <Search className="w-3.5 h-3.5 text-indigo-600 group-hover:scale-110 transition-transform" />
-              <span className="font-medium text-slate-700">Search person...</span>
-              <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.2 text-[9px] font-mono text-slate-400 bg-white border border-slate-200 rounded shadow-2xs">
-                ⌘K
-              </kbd>
+              <Search className="w-4 h-4 text-slate-700 hover:text-indigo-600 transition-colors" />
             </button>
 
             {/* 4. Notifications Icon */}
