@@ -1236,7 +1236,9 @@
       "hasWitnessed": false,
       "comments": [],
       "createdAt": "2026-10-22T11:58:59.549Z",
-      "checkedOutByCommitterAt": "2026-10-22T11:59:09.906Z"
+      "checkedOutByCommitterAt": "2026-10-22T11:59:09.906Z",
+      "ratingPercent": 100,
+      "ratingBadge": "100% Exemplary Good Faith"
     },
     {
       "id": "TC-1887",
@@ -1628,7 +1630,7 @@
   ],
   "impressions": {
     "network": {
-      "impressions": 4941,
+      "impressions": 4942,
       "witnessCount": 560
     },
     "usr_allen_001": {
