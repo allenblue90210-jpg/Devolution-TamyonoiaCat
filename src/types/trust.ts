@@ -498,7 +498,7 @@ export type GoodFaithBadge =
 export interface GoodFaithRating {
   id: string;
   targetUserId?: string; // target profile user ID or 'network'
-  targetUsername?: string; // e.g. 'allenokoro', 'sarah_adesina', etc.
+  targetUsername?: string; // e.g. 'allenkinetic006', 'lola', etc.
   authorId?: string;
   authorName: string;
   authorAvatar?: string;

@@ -1488,7 +1488,7 @@ export const PublicLedgerScreen: React.FC<PublicLedgerScreenProps> = ({
                     required
                     value={recCounterpartyName}
                     onChange={(e) => setRecCounterpartyName(e.target.value)}
-                    placeholder="e.g. Fatima Bello"
+                    placeholder="e.g. Lola or Counterparty Name"
                     className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg"
                   />
                 </div>

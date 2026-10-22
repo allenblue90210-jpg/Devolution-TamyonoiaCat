@@ -302,17 +302,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <div className="flex items-center gap-4">
                     <img
                       src="/src/assets/images/avatar_founder_1792334631930.jpg"
-                      alt="Allen Okoro"
+                      alt="Allen Kinetic"
                       className="w-14 h-14 rounded-full object-cover border border-slate-200"
                     />
                     <div>
                       <div className="text-base font-bold text-slate-900 flex items-center gap-1.5">
-                        <span>Allen Okoro</span>
+                        <span>Allen Kinetic</span>
                         <span title="Identity Verified">
                           <ShieldCheck className="w-4 h-4 text-emerald-600" />
                         </span>
                       </div>
-                      <div className="text-xs text-slate-600">Founder at Aegis Tech Systems Ltd</div>
+                      <div className="text-xs text-slate-600">Architect at Devolution Technologies Ltd</div>
                       <div className="text-xs text-slate-500 font-mono mt-0.5">Lagos, Nigeria · CAC RC-1849204</div>
                     </div>
                   </div>
@@ -346,7 +346,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <div className="p-2.5 rounded-lg bg-white border border-slate-200 flex items-start gap-2.5">
                       <Users className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
                       <div>
-                        <div className="font-semibold text-slate-900">Sarah Adesina (Colleague · CloudWorks NG)</div>
+                        <div className="font-semibold text-slate-900">Lola (Colleague · CloudWorks NG)</div>
                         <div className="text-slate-500 text-[11px]">"Co-built payment settlement pipelines for 3 years. Exceptional integrity."</div>
                       </div>
                     </div>
@@ -364,7 +364,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
                   <span className="text-slate-500">Cryptographically verifiable</span>
                   <button
-                    onClick={() => onExploreProfile('allenokoro')}
+                    onClick={() => onExploreProfile('allenkinetic006')}
                     className="text-indigo-600 font-semibold hover:text-indigo-800 transition-colors flex items-center gap-1"
                   >
                     <span>Inspect Full Ledger</span>
@@ -985,12 +985,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div className="lg:col-span-6">
               <div className="bg-slate-900 text-slate-100 rounded-xl p-6 font-mono text-xs overflow-x-auto shadow-xl border border-slate-800">
                 <div className="text-slate-400 pb-3 border-b border-slate-800 text-[11px] flex items-center justify-between">
-                  <span>GET /api/v1/verifiable-attestation/allenokoro</span>
+                  <span>GET /api/v1/verifiable-attestation/allenkinetic006</span>
                   <span className="text-emerald-400">200 OK</span>
                 </div>
                 <pre className="pt-3 text-[12px] leading-relaxed text-indigo-200">
 {`{
-  "subject": "allenokoro",
+  "subject": "allenkinetic006",
   "issuer": "https://devolution-trust.network",
   "attestation_type": "PortableTrustDossier",
   "claims": {
