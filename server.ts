@@ -2110,7 +2110,7 @@ app.put('/api/commitments/:id/checkout', (req: Request, res: Response) => {
   }
 
   res.json({
-    commitment: updated,
+    commitment: db.getCommitmentById(commitment.id) || updated,
     receipt: trustReceipt,
     pointsAwarded: numRating === 100 ? commitment.trustRewardPoints : Math.round(commitment.trustRewardPoints * 0.5),
     onTime: isFulfilledOnTime,
