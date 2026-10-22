@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../services/api.js';
 import { RelationshipInvite } from '../types/trust.js';
 import { ShieldCheck, CheckCircle2, AlertCircle, Users, Check, X, ArrowLeft } from 'lucide-react';
+import { UserAvatar } from './UserAvatar.js';
 
 interface AcceptInviteViewProps {
   token: string;
@@ -120,18 +121,12 @@ export const AcceptInviteView: React.FC<AcceptInviteViewProps> = ({
           <>
             {/* Inviter Info Card */}
             <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
-              {inviter?.avatarUrl ? (
-                <img
-                  src={inviter.avatarUrl}
-                  alt={inviter.fullName}
-                  referrerPolicy="no-referrer"
-                  className="w-14 h-14 rounded-full object-cover border border-slate-200"
-                />
-              ) : (
-                <div className="w-14 h-14 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-lg">
-                  {inviter?.fullName?.charAt(0) || 'U'}
-                </div>
-              )}
+              <UserAvatar
+                src={inviter?.avatarUrl}
+                name={inviter?.fullName || 'User'}
+                className="w-14 h-14 rounded-full border border-slate-200"
+                iconClassName="w-7 h-7 text-slate-500"
+              />
               <div>
                 <div className="flex items-center gap-1.5">
                   <span className="font-bold text-slate-900 text-base">{inviter?.fullName}</span>

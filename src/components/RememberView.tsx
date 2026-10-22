@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, RememberRecord, RememberWordTag } from '../types/trust.js';
 import { api } from '../services/api.js';
+import { UserAvatar } from './UserAvatar.js';
 import {
   Bookmark,
   ShieldCheck,
@@ -599,17 +600,12 @@ export const RememberView: React.FC<RememberViewProps> = ({
                   </div>
 
                   <div className="flex items-start gap-3 bg-white p-3 rounded-lg border border-indigo-100">
-                    <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden">
-                      {record.attachedReviewer.avatarUrl ? (
-                        <img
-                          src={record.attachedReviewer.avatarUrl}
-                          alt={record.attachedReviewer.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        record.attachedReviewer.name.substring(0, 2).toUpperCase()
-                      )}
-                    </div>
+                    <UserAvatar
+                      src={record.attachedReviewer.avatarUrl}
+                      name={record.attachedReviewer.name}
+                      className="w-9 h-9 rounded-full shrink-0"
+                      iconClassName="w-4 h-4 text-slate-500"
+                    />
 
                     <div className="space-y-1 flex-1">
                       <div className="flex items-baseline justify-between">
