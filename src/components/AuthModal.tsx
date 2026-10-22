@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { api } from '../services/api.js';
 import { User, AccountType, UserSummary } from '../types/trust.js';
-import { ShieldCheck, X, CheckCircle2, AlertCircle, Building2, User as UserIcon, LogOut, Eye, EyeOff, Key, Database, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
+import { ShieldCheck, X, CheckCircle2, AlertCircle, Building2, User as UserIcon, LogOut, Eye, EyeOff, Key } from 'lucide-react';
 import { UserAvatar } from './UserAvatar.js';
 
 interface AuthModalProps {
   onClose: () => void;
   onSuccess: (user: User) => void;
-  availableUsers: UserSummary[];
+  availableUsers?: UserSummary[];
   currentUser?: User | null;
   onLogout?: () => void;
 }
@@ -15,7 +15,6 @@ interface AuthModalProps {
 export const AuthModal: React.FC<AuthModalProps> = ({
   onClose,
   onSuccess,
-  availableUsers,
   currentUser,
   onLogout,
 }) => {
@@ -35,7 +34,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resetSentMessage, setResetSentMessage] = useState<string | null>(null);
-  const [showDemoPersonas, setShowDemoPersonas] = useState(false);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,20 +51,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       onClose();
     } catch (err: any) {
       setError(err.message || 'Sign in failed.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleQuickSwitch = async (userId: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await api.switchUser(userId);
-      onSuccess(res.user);
-      onClose();
-    } catch (err: any) {
-      setError(err.message || 'Failed to switch profile.');
     } finally {
       setLoading(false);
     }
@@ -194,141 +178,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         )}
 
-        {/* Real Assigned User Quick-Access Button */}
-        {mode === 'signin' && (
-          <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 font-bold text-emerald-900">
-                <Database className="w-4 h-4 text-emerald-600" />
-                <span>Primary Real Account: allenkinetic006@gmail.com</span>
-              </div>
-              <span className="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-emerald-200">
-                Verified Architect
-              </span>
-            </div>
-            <p className="text-[11px] text-emerald-700 leading-tight">
-              Assigned directly to your verified real profile with cryptographic trust ledger and live Supabase Cloud synchronization.
-            </p>
-            <button
-              type="button"
-              onClick={async () => {
-                setLoading(true);
-                setError(null);
-                try {
-                  const res = await api.assignRealUser('allenkinetic006@gmail.com');
-                  onSuccess(res.user);
-                  onClose();
-                } catch (err: any) {
-                  setError(err.message || 'Failed to switch to real user.');
-                } finally {
-                  setLoading(false);
-                }
-              }}
-              className="w-full py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Sign In as Primary Real User (allenkinetic006@gmail.com)</span>
-            </button>
-          </div>
-        )}
-
-        {/* Recently Registered Real Users */}
-        {mode === 'signin' && (
-          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-slate-800 flex items-center gap-1.5 text-xs">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Recently Registered Real Accounts</span>
-              </span>
-              <span className="text-[10px] font-mono font-semibold text-slate-500 bg-slate-200/70 px-2 py-0.5 rounded-full">
-                {availableUsers.filter(u => u.isReal || u.id.startsWith('usr_17') || u.id.includes('allen_006')).length} Registered
-              </span>
-            </div>
-
-            <div className="max-h-48 overflow-y-auto pr-1 space-y-1.5">
-              {availableUsers
-                .filter(u => u.isReal || u.id.startsWith('usr_17') || u.id.includes('allen_006') || u.id.includes('allen_004'))
-                .map((u) => (
-                  <button
-                    key={u.id}
-                    type="button"
-                    onClick={() => handleQuickSwitch(u.id)}
-                    className={`w-full text-left p-2.5 rounded-lg border transition-all flex items-center justify-between cursor-pointer ${
-                      currentUser?.id === u.id
-                        ? 'bg-indigo-50/90 border-indigo-300 text-indigo-950 font-bold shadow-2xs'
-                        : 'bg-white hover:bg-indigo-50/50 border-slate-200 hover:border-indigo-200 shadow-2xs'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <UserAvatar
-                        src={u.avatarUrl}
-                        name={u.fullName}
-                        className="w-7 h-7 rounded-full shrink-0 border border-slate-200"
-                        iconClassName="w-3.5 h-3.5 text-slate-500"
-                      />
-                      <div className="truncate">
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-bold text-slate-900 truncate">{u.fullName}</span>
-                          {currentUser?.id === u.id && (
-                            <span className="text-[9px] font-bold text-indigo-700 bg-indigo-100 px-1.5 py-0.2 rounded">
-                              Current
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-[11px] text-slate-500 font-mono truncate">
-                          @{u.username} {u.email ? `· ${u.email}` : ''}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="text-right shrink-0 ml-2">
-                      <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded block">
-                        Real User
-                      </span>
-                    </div>
-                  </button>
-                ))}
-            </div>
-
-            {/* Collapsible Sandbox Personas */}
-            <div className="pt-2 border-t border-slate-200/80">
-              <button
-                type="button"
-                onClick={() => setShowDemoPersonas(!showDemoPersonas)}
-                className="w-full flex items-center justify-between text-[11px] font-semibold text-slate-500 hover:text-slate-800 transition-colors py-1 cursor-pointer"
-              >
-                <span>Sandbox Test Personas (Allen, Sarah, Fatima)</span>
-                {showDemoPersonas ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-              </button>
-
-              {showDemoPersonas && (
-                <div className="mt-2 space-y-1">
-                  {availableUsers
-                    .filter(u => !u.isReal && !u.id.startsWith('usr_17') && !u.id.includes('allen_006') && !u.id.includes('allen_004'))
-                    .map((u) => (
-                      <button
-                        key={u.id}
-                        type="button"
-                        onClick={() => handleQuickSwitch(u.id)}
-                        className={`w-full text-left p-2 rounded border transition-colors flex items-center justify-between text-xs cursor-pointer ${
-                          currentUser?.id === u.id
-                            ? 'bg-indigo-50/80 border-indigo-300 font-bold'
-                            : 'bg-white hover:bg-slate-50 border-slate-200'
-                        }`}
-                      >
-                        <div className="truncate">
-                          <span className="font-medium text-slate-900">{u.fullName}</span>
-                          <span className="text-slate-500 font-mono text-[11px] ml-1.5">(@{u.username})</span>
-                        </div>
-                        <span className="text-[10px] text-slate-500 font-mono">{u.accountType}</span>
-                      </button>
-                    ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
+        {/* Clean Sign In Form */}
         {mode === 'signin' && (
           <form onSubmit={handleSignIn} className="space-y-4 text-xs">
             <div>
@@ -340,7 +190,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 required
                 value={login}
                 onChange={(e) => setLogin(e.target.value)}
-                placeholder="allenkinetic006 or email@domain.com"
+                placeholder="Enter your username or email"
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               />
             </div>
