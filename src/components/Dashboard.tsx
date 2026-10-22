@@ -730,6 +730,31 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       </button>
                     </div>
                   )}
+
+                  {cmt.status === 'completed' && (
+                    <div className="pt-2 mt-1 flex items-center justify-between border-t border-slate-100">
+                      <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-0.5">
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star
+                              key={s}
+                              className={`w-3 h-3 ${
+                                s <= Math.round(cmt.averageRating || 5)
+                                  ? 'text-amber-500 fill-amber-500'
+                                  : 'text-slate-200'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="font-mono text-[10px] font-bold text-slate-800">
+                          {(cmt.averageRating || 5).toFixed(1)}★
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                        {cmt.ratingPercent ?? 100}% Honor Attested
+                      </span>
+                    </div>
+                  )}
                 </div>
               ))
             )}
