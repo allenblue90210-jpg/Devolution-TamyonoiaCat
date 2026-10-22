@@ -963,6 +963,62 @@
       ],
       "isPublic": true,
       "createdAt": "2026-10-21T20:20:59.542Z"
+    },
+    {
+      "id": "TR-70885",
+      "creatorId": "usr_allen_006",
+      "creatorName": "Allen Kinetic",
+      "counterpartyName": "Sarah Adesina",
+      "counterpartyContact": "Attested Trust Identity",
+      "counterpartyUserId": "usr_sarah_002",
+      "interactionCategory": "Service Contract",
+      "title": "Fulfilled Commitment: Return Toyota Land Cruiser V8 Fully Refueled",
+      "description": "Dual-attested fulfillment of time-locked trust pact (100% Rating, 3★). User B (Sarah Adesina) returning loaned Toyota Land Cruiser V8 with full tank and clean handover to Allen Okoro at Lekki Phase 1.. ",
+      "status": "completed",
+      "completionConditions": "Delivered and verified finished at 100% rating (3★).",
+      "isFulfillmentConfirmed": true,
+      "evidenceAttachments": [
+        {
+          "name": "Dual-Signoff_Attestation_TR-70885.pdf",
+          "date": "2026-10-22",
+          "size": "142 KB"
+        }
+      ],
+      "history": [
+        {
+          "timestamp": "2026-10-22T11:58:59.549Z",
+          "actor": "Allen Kinetic",
+          "event": "Pact Request Created"
+        },
+        {
+          "timestamp": "2026-10-22T11:59:09.906Z",
+          "actor": "Sarah Adesina",
+          "event": "Pledge Fulfilled & Handover Submitted"
+        },
+        {
+          "timestamp": "2026-10-22T12:02:44.709Z",
+          "actor": "Allen Kinetic",
+          "event": "Marked Finished & Rated (100% Rating, 3★)"
+        }
+      ],
+      "ratings": [
+        {
+          "id": "rc_rt_1792670564709",
+          "receiptId": "TR-70885",
+          "authorId": "usr_allen_006",
+          "authorName": "Allen Kinetic",
+          "authorAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+          "rating": 3,
+          "goodFaithBadge": "100% Exemplary Good Faith Handover",
+          "comment": "Prompt and verified fulfillment in good faith.",
+          "createdAt": "2026-10-22T12:02:44.709Z"
+        }
+      ],
+      "averageRating": 3,
+      "ratingsCount": 1,
+      "isPublic": true,
+      "createdAt": "2026-10-22T11:58:59.549Z",
+      "completedAt": "2026-10-22T12:02:44.709Z"
     }
   ],
   "references": [
@@ -1009,6 +1065,16 @@
   ],
   "disputes": [],
   "notifications": [
+    {
+      "id": "notif_1792670564718",
+      "userId": "usr_sarah_002",
+      "type": "receipt_action",
+      "title": "Task Marked Finished & Rated (3★)!",
+      "message": "Allen Kinetic marked 'Return Toyota Land Cruiser V8 Fully Refueled' as FINISHED and rated you 3★ (100% Exemplary Good Faith Handover). Dual-signed Trust Receipt TR-70885 generated!",
+      "link": "/commitments",
+      "isRead": false,
+      "createdAt": "2026-10-22T12:02:44.709Z"
+    },
     {
       "id": "notif_1792670349908",
       "userId": "usr_allen_006",
@@ -1223,7 +1289,7 @@
       "creatorRole": "requester",
       "deadline": "2026-10-24T11:58:59.481Z",
       "committerPledgeNote": "I accept this pact and pledge to return the Land Cruiser V8 on time with full fuel tank.",
-      "status": "fulfilled_pending_checkout",
+      "status": "completed",
       "trustRewardPoints": 50,
       "penaltyRateDailyPercent": 30,
       "penaltyCurrentDeductionPercent": 0,
@@ -1238,7 +1304,26 @@
       "createdAt": "2026-10-22T11:58:59.549Z",
       "checkedOutByCommitterAt": "2026-10-22T11:59:09.906Z",
       "ratingPercent": 100,
-      "ratingBadge": "100% Exemplary Good Faith"
+      "ratingBadge": "100% Exemplary Good Faith Handover",
+      "checkedOutByRequesterAt": "2026-10-22T12:02:44.709Z",
+      "completedAt": "2026-10-22T12:02:44.709Z",
+      "linkedReceiptId": "TR-70885",
+      "averageRating": 3,
+      "ratingsCount": 1,
+      "ratingsList": [
+        {
+          "id": "pct_rate_1792670564713_0dxi",
+          "commitmentId": "TC-7871",
+          "authorId": "usr_allen_006",
+          "authorName": "Allen Kinetic",
+          "authorAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+          "rating": 3,
+          "ratingPercent": 100,
+          "badge": "100% Exemplary Good Faith Handover",
+          "comment": "3★ verified fulfillment on completion.",
+          "createdAt": "2026-10-22T12:02:44.709Z"
+        }
+      ]
     },
     {
       "id": "TC-1887",
@@ -1564,6 +1649,22 @@
     }
   ],
   "goodFaithRatings": [
+    {
+      "id": "gfr_1792670564716_asw5",
+      "targetUserId": "usr_sarah_002",
+      "targetUsername": "sarah_adesina",
+      "authorId": "usr_allen_006",
+      "authorName": "Allen Kinetic",
+      "authorAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+      "authorTitle": "Devolution Network Architect & Verified Trustee",
+      "rating": 3,
+      "goodFaithBadge": "Prompt Delivery",
+      "comment": "Fulfilled and finished task \"Return Toyota Land Cruiser V8 Fully Refueled\" successfully with 3★ rating!",
+      "context": "Task Completion: Return Toyota Land Cruiser V8 Fully Refueled",
+      "impressions": 1,
+      "helpfulCount": 0,
+      "createdAt": "2026-10-22T12:02:44.709Z"
+    },
     {
       "id": "gfr_001",
       "targetUserId": "usr_allen_001",
