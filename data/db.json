@@ -327,7 +327,7 @@
         {
           "id": "aud_1",
           "timestamp": "2025-11-14T09:28:00.000Z",
-          "actor": "Allen Okoro",
+          "actor": "Allen Kinetic",
           "action": "Verification Initiated",
           "note": "Submitted secure identity check via certified identity verification provider."
         },
@@ -479,7 +479,7 @@
     },
     {
       "id": "rel_03",
-      "inviterId": "usr_allen_001",
+      "inviterId": "usr_allen_006",
       "recipientName": "Emeka Okafor, Esq.",
       "recipientContact": "+234 803 771 9920",
       "relationshipCategory": "Business Partner",
@@ -496,7 +496,7 @@
     },
     {
       "id": "rel_04",
-      "inviterId": "usr_allen_001",
+      "inviterId": "usr_allen_006",
       "recipientName": "Chidi Okoro",
       "recipientContact": "+234 805 112 3344",
       "relationshipCategory": "Child / Family Member",
@@ -511,7 +511,7 @@
     },
     {
       "id": "rel_05",
-      "inviterId": "usr_allen_001",
+      "inviterId": "usr_allen_006",
       "recipientName": "Dr. Marcus Vance",
       "recipientContact": "m.vance@unilag.edu.ng",
       "relationshipCategory": "Employer / Supervisor",
@@ -528,7 +528,7 @@
     },
     {
       "id": "rel_06",
-      "inviterId": "usr_allen_001",
+      "inviterId": "usr_allen_006",
       "recipientName": "Tunde Adeleke",
       "recipientContact": "+234 818 200 9090",
       "relationshipCategory": "Friend",
@@ -545,7 +545,7 @@
     },
     {
       "id": "rel_07",
-      "inviterId": "usr_allen_001",
+      "inviterId": "usr_allen_006",
       "recipientName": "Amina Mohammed",
       "recipientContact": "amina.m@fintechsummit.africa",
       "relationshipCategory": "Business Associate",
@@ -585,17 +585,17 @@
       "history": [
         {
           "timestamp": "2026-03-10T10:00:00.000Z",
-          "actor": "Allen Okoro",
+          "actor": "Allen Kinetic",
           "event": "Escrow Transfer Terms Defined"
         },
         {
           "timestamp": "2026-03-11T14:30:00.000Z",
-          "actor": "Fatima Bello",
+          "actor": "wolf",
           "event": "Cryptographic Deliverable Verified"
         },
         {
           "timestamp": "2026-03-12T16:00:00.000Z",
-          "actor": "Allen Okoro & Fatima Bello",
+          "actor": "Allen Kinetic & wolf",
           "event": "Dual-Signed Mutual Completion & Trust Receipt Finalized"
         }
       ],
@@ -632,17 +632,17 @@
       "history": [
         {
           "timestamp": "2025-06-15T09:00:00.000Z",
-          "actor": "Allen Okoro",
+          "actor": "Allen Kinetic",
           "event": "Trust Receipt Created"
         },
         {
           "timestamp": "2025-06-16T11:20:00.000Z",
-          "actor": "Fatima Bello",
+          "actor": "wolf",
           "event": "Counterparty Confirmed Terms"
         },
         {
           "timestamp": "2025-08-30T17:00:00.000Z",
-          "actor": "Fatima Bello",
+          "actor": "wolf",
           "event": "Milestone Fulfillment Dual-Signed & Completed"
         }
       ],
@@ -674,7 +674,7 @@
       "history": [
         {
           "timestamp": "2025-10-01T10:00:00.000Z",
-          "actor": "Allen Okoro",
+          "actor": "Allen Kinetic",
           "event": "Trust Receipt Drafted"
         },
         {
@@ -710,7 +710,7 @@
       "history": [
         {
           "timestamp": "2025-03-20T08:00:00.000Z",
-          "actor": "Allen Okoro",
+          "actor": "Allen Kinetic",
           "event": "Receipt Created"
         },
         {
@@ -752,7 +752,7 @@
       "history": [
         {
           "timestamp": "2026-10-18T10:00:00.000Z",
-          "actor": "Allen Okoro",
+          "actor": "Allen Kinetic",
           "event": "Pact Request Created"
         },
         {
@@ -762,7 +762,7 @@
         },
         {
           "timestamp": "2026-10-18T21:33:18.047Z",
-          "actor": "Allen Okoro",
+          "actor": "Allen Kinetic",
           "event": "Dual Checkout Confirmed & Trust Points Awarded"
         }
       ],
@@ -793,17 +793,17 @@
       "history": [
         {
           "timestamp": "2026-10-18T16:15:51.620Z",
-          "actor": "Allen Okoro",
+          "actor": "Allen Kinetic",
           "event": "Pact Request Created"
         },
         {
           "timestamp": "2026-10-18T21:33:23.539Z",
-          "actor": "Sarah Adesina",
+          "actor": "Lola",
           "event": "Pledge Fulfilled & Handover Submitted"
         },
         {
           "timestamp": "2026-10-18T21:33:23.539Z",
-          "actor": "Allen Okoro",
+          "actor": "Allen Kinetic",
           "event": "Dual Checkout Confirmed & Trust Points Awarded"
         }
       ],
@@ -855,8 +855,8 @@
   "references": [
     {
       "id": "ref_01",
-      "subjectUserId": "usr_allen_001",
-      "authorName": "Sarah Adesina",
+      "subjectUserId": "usr_allen_006",
+      "authorName": "Lola",
       "authorTitle": "Senior Cloud Solutions Architect",
       "authorCompany": "CloudWorks NG",
       "authorRelationship": "Colleague",
@@ -868,8 +868,8 @@
     },
     {
       "id": "ref_02",
-      "subjectUserId": "usr_allen_001",
-      "authorName": "Fatima Bello",
+      "subjectUserId": "usr_allen_006",
+      "authorName": "wolf",
       "authorTitle": "Chief Operating Officer",
       "authorCompany": "Horizon Global Freight Services Ltd",
       "authorRelationship": "Client",
@@ -882,7 +882,7 @@
     },
     {
       "id": "ref_03",
-      "subjectUserId": "usr_allen_001",
+      "subjectUserId": "usr_allen_006",
       "authorName": "David Chen",
       "authorTitle": "VP of Engineering",
       "authorCompany": "Kora Labs (San Francisco & Lagos)",
@@ -901,7 +901,7 @@
       "userId": "usr_allen_006",
       "type": "receipt_action",
       "title": "Commitment Ready for Dual Checkout",
-      "message": "Sarah Adesina has marked 'Return Toyota Land Cruiser V8 Fully Refueled' as fulfilled/delivered. Please confirm checkout to finalize trust score boost.",
+      "message": "Lola has marked 'Return Toyota Land Cruiser V8 Fully Refueled' as fulfilled/delivered. Please confirm checkout to finalize trust score boost.",
       "isRead": false,
       "createdAt": "2026-10-22T11:59:09.908Z"
     },
@@ -910,13 +910,13 @@
       "userId": "usr_allen_006",
       "type": "receipt_action",
       "title": "Commitment Accepted & Timer Active",
-      "message": "Sarah Adesina accepted the commitment: \"I accept this pact and pledge to return the Land Cruiser V8 on time with full fuel tank.\". Live countdown timer is now running.",
+      "message": "Lola accepted the commitment: \"I accept this pact and pledge to return the Land Cruiser V8 on time with full fuel tank.\". Live countdown timer is now running.",
       "isRead": false,
       "createdAt": "2026-10-22T11:59:04.920Z"
     },
     {
       "id": "notif_1792670339552",
-      "userId": "usr_sarah_002",
+      "userId": "usr_1792419058259_ehg5",
       "type": "receipt_action",
       "title": "New Commitment Request Received",
       "message": "Allen Kinetic created a commitment pact: 'Return Toyota Land Cruiser V8 Fully Refueled'. Sign your pledge and confirmed delivery time.",
@@ -926,7 +926,7 @@
     },
     {
       "id": "notif_1792614068753",
-      "userId": "usr_sarah_002",
+      "userId": "usr_1792419058259_ehg5",
       "type": "receipt_action",
       "title": "New Timed Commitment Promised to You",
       "message": "Allen Kinetic made a time-locked promise to you: 'Handover Lexus LX570 Clean with Full Tank'. Deadline: 10/22/2026, 2:00:00 AM.",
@@ -936,7 +936,7 @@
     },
     {
       "id": "notif_1792614064290",
-      "userId": "usr_sarah_002",
+      "userId": "usr_1792419058259_ehg5",
       "type": "receipt_action",
       "title": "New Comment on Trust Receipt",
       "message": "Allen Kinetic commented on Receipt TR-91932 (\"Fullstack Dev Handover & QA Signoff\"): \"Reviewing the build artifacts now. Committing to verify and ...\"",
@@ -946,7 +946,7 @@
     },
     {
       "id": "notif_1792614059546",
-      "userId": "usr_sarah_002",
+      "userId": "usr_1792419058259_ehg5",
       "type": "receipt_action",
       "title": "New Trust Receipt & Timed Agreement Created",
       "message": "Allen Kinetic created a Trust Receipt with you: \"Fullstack Dev Handover & QA Signoff\". Timed deadline: 10/22/2026, 2:00:00 AM. Please review and confirm on the ledger.",
@@ -966,7 +966,7 @@
     },
     {
       "id": "notif_1792423779392",
-      "userId": "usr_allen_001",
+      "userId": "usr_allen_006",
       "type": "receipt_action",
       "title": "New Commitment Request Received",
       "message": "wolf created a commitment pact: 'Commitment '. Sign your pledge and confirmed delivery time.",
@@ -985,7 +985,7 @@
     },
     {
       "id": "notif_1792420107486",
-      "userId": "usr_allen_001",
+      "userId": "usr_allen_006",
       "type": "receipt_action",
       "title": "New Commitment Request Received",
       "message": "Allen created a commitment pact: 'Payback by October 23rd, 2026'. Sign your pledge and confirmed delivery time.",
@@ -994,7 +994,7 @@
     },
     {
       "id": "notif_1792359203546",
-      "userId": "usr_sarah_002",
+      "userId": "usr_1792419058259_ehg5",
       "type": "receipt_action",
       "title": "Commitment Successfully Checked Out!",
       "message": "Checkout confirmed for 'Loaner Audi RS5 Vehicle Return'. Dual-signed Trust Receipt TR-66576 generated and trust rating boosted by +25 pts!",
@@ -1003,7 +1003,7 @@
     },
     {
       "id": "notif_1792359198057",
-      "userId": "usr_sarah_002",
+      "userId": "usr_1792419058259_ehg5",
       "type": "receipt_action",
       "title": "Commitment Successfully Checked Out!",
       "message": "Checkout confirmed for 'High-Precision Spectral Sensor Kit Custody & Return'. Dual-signed Trust Receipt TR-61491 generated and trust rating boosted by +35 pts!",
@@ -1012,25 +1012,25 @@
     },
     {
       "id": "notif_1792340155710",
-      "userId": "usr_allen_001",
+      "userId": "usr_allen_006",
       "type": "receipt_action",
       "title": "Commitment Accepted & Timer Active",
-      "message": "Sarah Adesina accepted the commitment: \"Ill bring it by 2am parked safely in the front driveway with full tank.\". Live countdown timer is now running.",
+      "message": "Lola accepted the commitment: \"Ill bring it by 2am parked safely in the front driveway with full tank.\". Live countdown timer is now running.",
       "isRead": true,
       "createdAt": "2026-10-18T16:15:55.710Z"
     },
     {
       "id": "notif_1792340151620",
-      "userId": "usr_sarah_002",
+      "userId": "usr_1792419058259_ehg5",
       "type": "receipt_action",
       "title": "New Commitment Request Received",
-      "message": "Allen Okoro created a commitment pact: 'Loaner Audi RS5 Vehicle Return'. Sign your pledge and confirmed delivery time.",
+      "message": "Allen Kinetic created a commitment pact: 'Loaner Audi RS5 Vehicle Return'. Sign your pledge and confirmed delivery time.",
       "isRead": false,
       "createdAt": "2026-10-18T16:15:51.620Z"
     },
     {
       "id": "notif_01",
-      "userId": "usr_allen_001",
+      "userId": "usr_allen_006",
       "type": "evidence_status",
       "title": "Identity Attestation Verified",
       "message": "Your NIMC National Identity record and 3D liveness match were successfully validated.",
@@ -1040,20 +1040,20 @@
     },
     {
       "id": "notif_02",
-      "userId": "usr_allen_001",
+      "userId": "usr_allen_006",
       "type": "endorsement_received",
-      "title": "New Endorsement from Sarah Adesina",
-      "message": "Sarah Adesina has confirmed your colleague relationship and provided a personal endorsement.",
+      "title": "New Endorsement from Lola",
+      "message": "Lola has confirmed your colleague relationship and provided a personal endorsement.",
       "link": "/relationships",
       "isRead": true,
       "createdAt": "2025-09-02T16:20:00.000Z"
     },
     {
       "id": "notif_03",
-      "userId": "usr_allen_001",
+      "userId": "usr_allen_006",
       "type": "receipt_action",
       "title": "Trust Receipt Milestone Fulfilled",
-      "message": "Fatima Bello acknowledged final fulfillment of Trust Receipt TR-90214.",
+      "message": "wolf acknowledged final fulfillment of Trust Receipt TR-90214.",
       "link": "/receipts",
       "isRead": true,
       "createdAt": "2025-08-30T17:00:00.000Z"
@@ -1062,7 +1062,7 @@
   "businesses": [
     {
       "id": "biz_01",
-      "ownerUserId": "usr_allen_001",
+      "ownerUserId": "usr_allen_006",
       "name": "Aegis Tech Systems Ltd",
       "registrationNumber": "RC-1849204",
       "jurisdiction": "Federal Republic of Nigeria",
@@ -1072,14 +1072,14 @@
       "headquarters": "14 Adeola Odeku St, Victoria Island, Lagos",
       "teamMembers": [
         {
-          "userId": "usr_allen_001",
-          "name": "Allen Okoro",
+          "userId": "usr_allen_006",
+          "name": "Allen Kinetic",
           "role": "Owner",
           "email": "allen.okoro@example.com"
         },
         {
-          "userId": "usr_sarah_002",
-          "name": "Sarah Adesina",
+          "userId": "usr_1792419058259_ehg5",
+          "name": "Lola",
           "role": "Admin",
           "email": "sarah.adesina@cloudworks.ng"
         }
@@ -1096,7 +1096,7 @@
     {
       "id": "TC-7871",
       "title": "Return Toyota Land Cruiser V8 Fully Refueled",
-      "description": "User B (Sarah Adesina) returning loaned Toyota Land Cruiser V8 with full tank and clean handover to Allen Okoro at Lekki Phase 1.",
+      "description": "User B (Lola) returning loaned Toyota Land Cruiser V8 with full tank and clean handover to Allen Kinetic at Lekki Phase 1.",
       "category": "Vehicle & Transportation",
       "requesterId": "usr_allen_006",
       "requesterName": "Allen Kinetic",
@@ -1130,7 +1130,7 @@
     {
       "id": "TC-1887",
       "title": "Handover Lexus LX570 Clean with Full Tank",
-      "description": "Vehicle loan return pact to Sarah Adesina.",
+      "description": "Vehicle loan return pact to Lola.",
       "category": "Vehicle & Transportation",
       "requesterId": "usr_1792419058259_ehg5",
       "requesterName": "Lola",
@@ -1139,7 +1139,7 @@
       "committerName": "Allen Kinetic",
       "committerAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
       "promisedUserId": "usr_1792419058259_ehg5",
-      "promisedUserName": "Sarah Adesina",
+      "promisedUserName": "Lola",
       "promisedUserAvatar": "/src/assets/images/avatar_consultant_1792334644466.jpg",
       "creatorRole": "promisor",
       "deadline": "2026-10-22T02:00:00.000Z",
@@ -1472,30 +1472,6 @@
       "impressions": 4941,
       "witnessCount": 560
     },
-    "usr_allen_001": {
-      "impressions": 2423,
-      "witnessCount": 310
-    },
-    "allenokoro": {
-      "impressions": 2420,
-      "witnessCount": 310
-    },
-    "usr_sarah_002": {
-      "impressions": 1382,
-      "witnessCount": 195
-    },
-    "sarah_adesina": {
-      "impressions": 1380,
-      "witnessCount": 195
-    },
-    "usr_fatima_003": {
-      "impressions": 1890,
-      "witnessCount": 240
-    },
-    "fatimabello": {
-      "impressions": 1890,
-      "witnessCount": 240
-    },
     "usr_1792413526573_1z1j": {
       "impressions": 4,
       "witnessCount": 0
@@ -1507,6 +1483,26 @@
     "usr_allen_006": {
       "impressions": 1,
       "witnessCount": 0
+    },
+    "allenkinetic006": {
+      "impressions": 2420,
+      "witnessCount": 310
+    },
+    "usr_allen_nuclear": {
+      "impressions": 1890,
+      "witnessCount": 240
+    },
+    "allenblue": {
+      "impressions": 1890,
+      "witnessCount": 240
+    },
+    "usr_1792419058259_ehg5": {
+      "impressions": 1380,
+      "witnessCount": 195
+    },
+    "lola": {
+      "impressions": 1380,
+      "witnessCount": 195
     }
   },
   "rememberRecords": []
