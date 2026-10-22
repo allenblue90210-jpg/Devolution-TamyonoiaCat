@@ -31,6 +31,7 @@ import {
   ThumbsUp,
   MessageCircle,
   X,
+  Search,
 } from 'lucide-react';
 
 interface CommitmentsViewProps {
@@ -44,7 +45,7 @@ interface CommitmentsViewProps {
 export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
   currentUser,
   onSelectTab,
-  availableUsers,
+  availableUsers = [],
   onRefreshAllData,
   onBack,
 }) => {
@@ -61,6 +62,14 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
   const [otherCategoryDetails, setOtherCategoryDetails] = useState('');
   const [targetCommitterId, setTargetCommitterId] = useState('');
   const [externalCommitterName, setExternalCommitterName] = useState('');
+  const [counterpartySearch, setCounterpartySearch] = useState('');
+  const [selectedCounterpartyUser, setSelectedCounterpartyUser] = useState<{
+    id: string;
+    username: string;
+    fullName: string;
+    accountType?: string;
+    avatarUrl?: string;
+  } | null>(null);
   const [commitRole, setCommitRole] = useState<'promisor' | 'requester'>('promisor');
   const [customPledgeText, setCustomPledgeText] = useState('');
   const [deadlineDate, setDeadlineDate] = useState('');
