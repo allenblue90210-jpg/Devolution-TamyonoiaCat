@@ -65,8 +65,10 @@ git push -u origin main
 
 ---
 
-## Seed Test Personas (Sandbox)
+## Registered Network Participants
 
-- **Allen Okoro (`@allenokoro`)**: Principal Systems Architect & Founder, Aegis Tech Systems Ltd (CAC RC-1849204). Verified identity, phone verified, 6 attested credentials, 8 confirmed relationships, and 3 completed Trust Receipts.
-- **Sarah Adesina (`@sarah_adesina`)**: Senior Cloud Solutions Architect & FinTech Advisor. Confirmed colleague who provided a voluntary endorsement.
-- **Fatima Bello (`@fatimabello`)**: Chief Operating Officer, Horizon Global Freight Services Ltd. Counterparty on completed Trust Receipt `TR-90214` (₦ 4,500,000 NGN).
+- **Allen Kinetic (`@allenkinetic006`)**: Architect & Verified Trustee, Devolution Technologies Ltd (RC-1849204). Verified identity, phone verified, attested credentials, confirmed relationships, and completed Trust Receipts.
+- **Allen Blue (`@allenblue`)**: Verified Trustee (`allennuclear001@gmail.com`).
+- **Lola (`@lola`)**: Operations & Advisory Partner (`allenkinetic001@gmail.com`). Confirmed peer who co-built payment settlement pipelines.
+- **wolf (`@kai`)**: Technology & Hardware Counterparty (`allenblack530@gmail.com`). Counterparty on completed Trust Receipt `TR-90214`.
+
