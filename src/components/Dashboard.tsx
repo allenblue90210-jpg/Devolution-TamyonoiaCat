@@ -32,6 +32,7 @@ import {
   Camera,
   Sparkles,
   Search,
+  Star,
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -709,6 +710,26 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       Due: {new Date(cmt.deadline).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
+
+                  {cmt.status !== 'completed' && cmt.status !== 'cancelled' && (
+                    <div className="pt-2 mt-1 flex items-center justify-between border-t border-slate-100">
+                      <span className="text-[10px] text-emerald-800 font-medium">
+                        {cmt.status === 'fulfilled_pending_checkout' ? '✓ Handover ready to review' : 'Ongoing task'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onNavigateTab('commitments');
+                        }}
+                        className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-[10px] font-bold flex items-center gap-1 shadow-2xs transition-colors cursor-pointer"
+                      >
+                        <Check className="w-3 h-3 text-white" />
+                        <Star className="w-2.5 h-2.5 fill-amber-300 text-amber-300" />
+                        <span>Mark Finished & Rate</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))
             )}
