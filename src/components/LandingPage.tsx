@@ -697,8 +697,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="flex items-center gap-1.5 overflow-x-auto text-xs pb-1 sm:pb-0">
                 {[
                   { id: 'all', label: `All Reviews (${ratings.length})` },
-                  { id: 'allenokoro', label: 'Allen Okoro' },
-                  { id: 'sarah_adesina', label: 'Sarah Adesina' },
+                  { id: 'allenkinetic006', label: 'Allen Kinetic' },
+                  { id: 'lola', label: 'Lola' },
+                  { id: 'kai', label: 'wolf' },
                   { id: 'network', label: 'Network Overall' },
                 ].map((f) => (
                   <button
@@ -1092,9 +1093,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div>
               <div className="font-semibold text-slate-900 mb-3">Public Profiles</div>
               <ul className="space-y-2">
-                <li><button onClick={() => onExploreProfile('allenokoro')} className="hover:text-slate-900">Allen Okoro (Principal Architect)</button></li>
-                <li><button onClick={() => onExploreProfile('sarah_adesina')} className="hover:text-slate-900">Sarah Adesina (Cloud Advisor)</button></li>
-                <li><button onClick={() => onExploreProfile('fatimabello')} className="hover:text-slate-900">Fatima Bello (Logistics COO)</button></li>
+                <li><button onClick={() => onExploreProfile('allenkinetic006')} className="hover:text-slate-900">Allen Kinetic (Architect & Trustee)</button></li>
+                <li><button onClick={() => onExploreProfile('lola')} className="hover:text-slate-900">Lola (Verified Partner)</button></li>
+                <li><button onClick={() => onExploreProfile('kai')} className="hover:text-slate-900">wolf / Kai (Network Counterparty)</button></li>
               </ul>
             </div>
           </div>
