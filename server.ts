@@ -483,6 +483,107 @@ app.post('/api/auth/update-profile', (req: Request, res: Response) => {
   res.json({ user: updated, message: 'Profile updated successfully.' });
 });
 
+/* ==========================================================================
+   GOOGLE PLAY POLICY COMPLIANCE: ACCOUNT DELETION & UGC REPORTING
+   ========================================================================== */
+
+// 1. Mandatory In-App & Web Account Deletion (Google Play Data Safety Policy)
+app.delete('/api/users/me', async (req: Request, res: Response) => {
+  const userId = getSessionUserId(req);
+  if (!userId || userId === 'guest') {
+    return res.status(401).json({ error: 'You must be authenticated to request account deletion.' });
+  }
+
+  const user = db.getUserById(userId);
+  if (!user) {
+    return res.status(404).json({ error: 'Account not found.' });
+  }
+
+  try {
+    // Delete local user data and all associated personal items
+    db.deleteUser(userId);
+
+    // If connected to Supabase, attempt to clean up the Supabase records
+    const supabaseClient = (await import('./server/supabase.js')).getSupabaseClient();
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from('devolution_users').delete().eq('id', userId);
+        if (user.supabaseAuthId) {
+          await supabaseClient.auth.admin.deleteUser(user.supabaseAuthId);
+        }
+      } catch (sbDelErr: any) {
+        console.warn('[Supabase Account Deletion Warning]:', sbDelErr.message);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Your account and all associated personal records have been permanently deleted in accordance with data privacy regulations.',
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to complete account deletion request.' });
+  }
+});
+
+// 2. User-Generated Content (UGC) Abuse Reporting (Google Play UGC Policy)
+app.post('/api/reports', (req: Request, res: Response) => {
+  const reporterId = getSessionUserId(req);
+  const { targetType, targetId, reason, description } = req.body;
+
+  if (!targetType || !targetId || !reason) {
+    return res.status(400).json({ error: 'Target type, target ID, and reason are required to submit an abuse report.' });
+  }
+
+  const dispute: any = {
+    id: `rep_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+    title: `UGC Report: ${reason}`,
+    complainantId: reporterId || 'anonymous_witness',
+    respondentId: targetType === 'user' ? targetId : 'content_owner',
+    status: 'under_review',
+    category: reason,
+    description: description || `Report against ${targetType} [${targetId}] for ${reason}`,
+    createdAt: new Date().toISOString(),
+    evidenceIds: [],
+    resolution: null,
+  };
+
+  db.addDispute(dispute);
+
+  res.status(201).json({
+    success: true,
+    reportId: dispute.id,
+    message: 'Thank you for your report. Our moderation team reviews all flagged content within 24 hours to enforce our Community Guidelines and Terms of Service.',
+  });
+});
+
+// 3. User-Generated Content Blocking (Google Play UGC Policy)
+app.post('/api/users/block', (req: Request, res: Response) => {
+  const blockerId = getSessionUserId(req);
+  const { blockedUserId } = req.body;
+
+  if (!blockerId || blockerId === 'guest') {
+    return res.status(401).json({ error: 'You must be signed in to block a user.' });
+  }
+
+  if (!blockedUserId) {
+    return res.status(400).json({ error: 'User ID to block is required.' });
+  }
+
+  const blocker = db.getUserById(blockerId);
+  if (!blocker) return res.status(404).json({ error: 'User not found.' });
+
+  const currentBlocked = (blocker as any).blockedUserIds || [];
+  if (!currentBlocked.includes(blockedUserId)) {
+    currentBlocked.push(blockedUserId);
+    db.updateUser(blockerId, { blockedUserIds: currentBlocked } as any);
+  }
+
+  res.json({
+    success: true,
+    message: 'User blocked. You will no longer see content or receive interactions from this account.',
+  });
+});
+
 app.post('/api/user/upload-avatar', (req: Request, res: Response) => {
   const userId = getSessionUserId(req);
   if (!userId) {

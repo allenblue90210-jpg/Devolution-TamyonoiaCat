@@ -77,6 +77,25 @@ function getCachedVaultList(key: string): any[] {
   }
 }
 
+export function getApiBaseUrl(): string {
+  if (typeof window === 'undefined') return '';
+  const customUrl = localStorage.getItem('devolution_api_server_url');
+  if (customUrl) return customUrl.replace(/\/$/, '');
+  const envUrl = (import.meta as any).env?.VITE_API_URL;
+  if (envUrl) return envUrl.replace(/\/$/, '');
+  return '';
+}
+
+export function setApiBaseUrl(url: string) {
+  if (typeof window !== 'undefined') {
+    if (!url || !url.trim()) {
+      localStorage.removeItem('devolution_api_server_url');
+    } else {
+      localStorage.setItem('devolution_api_server_url', url.trim());
+    }
+  }
+}
+
 async function request<T>(endpoint: string, options: RequestInit = {}, retries = 2): Promise<T> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -84,8 +103,11 @@ async function request<T>(endpoint: string, options: RequestInit = {}, retries =
     ...(options.headers as Record<string, string>),
   };
 
+  const baseUrl = getApiBaseUrl();
+  const targetUrl = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint}`;
+
   try {
-    const res = await fetch(endpoint, {
+    const res = await fetch(targetUrl, {
       ...options,
       headers,
     });
@@ -219,6 +241,25 @@ export const api = {
     return request('/api/auth/reset-password', {
       method: 'POST',
       body: JSON.stringify({ email }),
+    });
+  },
+  async deleteAccount(): Promise<{ success: boolean; message: string }> {
+    const res = await request<{ success: boolean; message: string }>('/api/users/me', {
+      method: 'DELETE',
+    });
+    clearSessionUserId();
+    return res;
+  },
+  async reportContent(targetType: string, targetId: string, reason: string, description?: string): Promise<{ success: boolean; message: string }> {
+    return request('/api/reports', {
+      method: 'POST',
+      body: JSON.stringify({ targetType, targetId, reason, description }),
+    });
+  },
+  async blockUser(blockedUserId: string): Promise<{ success: boolean; message: string }> {
+    return request('/api/users/block', {
+      method: 'POST',
+      body: JSON.stringify({ blockedUserId }),
     });
   },
   async getUsersList(): Promise<{ users: Array<{ id: string; username: string; fullName: string; accountType: string; category: string; avatarUrl: string }> }> {
