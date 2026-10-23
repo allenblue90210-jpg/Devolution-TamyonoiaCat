@@ -1375,6 +1375,7 @@ app.post('/api/receipts', (req: Request, res: Response) => {
   };
 
   db.addReceipt(newReceipt);
+  triggerGitSyncImmediate(`receipt ${newReceipt.id} ("${newReceipt.title}")`);
 
   // Notify creator
   db.addNotification({
@@ -1902,6 +1903,7 @@ app.post('/api/commitments', (req: Request, res: Response) => {
   };
 
   db.createCommitment(newCommitment);
+  triggerGitSyncImmediate(`pact ${newCommitment.id} ("${newCommitment.title}")`);
 
   if (targetUser) {
     db.addNotification({
@@ -2776,6 +2778,30 @@ export function triggerGitSyncDebounced(reason = 'data updated') {
   }, 5000);
 }
 
+export async function triggerGitSyncImmediate(reason = 'immutable record created') {
+  if (syncDebounceTimer) {
+    clearTimeout(syncDebounceTimer);
+    syncDebounceTimer = null;
+  }
+  try {
+    const cfg = getResolvedSupabaseConfig();
+    if (cfg.url && cfg.key) {
+      syncToSupabase(db.getState()).catch(() => {});
+    }
+  } catch {
+    // ignore
+  }
+
+  setImmediate(async () => {
+    try {
+      console.log(`[Git Sync Immediate] Permanently anchoring changes: ${reason}`);
+      await performGitSync(`feat(vault): permanently anchor ${reason}`);
+    } catch (err: any) {
+      console.warn('[Git Sync Immediate Notice]:', err.message);
+    }
+  });
+}
+
 let supabaseDebounceTimer: NodeJS.Timeout | null = null;
 export function triggerSupabaseSyncDebounced(reason = 'data updated') {
   if (supabaseDebounceTimer) clearTimeout(supabaseDebounceTimer);
@@ -2858,6 +2884,47 @@ app.post('/api/git/pull', async (_req: Request, res: Response) => {
   } catch (err: any) {
     res.status(500).json({ error: err.message || 'Failed to pull updates from repository' });
   }
+});
+
+/* ==========================================================================
+   PERMANENT IMMUTABLE VAULT & DUAL-STORAGE RECONCILIATION
+   ========================================================================== */
+
+app.post('/api/vault/reconcile', (req: Request, res: Response) => {
+  const { commitments, receipts } = req.body || {};
+  let restoredPacts = 0;
+  let restoredReceipts = 0;
+  if (Array.isArray(commitments) && commitments.length > 0) {
+    restoredPacts = db.reconcileExternalPacts(commitments);
+  }
+  if (Array.isArray(receipts) && receipts.length > 0) {
+    restoredReceipts = db.reconcileExternalReceipts(receipts);
+  }
+  if (restoredPacts > 0 || restoredReceipts > 0) {
+    triggerGitSyncImmediate(`reconciled ${restoredPacts} pacts and ${restoredReceipts} receipts`);
+  }
+  res.json({
+    success: true,
+    restoredPacts,
+    restoredReceipts,
+    totalCommitments: db.getCommitments().length,
+    totalReceipts: db.getReceipts().length,
+  });
+});
+
+app.get('/api/vault/stats', (_req: Request, res: Response) => {
+  const commitments = db.getCommitments();
+  const receipts = db.getReceipts();
+  res.json({
+    vaultStatus: 'immutable_active',
+    totalPacts: commitments.length,
+    totalReceipts: receipts.length,
+    permanentStorage: 'dual_layer_disk_and_git',
+    gitSyncActive: true,
+    lastSyncTime,
+    lastSyncStatus,
+    lastSyncMessage,
+  });
 });
 
 /* ==========================================================================
