@@ -28,6 +28,7 @@ import {
   Camera,
   LogOut,
   Settings,
+  Ban,
 } from 'lucide-react';
 
 interface PublicProfileViewProps {
@@ -309,13 +310,30 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
                 )}
               </>
             ) : (
-              <button
-                onClick={() => setShowDisputeModal(true)}
-                className="px-3 py-2 text-xs text-slate-500 hover:text-red-600 border border-slate-200 hover:border-red-200 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
-              >
-                <AlertTriangle className="w-3.5 h-3.5" />
-                <span>Report Profile</span>
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setShowDisputeModal(true)}
+                  className="px-2.5 py-1.5 text-xs text-slate-600 hover:text-red-600 border border-slate-200 hover:border-red-200 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                  title="Report abusive or objectionable content"
+                >
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Report</span>
+                </button>
+                <button
+                  onClick={async () => {
+                    if (confirm(`Block @${user.username}? You will no longer see interactions from this user.`)) {
+                      await api.blockUser(user.id);
+                      alert(`User @${user.username} blocked.`);
+                      if (onBack) onBack();
+                    }
+                  }}
+                  className="px-2.5 py-1.5 text-xs text-slate-500 hover:text-slate-800 border border-slate-200 hover:bg-slate-50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                  title="Block this user"
+                >
+                  <Ban className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Block</span>
+                </button>
+              </div>
             )}
             <button
               onClick={handleCopyLink}
