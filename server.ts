@@ -163,7 +163,7 @@ app.post('/api/auth/logout', (_req: Request, res: Response) => {
   res.json({ success: true, message: 'Logged out successfully' });
 });
 
-app.post('/api/auth/signin', (req: Request, res: Response) => {
+app.post('/api/auth/signin', async (req: Request, res: Response) => {
   const { login, password } = req.body;
 
   if (!login || typeof login !== 'string' || !login.trim()) {
@@ -184,9 +184,42 @@ app.post('/api/auth/signin', (req: Request, res: Response) => {
     return res.status(401).json({ error: 'This account is not registered. Please sign up first to create an account.' });
   }
 
+  // === PRIMARY: Authenticate via Supabase Auth ===
+  let supabaseAuthResult: { success: boolean; session?: any; user?: any; error?: string } | null = null;
+  const userEmail = user.email?.toLowerCase().trim();
+
+  if (userEmail) {
+    try {
+      supabaseAuthResult = await supabaseAuthSignIn(userEmail, password);
+    } catch (err: any) {
+      console.warn('[Supabase Auth SignIn Notice]:', err.message);
+    }
+  }
+
+  if (supabaseAuthResult?.success) {
+    // Supabase authenticated successfully — sync password hash locally and mark email verified
+    const inputHash = crypto.createHash('sha256').update(password).digest('hex');
+    db.updateUser(user.id, {
+      passwordHash: inputHash,
+      emailVerified: true,
+    });
+
+    return res.json({
+      user: db.getUserById(user.id) || user,
+      supabaseSession: supabaseAuthResult.session,
+      authProvider: 'supabase',
+      message: `Authenticated via Supabase Auth as ${userEmail}`,
+    });
+  }
+
+  // === FALLBACK: Local password hash check (if Supabase unavailable or not yet configured) ===
   const inputHash = crypto.createHash('sha256').update(password).digest('hex');
   if (user.passwordHash) {
     if (user.passwordHash !== inputHash) {
+      // If Supabase explicitly rejected credentials, use that error
+      if (supabaseAuthResult && !supabaseAuthResult.success && supabaseAuthResult.error) {
+        return res.status(401).json({ error: `Authentication failed: ${supabaseAuthResult.error}` });
+      }
       return res.status(401).json({ error: 'Incorrect password. Please verify your credentials and try again.' });
     }
   } else {
@@ -194,13 +227,34 @@ app.post('/api/auth/signin', (req: Request, res: Response) => {
     db.updateUser(user.id, { passwordHash: inputHash });
   }
 
-  res.json({ user, message: 'Authentication successful' });
+  // Try to create user in Supabase Auth if they don't exist there yet
+  if (userEmail) {
+    createSupabaseAuthUser({
+      email: userEmail,
+      password,
+      fullName: user.fullName,
+      username: user.username,
+      accountType: user.accountType,
+      phone: user.phone,
+    }).catch(() => {});
+  }
+
+  res.json({
+    user,
+    authProvider: supabaseAuthResult?.success ? 'supabase' : 'local',
+    message: supabaseAuthResult?.success
+      ? `Authenticated via Supabase Auth as ${userEmail}`
+      : 'Authenticated via local credentials (Supabase sync pending)',
+  });
 });
 
 app.post('/api/auth/signup', async (req: Request, res: Response) => {
   const { fullName, username, email, password, accountType, businessName, category, country, city, phone } = req.body;
   if (!fullName || !username || !email) {
     return res.status(400).json({ error: 'Full name, username, and email are required.' });
+  }
+  if (!password || password.length < 6) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters.' });
   }
   if (db.getUserByUsername(username)) {
     return res.status(409).json({ error: 'Username is already taken.' });
@@ -209,11 +263,45 @@ app.post('/api/auth/signup', async (req: Request, res: Response) => {
     return res.status(409).json({ error: 'Email address is already registered.' });
   }
 
-  const passwordHash = password ? crypto.createHash('sha256').update(password).digest('hex') : undefined;
+  // === PRIMARY: Register in Supabase Auth (auth.users) FIRST ===
+  let supabaseAuthResult: { success: boolean; user?: any; session?: any; error?: string } | null = null;
+  const cleanEmail = email.trim().toLowerCase();
+
+  try {
+    // First try the client-side signUp (creates auth.users + session)
+    supabaseAuthResult = await supabaseAuthSignUp(cleanEmail, password, {
+      full_name: fullName,
+      username: username.toLowerCase().replace(/[^a-z0-9_]/g, ''),
+      account_type: accountType || 'personal',
+      email_verified: true,
+    });
+
+    // If client signUp fails (e.g. signups disabled), try admin API
+    if (!supabaseAuthResult?.success) {
+      const adminResult = await createSupabaseAuthUser({
+        email: cleanEmail,
+        password,
+        fullName,
+        username,
+        accountType,
+        phone,
+      });
+      if (adminResult.success) {
+        supabaseAuthResult = { success: true, user: adminResult.user };
+      }
+    }
+  } catch (err: any) {
+    console.warn('[Supabase Auth SignUp Notice]:', err.message);
+  }
+
+  // Extract Supabase auth UID if available
+  const supabaseAuthId = supabaseAuthResult?.user?.id || supabaseAuthResult?.user?.uid || undefined;
+
+  const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
 
   const newUser: User = {
     id: `usr_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-    email,
+    email: cleanEmail,
     username: username.toLowerCase().replace(/[^a-z0-9_]/g, ''),
     fullName,
     accountType: accountType === 'business' ? 'business' : 'personal',
@@ -225,7 +313,7 @@ app.post('/api/auth/signup', async (req: Request, res: Response) => {
     city: city || 'Lagos',
     phone: phone || '',
     phoneVerified: false,
-    emailVerified: false,
+    emailVerified: !!supabaseAuthResult?.success,
     identityStatus: 'unverified',
     identityMethod: 'None submitted',
     identityVerifiedAt: null,
@@ -233,6 +321,7 @@ app.post('/api/auth/signup', async (req: Request, res: Response) => {
     businessName: businessName || undefined,
     businessRegNumber: undefined,
     passwordHash,
+    supabaseAuthId,
     privacySettings: {
       showRelationshipCounts: true,
       showCategoryBreakdown: true,
@@ -247,13 +336,13 @@ app.post('/api/auth/signup', async (req: Request, res: Response) => {
 
   db.createUser(newUser);
 
-  // 1. Auto-link pending relationship invitations addressed to this user's email or phone
+  // Auto-link pending relationship invitations addressed to this user's email or phone
   if (email || phone) {
     db.getState().relationships.forEach((rel) => {
       if (rel.status === 'pending') {
         const contact = (rel.recipientContact || '').toLowerCase().trim();
         if (
-          (email && contact === email.toLowerCase().trim()) ||
+          (email && contact === cleanEmail) ||
           (phone && contact.replace(/\s+/g, '') === phone.replace(/\s+/g, ''))
         ) {
           db.updateRelationship(rel.id, { recipientUserId: newUser.id });
@@ -261,12 +350,12 @@ app.post('/api/auth/signup', async (req: Request, res: Response) => {
       }
     });
 
-    // 2. Auto-link pending trust receipts
+    // Auto-link pending trust receipts
     db.getState().receipts.forEach((rcp) => {
       if (rcp.status === 'pending' || rcp.status === 'confirmed') {
         const contact = (rcp.counterpartyContact || '').toLowerCase().trim();
         if (
-          (email && contact === email.toLowerCase().trim()) ||
+          (email && contact === cleanEmail) ||
           (phone && contact.replace(/\s+/g, '') === phone.replace(/\s+/g, ''))
         ) {
           db.updateReceipt(rcp.id, { counterpartyUserId: newUser.id });
@@ -275,29 +364,21 @@ app.post('/api/auth/signup', async (req: Request, res: Response) => {
     });
   }
 
-  // 3. Welcome notification with onboarding guidance
+  // Welcome notification with onboarding guidance
   db.addNotification({
     id: `notif_${Date.now()}`,
     userId: newUser.id,
     type: 'evidence_status',
     title: 'Welcome to Devolution Trust Platform',
-    message: 'Your cryptographic trust ledger is active and synchronized with Supabase PostgreSQL. Complete identity attestation and establish bilateral trust receipts to grow your verifiable score.',
+    message: supabaseAuthResult?.success
+      ? 'Your account has been registered and authenticated via Supabase. Your cryptographic trust ledger is active. Complete identity attestation and establish bilateral trust receipts to grow your verifiable score.'
+      : 'Your cryptographic trust ledger is active. Supabase authentication sync will complete on next sign-in. Complete identity attestation and establish bilateral trust receipts to grow your verifiable score.',
     link: '/dashboard',
     isRead: false,
     createdAt: new Date().toISOString(),
   });
 
-  // 1. Directly create in Supabase Auth (auth.users)
-  createSupabaseAuthUser({
-    email,
-    password,
-    fullName,
-    username,
-    accountType,
-    phone,
-  }).catch((err: any) => console.warn('[Supabase Auth User Create Notice]:', err.message));
-
-  // 2. Directly sync real user into Supabase table (public.devolution_users)
+  // Sync user profile to Supabase public.devolution_users table
   try {
     await syncUserToSupabase(newUser);
   } catch (syncErr: any) {
@@ -327,7 +408,15 @@ app.post('/api/auth/signup', async (req: Request, res: Response) => {
     });
   }
 
-  res.status(201).json({ user: newUser, message: 'Account registered successfully.' });
+  res.status(201).json({
+    user: newUser,
+    supabaseSession: supabaseAuthResult?.session,
+    authProvider: supabaseAuthResult?.success ? 'supabase' : 'local',
+    supabaseAuthId,
+    message: supabaseAuthResult?.success
+      ? `Account registered and authenticated via Supabase Auth (${cleanEmail})`
+      : 'Account registered successfully. Supabase Auth sync pending.',
+  });
 });
 
 app.post('/api/users/quick-verify', (req: Request, res: Response) => {

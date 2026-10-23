@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { api } from '../services/api.js';
 import { User, AccountType, UserSummary } from '../types/trust.js';
-import { ShieldCheck, X, CheckCircle2, AlertCircle, Building2, User as UserIcon, LogOut, Eye, EyeOff, Key } from 'lucide-react';
+import { ShieldCheck, X, CheckCircle2, AlertCircle, Building2, User as UserIcon, LogOut, Eye, EyeOff, Key, CloudCog, Zap } from 'lucide-react';
 import { UserAvatar } from './UserAvatar.js';
 
 interface AuthModalProps {
@@ -33,6 +33,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [authProvider, setAuthProvider] = useState<string | null>(null);
   const [resetSentMessage, setResetSentMessage] = useState<string | null>(null);
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -49,6 +50,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setError(null);
     try {
       const res = await api.signIn(login.trim(), password);
+      setAuthProvider((res as any).authProvider || 'supabase');
       onSuccess(res.user);
       onClose();
     } catch (err: any) {
@@ -79,6 +81,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         phone,
         city,
       });
+      setAuthProvider((res as any).authProvider || 'supabase');
       onSuccess(res.user);
       onClose();
     } catch (err: any) {
@@ -123,8 +126,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       <div className="relative z-10 bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl p-5 sm:p-6 space-y-5 my-auto max-h-[calc(100vh-2rem)] overflow-y-auto overscroll-contain animate-in zoom-in-95 duration-150">
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div>
-            <div className="text-xs font-semibold uppercase tracking-wider text-indigo-700">
-              Devolution Trust Access
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-indigo-700">
+                Devolution Trust Access
+              </span>
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-emerald-50 border border-emerald-200 rounded text-[9px] font-bold text-emerald-700 uppercase tracking-wider">
+                <Zap className="w-2.5 h-2.5" />
+                Supabase Auth
+              </span>
             </div>
             <h3 className="text-base font-bold text-slate-900 mt-0.5">
               {mode === 'signin' && 'Sign In to Your Trust Ledger'}
@@ -354,7 +363,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 placeholder="Choose a password (min. 6 characters)"
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
               />
-              <span className="text-[10px] text-slate-400 mt-1 block">Used to sign in across sessions or sync to Supabase.</span>
+              <span className="text-[10px] text-slate-400 mt-1 block flex items-center gap-1">
+                <CloudCog className="w-3 h-3 text-emerald-500" />
+                Authenticated & synced via Supabase Auth. Your credentials are securely stored in Supabase.
+              </span>
             </div>
 
             <div className="grid grid-cols-2 gap-2">

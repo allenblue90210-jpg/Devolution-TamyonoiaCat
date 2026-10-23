@@ -54,12 +54,12 @@
       "businessVerificationStatus": "unverified",
       "passwordHash": "1880c0255fe729d7cc0d2cfc4644f98cb6a3225dd0c4216bc07bb4b5b0fc92f1",
       "privacySettings": {
-        "showRelationshipCounts": true,
-        "showCategoryBreakdown": true,
-        "showPublicEndorsers": true,
-        "showTrustReceipts": true,
         "showCredentials": true,
+        "showTrustReceipts": true,
+        "showPublicEndorsers": true,
         "showLocationCityOnly": true,
+        "showCategoryBreakdown": true,
+        "showRelationshipCounts": true,
         "allowDirectVerificationRequests": true
       },
       "createdAt": "2026-10-23T10:34:27.628Z"
@@ -177,9 +177,9 @@
       "createdAt": "2026-10-23T09:32:01.676Z",
       "history": [
         {
-          "timestamp": "2026-10-23T09:32:01.676Z",
           "actor": "Allen",
-          "event": "Commitment pact recorded on ledger (Public Ledger)"
+          "event": "Commitment pact recorded on ledger (Public Ledger)",
+          "timestamp": "2026-10-23T09:32:01.676Z"
         }
       ]
     },
@@ -581,7 +581,7 @@
   "goodFaithRatings": [],
   "impressions": {
     "network": {
-      "impressions": 13,
+      "impressions": 17,
       "witnessCount": 0
     },
     "usr_allen_nuclear": {
