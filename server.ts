@@ -22,6 +22,10 @@ import {
   supabaseAuthSignIn,
   supabaseAuthSignUp,
   supabaseAuthSendOtp,
+  syncPactToSupabase,
+  syncReceiptToSupabase,
+  pullPactsFromSupabase,
+  pullReceiptsFromSupabase,
 } from './server/supabase.js';
 import {
   User,
