@@ -350,8 +350,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <div className="p-2.5 rounded-lg bg-white border border-slate-200 flex items-start gap-2.5">
                       <CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
                       <div>
-                        <div className="font-semibold text-slate-900">NIMC National Identity & Biometric Match</div>
-                        <div className="text-slate-500 text-[11px]">Query executed via certified provider · zero biometric storage</div>
+                        <div className="font-semibold text-slate-900">Cryptographic Identity & Liveness Attestation</div>
+                        <div className="text-slate-500 text-[11px]">Provider-verified attestation · zero biometric storage protocol</div>
                       </div>
                     </div>
 
@@ -409,10 +409,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </div>
               <h4 className="text-base font-bold text-slate-900">01. Identity & Contact Control</h4>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Connect official registries (e.g. NIMC NIN, Corporate CAC, passports) and international phone ownership challenges. Proof of control without storing invasive biometric data.
+                Connect verified credentials (e.g. registry attestations, Corporate CAC, verified documents) and verified phone ownership challenges. Proof of control without storing invasive biometric data.
               </p>
               <div className="text-xs text-slate-500 pt-2 border-t border-slate-100">
-                Non-simulated verification · Zero vanity badges
+                Independent attestation · Zero vanity badges
               </div>
             </div>
 
@@ -992,7 +992,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="font-semibold text-slate-900 mb-3">Regulatory & Compliance</div>
               <ul className="space-y-2">
                 <li><span className="text-slate-600">NDPR & GDPR Privacy by Design</span></li>
-                <li><span className="text-slate-600">NIMC / CAC Direct Cross-Checks</span></li>
+                <li><span className="text-slate-600">Enterprise Registry Cross-Checks</span></li>
                 <li><span className="text-slate-600">Data Subject Access & Export</span></li>
                 <li><span className="text-slate-600">Zero Biometric Raw Storage</span></li>
               </ul>
