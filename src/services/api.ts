@@ -37,6 +37,32 @@ export function getSessionUserId(): string {
   return currentSessionUserId;
 }
 
+function cacheVaultItems(key: string, items: any[]) {
+  try {
+    const raw = localStorage.getItem(key);
+    const existing = raw ? JSON.parse(raw) : {};
+    for (const it of items) {
+      if (it && it.id) {
+        existing[it.id] = it;
+      }
+    }
+    localStorage.setItem(key, JSON.stringify(existing));
+  } catch {
+    // ignore
+  }
+}
+
+function getCachedVaultList(key: string): any[] {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return [];
+    const obj = JSON.parse(raw);
+    return Object.values(obj);
+  } catch {
+    return [];
+  }
+}
+
 async function request<T>(endpoint: string, options: RequestInit = {}, retries = 2): Promise<T> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -295,7 +321,18 @@ export const api = {
 
   async getReceipts(filter?: string): Promise<{ receipts: TrustReceipt[] }> {
     const q = filter ? `?filter=${encodeURIComponent(filter)}` : '';
-    return request(`/api/receipts${q}`);
+    const res = await request<{ receipts: TrustReceipt[] }>(`/api/receipts${q}`);
+    if (res && res.receipts) {
+      cacheVaultItems('devolution_vault_receipts', res.receipts);
+      const cached = getCachedVaultList('devolution_vault_receipts');
+      if (cached.length > res.receipts.length) {
+        request('/api/vault/reconcile', {
+          method: 'POST',
+          body: JSON.stringify({ receipts: cached }),
+        }).catch(() => {});
+      }
+    }
+    return res;
   },
   async getPublicReceipts(): Promise<{ receipts: TrustReceipt[] }> {
     return request('/api/receipts?public=true');
@@ -310,10 +347,14 @@ export const api = {
     return request(`/api/receipts/${id}`);
   },
   async createReceipt(data: Partial<TrustReceipt>): Promise<{ receipt: TrustReceipt }> {
-    return request('/api/receipts', {
+    const res = await request<{ receipt: TrustReceipt }>('/api/receipts', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+    if (res && res.receipt) {
+      cacheVaultItems('devolution_vault_receipts', [res.receipt]);
+    }
+    return res;
   },
   async updateReceipt(id: string, data: any): Promise<{ receipt: TrustReceipt; message: string }> {
     return request(`/api/receipts/${id}`, {
@@ -398,7 +439,18 @@ export const api = {
 
   // Time-Locked Commitments & Trust Pacts
   async getCommitments(filter: 'all' | 'mine' = 'mine'): Promise<{ commitments: TrustCommitment[] }> {
-    return request(`/api/commitments?filter=${filter}`);
+    const res = await request<{ commitments: TrustCommitment[] }>(`/api/commitments?filter=${filter}`);
+    if (res && res.commitments) {
+      cacheVaultItems('devolution_vault_commitments', res.commitments);
+      const cached = getCachedVaultList('devolution_vault_commitments');
+      if (cached.length > res.commitments.length) {
+        request('/api/vault/reconcile', {
+          method: 'POST',
+          body: JSON.stringify({ commitments: cached }),
+        }).catch(() => {});
+      }
+    }
+    return res;
   },
   async getPublicCommitments(): Promise<{ commitments: TrustCommitment[] }> {
     return request('/api/commitments?public=true');
@@ -433,10 +485,14 @@ export const api = {
     promisedUserId?: string;
     isPublic?: boolean;
   }): Promise<{ commitment: TrustCommitment; message: string }> {
-    return request('/api/commitments', {
+    const res = await request<{ commitment: TrustCommitment; message: string }>('/api/commitments', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+    if (res && res.commitment) {
+      cacheVaultItems('devolution_vault_commitments', [res.commitment]);
+    }
+    return res;
   },
   async acceptCommitment(
     id: string,
