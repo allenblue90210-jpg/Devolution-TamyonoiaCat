@@ -1296,6 +1296,17 @@ class Database {
     }
     this.data.receipts.unshift(receipt);
 
+    // Save to permanent vault immediately
+    const vaultReceipts = loadVaultReceipts();
+    vaultReceipts[receipt.id] = receipt;
+    saveVaultReceipts(vaultReceipts);
+    appendToImmutableLedger({
+      type: 'RECEIPT_DROPPED',
+      id: receipt.id,
+      timestamp: receipt.createdAt || new Date().toISOString(),
+      data: receipt,
+    });
+
     // Record receipt dropped on permanent immutable ledger
     this.recordLedgerEntry({
       entryType: 'RECEIPT_DROPPED',
@@ -1380,6 +1391,18 @@ class Database {
       });
     }
     this.data.receipts[idx] = { ...current, ...updates, history };
+
+    // Update in permanent vault
+    const vaultReceipts = loadVaultReceipts();
+    vaultReceipts[id] = this.data.receipts[idx];
+    saveVaultReceipts(vaultReceipts);
+    appendToImmutableLedger({
+      type: 'RECEIPT_UPDATED',
+      id,
+      timestamp: new Date().toISOString(),
+      data: this.data.receipts[idx],
+    });
+
     this.persist();
     return this.data.receipts[idx];
   }
@@ -1389,6 +1412,11 @@ class Database {
     if (!receipt) return null;
     if (!receipt.comments) receipt.comments = [];
     receipt.comments.push(comment);
+
+    const vaultReceipts = loadVaultReceipts();
+    vaultReceipts[receiptId] = receipt;
+    saveVaultReceipts(vaultReceipts);
+
     this.persist();
     return receipt;
   }
