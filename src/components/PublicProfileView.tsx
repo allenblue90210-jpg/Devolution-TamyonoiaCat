@@ -66,18 +66,29 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
   const [disputeSuccess, setDisputeSuccess] = useState(false);
 
   useEffect(() => {
+    let isCancelled = false;
     async function fetchProfile() {
       try {
-        setLoading(true);
+        if (!data) setLoading(true);
         const res = await api.getProfileByUsername(username);
-        setData(res);
+        if (!isCancelled) {
+          setData(res);
+          setError(null);
+        }
       } catch (err: any) {
-        setError(err.message || 'Profile not found');
+        if (!isCancelled) {
+          setError(err.message || 'Profile not found');
+        }
       } finally {
-        setLoading(false);
+        if (!isCancelled) {
+          setLoading(false);
+        }
       }
     }
     fetchProfile();
+    return () => {
+      isCancelled = true;
+    };
   }, [username]);
 
   const handleCopyLink = () => {
@@ -107,10 +118,38 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
     }
   };
 
-  if (loading) {
+  // Only show skeleton on initial load when data is not yet available
+  if (loading && !data) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-20 text-center text-xs text-slate-500">
-        Loading verifiable public trust profile...
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="w-16 h-7 bg-slate-200/70 rounded-lg animate-pulse" />
+          <div className="w-24 h-4 bg-slate-200/70 rounded animate-pulse" />
+        </div>
+        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+            <div className="w-20 h-20 rounded-full bg-slate-200/80 animate-pulse shrink-0" />
+            <div className="space-y-2.5 flex-1">
+              <div className="w-48 h-6 bg-slate-200/80 rounded animate-pulse" />
+              <div className="w-full max-w-md h-4 bg-slate-100 rounded animate-pulse" />
+              <div className="w-32 h-3 bg-slate-100 rounded animate-pulse" />
+            </div>
+          </div>
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/60 h-20 animate-pulse" />
+          <div className="pt-4 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-5 gap-3">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-14 bg-slate-100 rounded-lg animate-pulse" />
+            ))}
+          </div>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-7 space-y-6">
+            <div className="h-64 bg-white rounded-xl border border-slate-200 animate-pulse" />
+          </div>
+          <div className="lg:col-span-5 space-y-6">
+            <div className="h-64 bg-white rounded-xl border border-slate-200 animate-pulse" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -122,7 +161,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
         <p className="text-xs text-slate-500">The requested profile username "@{username}" does not exist or has private visibility.</p>
         <button
           onClick={() => onNavigateTab('directory')}
-          className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
+          className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 cursor-pointer"
         >
           Explore Verified Directory
         </button>
@@ -490,7 +529,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
                           cmt.status === 'completed'
                             ? 'bg-emerald-100 text-emerald-800'
                             : cmt.status === 'overdue' || cmt.isOverdue
-                            ? 'bg-red-100 text-red-800 animate-pulse'
+                            ? 'bg-red-100 text-red-800 border border-red-300 font-bold'
                             : 'bg-indigo-100 text-indigo-800'
                         }`}
                       >
