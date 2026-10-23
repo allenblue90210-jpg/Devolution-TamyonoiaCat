@@ -59,7 +59,7 @@ git config user.email "your.email@example.com"
 git add .
 git commit -m "feat: initial commit of Aegis Trust Network platform"
 git branch -M main
-git remote add origin https://github.com/allenblue90210-jpg/Devolution-TamyonoiaCat.git
+git remote add origin https://github.com/tamiyanoiacat-web/Devolution-web.git
 git push -u origin main
 ```
 
