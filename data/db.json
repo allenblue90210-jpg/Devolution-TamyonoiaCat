@@ -63,6 +63,38 @@
         "allowDirectVerificationRequests": true
       },
       "createdAt": "2026-10-23T10:34:27.628Z"
+    },
+    {
+      "id": "usr_1792766055954_q6c5",
+      "email": "allenbrowndrago@gmail.com",
+      "username": "lolo",
+      "fullName": "Ghost",
+      "accountType": "personal",
+      "avatarUrl": "",
+      "headline": "Software Engineering",
+      "bio": "",
+      "category": "Software Engineering",
+      "country": "Nigeria",
+      "city": "Lagos",
+      "phone": "+234 ",
+      "phoneVerified": false,
+      "emailVerified": true,
+      "identityStatus": "unverified",
+      "identityMethod": "None submitted",
+      "identityVerifiedAt": null,
+      "businessVerificationStatus": "unverified",
+      "passwordHash": "1880c0255fe729d7cc0d2cfc4644f98cb6a3225dd0c4216bc07bb4b5b0fc92f1",
+      "supabaseAuthId": "1bdec25d-c158-4976-b954-c13a4c256ac6",
+      "privacySettings": {
+        "showRelationshipCounts": true,
+        "showCategoryBreakdown": true,
+        "showPublicEndorsers": true,
+        "showTrustReceipts": true,
+        "showCredentials": true,
+        "showLocationCityOnly": true,
+        "allowDirectVerificationRequests": true
+      },
+      "createdAt": "2026-10-23T14:34:15.955Z"
     }
   ],
   "evidence": [],
@@ -71,6 +103,16 @@
   "references": [],
   "disputes": [],
   "notifications": [
+    {
+      "id": "notif_1792766055960",
+      "userId": "usr_1792766055954_q6c5",
+      "type": "evidence_status",
+      "title": "Welcome to Devolution Trust Platform",
+      "message": "Your account has been registered and authenticated via Supabase. Your cryptographic trust ledger is active. Complete identity attestation and establish bilateral trust receipts to grow your verifiable score.",
+      "link": "/dashboard",
+      "isRead": false,
+      "createdAt": "2026-10-23T14:34:15.960Z"
+    },
     {
       "id": "notif_1792751667632",
       "userId": "usr_1792751667628_nce6",
