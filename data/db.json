@@ -1184,8 +1184,8 @@
       "gitSynced": true,
       "metadata": {
         "deadline": "2026-10-23T08:58:24.262Z",
-        "trustRewardPoints": 25,
-        "creatorRole": "requester"
+        "creatorRole": "requester",
+        "trustRewardPoints": 25
       },
       "timestamp": "2026-10-23T07:58:24.429Z"
     },
