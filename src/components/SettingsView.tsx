@@ -63,6 +63,47 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
   const [supabaseLoading, setSupabaseLoading] = useState(false);
   const [supabaseMessage, setSupabaseMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [showSqlSchema, setShowSqlSchema] = useState(false);
+
+  // Google Play Compliance: Account Deletion, Legal Disclosures & Mobile Server Config
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteInput, setDeleteInput] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [showLegalModal, setShowLegalModal] = useState<'privacy' | 'terms' | null>(null);
+  const [apiUrlInput, setApiUrlInput] = useState(() => localStorage.getItem('devolution_api_server_url') || '');
+  const [apiSaveMsg, setApiSaveMsg] = useState<string | null>(null);
+
+  const handleDeleteAccount = async () => {
+    if (deleteInput !== 'DELETE') {
+      setDeleteError('Please type DELETE in capital letters to confirm permanent account deletion.');
+      return;
+    }
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await api.deleteAccount();
+      alert('Your account and all associated personal records have been permanently deleted.');
+      if (onLogout) {
+        onLogout();
+      } else {
+        window.location.reload();
+      }
+    } catch (err: any) {
+      setDeleteError(err.message || 'Failed to delete account.');
+      setIsDeleting(false);
+    }
+  };
+
+  const handleSaveApiUrl = () => {
+    if (!apiUrlInput.trim()) {
+      localStorage.removeItem('devolution_api_server_url');
+      setApiSaveMsg('Default API endpoint restored (local/same-origin).');
+    } else {
+      localStorage.setItem('devolution_api_server_url', apiUrlInput.trim().replace(/\/$/, ''));
+      setApiSaveMsg('Mobile API server endpoint updated.');
+    }
+    setTimeout(() => setApiSaveMsg(null), 3500);
+  };
   const [sqlSchema, setSqlSchema] = useState('');
   const [copiedSql, setCopiedSql] = useState(false);
 
