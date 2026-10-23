@@ -104,7 +104,12 @@
   "phoneOtps": {},
   "commitments": [],
   "goodFaithRatings": [],
-  "impressions": {},
+  "impressions": {
+    "network": {
+      "impressions": 1,
+      "witnessCount": 0
+    }
+  },
   "rememberRecords": [],
   "recordedLedger": []
 }
