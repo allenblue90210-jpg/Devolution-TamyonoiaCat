@@ -1571,6 +1571,17 @@ class Database {
     });
     this.data.commitments.unshift(commitment);
 
+    // Save to permanent vault immediately
+    const vaultPacts = loadVaultPacts();
+    vaultPacts[commitment.id] = commitment;
+    saveVaultPacts(vaultPacts);
+    appendToImmutableLedger({
+      type: 'PACT_DROPPED',
+      id: commitment.id,
+      timestamp: commitment.createdAt || new Date().toISOString(),
+      data: commitment,
+    });
+
     // Record commit dropped on permanent immutable ledger
     this.recordLedgerEntry({
       entryType: 'COMMITMENT_DROPPED',
