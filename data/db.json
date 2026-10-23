@@ -49,7 +49,7 @@
       "emailVerified": true,
       "identityStatus": "verified",
       "identityMethod": "Government ID & Biometric Verification",
-      "identityVerifiedAt": "2026-10-23T09:25:56.167Z",
+      "identityVerifiedAt": "2026-10-23T09:40:56.158Z",
       "businessVerificationStatus": "unverified",
       "privacySettings": {
         "showRelationshipCounts": true,
@@ -60,7 +60,7 @@
         "showLocationCityOnly": true,
         "allowDirectVerificationRequests": true
       },
-      "createdAt": "2026-10-23T09:25:56.170Z"
+      "createdAt": "2026-10-23T09:40:56.159Z"
     }
   ],
   "evidence": [],
@@ -69,6 +69,26 @@
   "references": [],
   "disputes": [],
   "notifications": [
+    {
+      "id": "notif_1792747921805",
+      "userId": "usr_allen_nuclear",
+      "type": "receipt_action",
+      "title": "New Timed Commitment Promised to You",
+      "message": "Allen made a time-locked promise to you: 'go'. Deadline: 24/10/2026, 02:00:00.",
+      "link": "/commitments",
+      "isRead": false,
+      "createdAt": "2026-10-23T09:32:01.805Z"
+    },
+    {
+      "id": "notif_1792747770001",
+      "userId": "usr_1792747769995_yomk",
+      "type": "evidence_status",
+      "title": "Welcome to Devolution Trust Platform",
+      "message": "Your cryptographic trust ledger is active and synchronized with Supabase PostgreSQL. Complete identity attestation and establish bilateral trust receipts to grow your verifiable score.",
+      "link": "/dashboard",
+      "isRead": false,
+      "createdAt": "2026-10-23T09:29:30.001Z"
+    },
     {
       "id": "notif_1792742304518",
       "userId": "usr_allen_006",
@@ -113,30 +133,8 @@
   "businesses": [],
   "phoneOtps": {},
   "commitments": [],
-  "goodFaithRatings": [
-    {
-      "id": "gfr_1792742304511_07xp",
-      "targetUserId": "usr_allen_006",
-      "targetUsername": "allenkinetic006",
-      "authorId": "usr_allen_nuclear",
-      "authorName": "Allen Blue",
-      "authorAvatar": "",
-      "authorTitle": "Founder & Lead Architect | Devolution Platform",
-      "rating": 5,
-      "goodFaithBadge": "Exemplary Integrity",
-      "comment": "Excellent work!",
-      "context": "Task Completion: Test Task To Finish",
-      "impressions": 1,
-      "helpfulCount": 0,
-      "createdAt": "2026-10-23T07:58:24.468Z"
-    }
-  ],
-  "impressions": {
-    "network": {
-      "impressions": 13,
-      "witnessCount": 0
-    }
-  },
+  "goodFaithRatings": [],
+  "impressions": {},
   "rememberRecords": [],
   "recordedLedger": []
 }
