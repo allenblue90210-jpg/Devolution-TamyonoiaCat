@@ -186,14 +186,13 @@ export const Navigation: React.FC<NavigationProps> = ({
   ];
 
   const moreNavLinks = [
+    { id: 'reputation', label: 'Reputation', icon: Shield },
     { id: 'evidence', label: 'Evidence', icon: ShieldCheck },
     { id: 'directory', label: 'Directory', icon: Compass },
     { id: 'remember', label: 'Remember', icon: Bookmark },
   ];
 
-  // Placed at the end right: Reputation beside Profile
   const endNavLinks = [
-    { id: 'reputation', label: 'Reputation', icon: Shield },
     { id: 'profile', label: 'Profile', icon: UserIcon },
   ];
 
@@ -477,21 +476,6 @@ export const Navigation: React.FC<NavigationProps> = ({
                 )}
               </div>
             )}
-
-            {/* Reputation quick access button - beside profile menu (second end right) */}
-            <button
-              onClick={() => onSelectTab('reputation')}
-              className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border transition-all cursor-pointer shadow-xs shrink-0 ${
-                currentTab === 'reputation'
-                  ? 'bg-amber-50 border-amber-400 text-amber-800 ring-2 ring-amber-200 font-bold'
-                  : 'bg-white hover:bg-amber-50/60 border-slate-200 hover:border-amber-300 text-slate-700'
-              }`}
-              title="Transparent Multi-Dimensional Reputation & Trust Metrics"
-              aria-label="Reputation Breakdown"
-            >
-              <Shield className={`w-3.5 h-3.5 ${currentTab === 'reputation' ? 'text-amber-600' : 'text-amber-500'}`} />
-              <span className="text-xs font-semibold">Reputation</span>
-            </button>
 
             {/* 4. Active User Profile Menu (at the end right) */}
             {currentUser ? (
