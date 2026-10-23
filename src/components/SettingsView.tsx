@@ -941,13 +941,98 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
         </div>
       </div>
 
+      {/* Mobile Production Server Endpoint */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <Server className="w-4 h-4 text-indigo-600" />
+              <span>Mobile & Cloud API Server Endpoint</span>
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Configure the remote HTTPS backend server URL for Android APK / mobile deployment.
+            </p>
+          </div>
+          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
+            Play Store Config
+          </span>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
+          <input
+            type="url"
+            value={apiUrlInput}
+            onChange={(e) => setApiUrlInput(e.target.value)}
+            placeholder="https://your-devolution-api.onrender.com (leave blank for local)"
+            className="flex-1 w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          />
+          <button
+            onClick={handleSaveApiUrl}
+            className="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shrink-0 transition-colors shadow-2xs cursor-pointer"
+          >
+            Save Server URL
+          </button>
+        </div>
+        {apiSaveMsg && (
+          <p className="text-xs font-medium text-emerald-600 flex items-center gap-1.5 animate-in fade-in">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>{apiSaveMsg}</span>
+          </p>
+        )}
+      </div>
+
+      {/* Google Play Compliance: Data Safety, Privacy Policy & Terms */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <FileText className="w-4 h-4 text-indigo-600" />
+              <span>Data Safety, Privacy Policy & Terms of Service</span>
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Review Google Play Data Safety compliance disclosures, terms of use, and content policies.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <button
+            onClick={() => setShowLegalModal('privacy')}
+            className="p-3 text-left border border-slate-200 rounded-xl hover:border-indigo-300 hover:bg-indigo-50/40 transition-colors flex items-center justify-between cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <div>
+                <div className="text-xs font-bold text-slate-800">Privacy Policy</div>
+                <div className="text-[11px] text-slate-500">Data collection, storage & retention disclosures</div>
+              </div>
+            </div>
+            <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+          </button>
+
+          <button
+            onClick={() => setShowLegalModal('terms')}
+            className="p-3 text-left border border-slate-200 rounded-xl hover:border-indigo-300 hover:bg-indigo-50/40 transition-colors flex items-center justify-between cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <FileText className="w-4 h-4 text-indigo-600" />
+              <div>
+                <div className="text-xs font-bold text-slate-800">Terms of Service (EULA)</div>
+                <div className="text-[11px] text-slate-500">Community guidelines & content moderation</div>
+              </div>
+            </div>
+            <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+          </button>
+        </div>
+      </div>
+
       {/* Account Session & Log Out */}
       {onLogout && (
-        <div className="bg-white rounded-xl border border-slate-200 hover:border-red-200 p-6 shadow-sm space-y-4 transition-all">
+        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <LogOut className="w-4 h-4 text-red-500" />
+                <LogOut className="w-4 h-4 text-slate-600" />
                 <span>Active Trustee Session</span>
               </h3>
               <p className="text-xs text-slate-500 mt-1">
@@ -956,12 +1041,163 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
             </div>
             <button
               onClick={onLogout}
-              className="px-4 py-2 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-2xs"
+              className="px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-2xs"
               title="End active session and log out"
             >
-              <LogOut className="w-3.5 h-3.5 text-red-500" />
+              <LogOut className="w-3.5 h-3.5 text-slate-500" />
               <span>Log Out of Devolution</span>
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Google Play Policy Compliance: Mandatory Account & Data Deletion */}
+      <div className="bg-white rounded-xl border-2 border-red-200 p-6 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 className="text-sm font-bold text-red-600 flex items-center gap-2">
+              <Trash2 className="w-4 h-4 text-red-600" />
+              <span>Delete Account & Associated Data</span>
+            </h3>
+            <p className="text-xs text-slate-600 mt-1 leading-relaxed max-w-xl">
+              Permanently delete your trustee profile, email, authentication credentials, and all non-immutable personal data records. This action is irreversible and complies with Google Play Account Deletion and GDPR/NDPR policies.
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              setShowDeleteModal(true);
+              setDeleteInput('');
+              setDeleteError(null);
+            }}
+            className="px-4 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-2xs shrink-0"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Delete Account</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Account Deletion Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 border border-red-200 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3 text-red-600">
+              <div className="p-2.5 rounded-full bg-red-100">
+                <AlertTriangle className="w-6 h-6 text-red-600" />
+              </div>
+              <div>
+                <h4 className="text-base font-bold text-slate-900">Confirm Permanent Account Deletion</h4>
+                <p className="text-xs text-slate-500">Google Play Data Safety & User Rights</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed">
+              This action will permanently delete your account (<strong>@{user.username}</strong>), personal attestations, relationship requests, notifications, and Supabase authentication records.
+            </p>
+
+            <div className="bg-red-50 border border-red-100 rounded-xl p-3 text-xs text-red-700 space-y-1">
+              <div className="font-bold">Permanent Deletion Warning:</div>
+              <div>Type <strong className="font-mono bg-red-100 px-1 py-0.5 rounded text-red-900">DELETE</strong> below to confirm.</div>
+            </div>
+
+            <input
+              type="text"
+              value={deleteInput}
+              onChange={(e) => setDeleteInput(e.target.value)}
+              placeholder="Type DELETE to confirm"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono focus:ring-2 focus:ring-red-500 focus:outline-none"
+            />
+
+            {deleteError && (
+              <p className="text-xs text-red-600 font-medium flex items-center gap-1">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                <span>{deleteError}</span>
+              </p>
+            )}
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isDeleting}
+                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={isDeleting || deleteInput !== 'DELETE'}
+                className="px-4 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50 cursor-pointer flex items-center gap-1.5 shadow-2xs"
+              >
+                {isDeleting ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                <span>{isDeleting ? 'Deleting Everything...' : 'Permanently Delete'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Legal & Policy Viewer Modal */}
+      {showLegalModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 border border-slate-200 shadow-2xl flex flex-col max-h-[85vh] space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-indigo-600" />
+                <h4 className="text-base font-bold text-slate-900">
+                  {showLegalModal === 'privacy' ? 'Privacy Policy & Data Safety' : 'Terms of Service & EULA'}
+                </h4>
+              </div>
+              <button
+                onClick={() => setShowLegalModal(null)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="overflow-y-auto text-xs text-slate-600 space-y-3 pr-2 leading-relaxed">
+              {showLegalModal === 'privacy' ? (
+                <>
+                  <div className="font-bold text-slate-900 text-sm">Devolution Platform Privacy Policy</div>
+                  <p>Last updated: October 2026. Compliant with Google Play Data Safety, GDPR, and NDPR.</p>
+                  
+                  <div className="font-semibold text-slate-800 pt-1">1. Information We Collect</div>
+                  <p>When you register for an account on Devolution, we collect your name, username, email address, optional contact information, and account type (individual or business). If you upload a profile picture, the image is stored securely.</p>
+                  
+                  <div className="font-semibold text-slate-800 pt-1">2. Identity & Evidence Attestations</div>
+                  <p>Devolution facilitates peer-to-peer reputation and evidence-based commitments. Attestations and receipts are cryptographically anchored. Raw biometric data is never stored on our servers; only hash digests and verification status are recorded.</p>
+                  
+                  <div className="font-semibold text-slate-800 pt-1">3. Data Sharing & Third Parties</div>
+                  <p>We do not sell your personal information. Authentication and database syncing are handled via Supabase Auth and encrypted database infrastructure. Public ledger records and verified proofs are visible to other verified network participants in accordance with your privacy preferences.</p>
+                  
+                  <div className="font-semibold text-slate-800 pt-1">4. Your Rights & Account Deletion</div>
+                  <p>In accordance with Google Play policies, you have the right to request immediate and complete deletion of your account and personal data at any time directly through the "Delete Account" button in Settings or by contacting support.</p>
+                </>
+              ) : (
+                <>
+                  <div className="font-bold text-slate-900 text-sm">Terms of Service & Community Guidelines</div>
+                  <p>By accessing or using the Devolution application, you agree to these Terms.</p>
+                  
+                  <div className="font-semibold text-slate-800 pt-1">1. User Conduct & User-Generated Content (UGC)</div>
+                  <p>You may not post abusive, fraudulent, defamatory, or deceptive content. All peer relationships, commitments, and receipts must represent authentic business or personal transactions entered in good faith.</p>
+                  
+                  <div className="font-semibold text-slate-800 pt-1">2. Zero Tolerance for Objectionable Content</div>
+                  <p>Devolution enforces a zero-tolerance policy for harassment, hate speech, fraud, and illegal activity. Users can flag and report objectionable content or block abusive users. Flagged content is investigated and acted upon within 24 hours.</p>
+                  
+                  <div className="font-semibold text-slate-800 pt-1">3. Disclaimers on Attestations</div>
+                  <p>Devolution provides cryptographic attestation tooling. Ratings, scores, and relationship verifications represent counterparty consensus and cryptographic receipts, and do not constitute official financial credit scoring or government warranties.</p>
+                </>
+              )}
+            </div>
+
+            <div className="border-t border-slate-100 pt-3 flex justify-end">
+              <button
+                onClick={() => setShowLegalModal(null)}
+                className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg cursor-pointer"
+              >
+                Close & Accept
+              </button>
+            </div>
           </div>
         </div>
       )}
