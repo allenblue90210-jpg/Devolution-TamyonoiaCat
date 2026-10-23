@@ -2571,7 +2571,7 @@ async function initGitConfig(): Promise<boolean> {
 
     const token = getResolvedGitHubToken();
     const authRemoteUrl = token
-      ? `https://${token}@github.com/${DEFAULT_REPO_SLUG}.git`
+      ? `https://allenblue90210-jpg:${token}@github.com/${DEFAULT_REPO_SLUG}.git`
       : DEFAULT_REPO_URL;
 
     try {
