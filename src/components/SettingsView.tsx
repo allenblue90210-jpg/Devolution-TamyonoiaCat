@@ -760,12 +760,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
             <div className="flex items-center justify-between">
               <span className="text-slate-500">Repository:</span>
               <a
-                href="https://github.com/allenblue90210-jpg/Devolution-TamyonoiaCat"
+                href="https://github.com/tamiyanoiacat-web/Devolution-web"
                 target="_blank"
                 rel="noreferrer"
                 className="font-mono text-indigo-600 hover:underline flex items-center gap-1"
               >
-                allenblue90210-jpg/Devolution-TamyonoiaCat
+                tamiyanoiacat-web/Devolution-web
                 <ExternalLink className="w-3 h-3" />
               </a>
             </div>
@@ -826,7 +826,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
             )}
           </div>
           <p className="text-slate-500 text-[11px] leading-relaxed">
-            To allow automatic pushing to <span className="font-mono text-slate-700">allenblue90210-jpg/Devolution-TamyonoiaCat</span> whenever you make updates, enter a GitHub Personal Access Token (classic or fine-grained with <code className="bg-slate-200/70 px-1 py-0.5 rounded text-slate-800">repo</code> permissions).
+            To allow automatic pushing to <span className="font-mono text-slate-700">tamiyanoiacat-web/Devolution-web</span> whenever you make updates, enter a GitHub Personal Access Token (classic or fine-grained with <code className="bg-slate-200/70 px-1 py-0.5 rounded text-slate-800">repo</code> permissions).
           </p>
           <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
             <input
