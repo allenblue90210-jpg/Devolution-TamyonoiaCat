@@ -262,6 +262,8 @@ export interface User {
   goodFaithRating?: number;
   ratingsCount?: number;
   passwordHash?: string;
+  supabaseAuthId?: string;
+  blockedUserIds?: string[];
   createdAt: string;
 }
 

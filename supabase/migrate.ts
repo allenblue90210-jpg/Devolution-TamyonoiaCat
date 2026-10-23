@@ -33,23 +33,23 @@ async function runMigration() {
   for (const sql of migrations) {
     console.log(`[Migration] Executing: ${sql.substring(0, 80)}...`);
     try {
-      const res = await fetch(`${url}/rest/v1/rpc/`, {
+      await fetch(`${url}/rest/v1/rpc/`, {
         method: 'POST',
         headers: {
-          'apikey': key,
-          'Authorization': `Bearer ${key}`,
+          apikey: key as string,
+          Authorization: `Bearer ${key}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ query: sql }),
       });
       // RPC might not work for DDL, try direct SQL via pg
-    } catch (err) {
-      console.warn('[Migration] RPC notice:', err.message);
+    } catch (err: any) {
+      console.warn('[Migration] RPC notice:', err?.message || err);
     }
   }
 
   // Alternative: Execute migrations via Supabase SQL endpoint (management API)
-  const managementUrl = url.replace('.supabase.co', '.supabase.co');
+  const managementUrl = url ? url.replace('.supabase.co', '.supabase.co') : '';
   
   const fullMigrationSQL = migrations.join('\n');
   console.log('\n[Migration] If automatic migration failed, please run this SQL in your Supabase SQL Editor:\n');
