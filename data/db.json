@@ -86,12 +86,12 @@
       "passwordHash": "1880c0255fe729d7cc0d2cfc4644f98cb6a3225dd0c4216bc07bb4b5b0fc92f1",
       "supabaseAuthId": "1bdec25d-c158-4976-b954-c13a4c256ac6",
       "privacySettings": {
-        "showRelationshipCounts": true,
-        "showCategoryBreakdown": true,
-        "showPublicEndorsers": true,
-        "showTrustReceipts": true,
         "showCredentials": true,
+        "showTrustReceipts": true,
+        "showPublicEndorsers": true,
         "showLocationCityOnly": true,
+        "showCategoryBreakdown": true,
+        "showRelationshipCounts": true,
         "allowDirectVerificationRequests": true
       },
       "createdAt": "2026-10-23T14:34:15.955Z"
@@ -229,9 +229,9 @@
       "createdAt": "2026-10-23T14:37:15.683Z",
       "history": [
         {
-          "timestamp": "2026-10-23T14:37:15.683Z",
           "actor": "Fanan",
-          "event": "Commitment pact recorded on ledger (Public Ledger)"
+          "event": "Commitment pact recorded on ledger (Public Ledger)",
+          "timestamp": "2026-10-23T14:37:15.683Z"
         }
       ]
     },
@@ -671,7 +671,7 @@
   "goodFaithRatings": [],
   "impressions": {
     "network": {
-      "impressions": 31,
+      "impressions": 32,
       "witnessCount": 0
     },
     "usr_allen_nuclear": {
@@ -705,8 +705,8 @@
       "gitSynced": true,
       "metadata": {
         "deadline": "2026-10-24T09:00:00.000Z",
-        "trustRewardPoints": 25,
-        "creatorRole": "promisor"
+        "creatorRole": "promisor",
+        "trustRewardPoints": 25
       },
       "timestamp": "2026-10-23T14:37:15.714Z"
     }
