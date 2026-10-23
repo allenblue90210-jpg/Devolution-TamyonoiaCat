@@ -10,6 +10,7 @@ import {
   Lock,
   Save,
   AlertCircle,
+  AlertTriangle,
   GitBranch,
   RefreshCw,
   ExternalLink,
@@ -22,6 +23,10 @@ import {
   Camera,
   Key,
   LogOut,
+  FileText,
+  Globe,
+  Server,
+  X,
 } from 'lucide-react';
 
 interface SettingsViewProps {
