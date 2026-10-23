@@ -456,10 +456,12 @@ export async function syncPactToSupabase(pact: any): Promise<boolean> {
         title: pact.title || '',
         description: pact.description || '',
         category: pact.category || 'General',
-        other_category_details: pact.otherCategoryDetails || null,
         status: pact.status || 'pending_acceptance',
         requester_id: pact.requesterId || 'unknown',
         committer_id: pact.committerId || 'unknown',
+        deadline: pact.deadline || null,
+        trust_reward_points: pact.trustRewardPoints ?? 20,
+        is_public: pact.isPublic ?? true,
         data: pact,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'id' });
@@ -486,13 +488,13 @@ export async function syncReceiptToSupabase(receipt: any): Promise<boolean> {
         id: receipt.id,
         title: receipt.title || '',
         description: receipt.description || '',
-        category: receipt.interactionCategory || 'General',
-        amount: receipt.transactionValue || null,
+        transaction_value: receipt.transactionValue || null,
         status: receipt.status || 'pending',
         creator_id: receipt.creatorId || 'unknown',
-        counterparty_id: receipt.counterpartyUserId || 'unknown',
+        counterparty_name: receipt.counterpartyName || receipt.counterpartyUserId || 'unknown',
+        counterparty_contact: receipt.counterpartyContact || null,
+        is_fulfillment_confirmed: receipt.isFulfillmentConfirmed ?? false,
         data: receipt,
-        updated_at: new Date().toISOString(),
       }, { onConflict: 'id' });
 
     if (error) {
