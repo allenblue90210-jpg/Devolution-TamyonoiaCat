@@ -500,7 +500,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button
-            onClick={() => setShowCreateModal(true)}
+            onClick={openCreateModal}
             className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4" />
@@ -534,7 +534,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
             <Receipt className="w-8 h-8 text-slate-300 mx-auto" />
             <p>No trust receipts found in this view.</p>
             <button
-              onClick={() => setShowCreateModal(true)}
+              onClick={openCreateModal}
               className="px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 cursor-pointer"
             >
               Post First Timed Receipt
