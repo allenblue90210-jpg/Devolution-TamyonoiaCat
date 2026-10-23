@@ -366,8 +366,8 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
       setCustomPledgeText('');
       setActionSuccessMessage(
         commitRole === 'promisor'
-          ? 'Time-locked promise committed! Active countdown initiated on ledger.'
-          : 'Commitment request created and sent to counterparty!'
+          ? 'Time-locked promise committed! Permanently anchored to vault, ledger & GitHub repository.'
+          : 'Commitment pact dropped! Permanently anchored to vault, ledger & sent to counterparty.'
       );
       setTimeout(() => setActionSuccessMessage(null), 4000);
       await loadCommitments();

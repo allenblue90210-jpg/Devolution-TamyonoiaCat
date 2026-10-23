@@ -687,7 +687,46 @@
       "expiresAt": 1792338999019
     }
   },
-  "commitments": [],
+  "commitments": [
+    {
+      "id": "TC-2321",
+      "title": "Vehicle Fleet Handover & Security Inspection",
+      "description": "Pledge to return operational transport vehicle on schedule with verified inspection.",
+      "category": "Vehicle & Transportation",
+      "requesterId": "ext_1792737587376",
+      "requesterName": "Allen Kinetic",
+      "requesterAvatar": "",
+      "committerId": "usr_allen_006",
+      "committerName": "Allen Kinetic",
+      "committerAvatar": "",
+      "promisedUserId": "ext_1792737587376",
+      "promisedUserName": "Allen Kinetic",
+      "promisedUserAvatar": "",
+      "creatorRole": "promisor",
+      "deadline": "2026-10-25T12:00:00.000Z",
+      "committerPledgeNote": "I pledge to deliver and return the vehicle in pristine condition on schedule.",
+      "status": "active",
+      "trustRewardPoints": 35,
+      "penaltyRateDailyPercent": 30,
+      "penaltyCurrentDeductionPercent": 0,
+      "isOverdue": false,
+      "daysOverdue": 0,
+      "isPublic": true,
+      "impressions": 1,
+      "witnessCount": 0,
+      "positiveImpressions": 0,
+      "hasWitnessed": false,
+      "comments": [],
+      "createdAt": "2026-10-23T06:39:47.376Z",
+      "history": [
+        {
+          "timestamp": "2026-10-23T06:39:47.376Z",
+          "actor": "Allen Kinetic",
+          "event": "Commitment pact recorded on ledger (Public Ledger)"
+        }
+      ]
+    }
+  ],
   "goodFaithRatings": [
     {
       "id": "gfr_003",
@@ -980,6 +1019,31 @@
     }
   ],
   "recordedLedger": [
+    {
+      "id": "REC-00028",
+      "sequence": 28,
+      "recordHash": "6496bebd185147492615daffb18ad5174d078a9e1f916a0657d58bb9417822cd",
+      "entryType": "COMMITMENT_DROPPED",
+      "targetId": "TC-2321",
+      "targetTitle": "Vehicle Fleet Handover & Security Inspection",
+      "actorId": "usr_allen_006",
+      "actorName": "Allen Kinetic",
+      "actorAvatar": "",
+      "counterpartyId": "ext_1792737587376",
+      "counterpartyName": "Allen Kinetic",
+      "counterpartyAvatar": "",
+      "category": "Vehicle & Transportation",
+      "summary": "Commitment dropped / pledged: \"Vehicle Fleet Handover & Security Inspection\" (Vehicle & Transportation) by Allen Kinetic to Allen Kinetic. Deadline: 10/25/2026, 12:00:00 PM.",
+      "isPublic": true,
+      "status": "active",
+      "gitSynced": true,
+      "metadata": {
+        "deadline": "2026-10-25T12:00:00.000Z",
+        "trustRewardPoints": 35,
+        "creatorRole": "promisor"
+      },
+      "timestamp": "2026-10-23T06:39:47.383Z"
+    },
     {
       "id": "REC-00027",
       "sequence": 27,

@@ -348,7 +348,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
       setTransactionValue('');
       setCompletionConditions('');
       setOtherCategoryDetails('');
-      setToastMessage('Timed Trust Receipt created and broadcasted to counterparty!');
+      setToastMessage('Trust Receipt dropped! Permanently anchored to vault, ledger & GitHub repository.');
       setTimeout(() => setToastMessage(null), 4000);
       if (onRefreshAllData) onRefreshAllData();
     } catch (err: any) {

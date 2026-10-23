@@ -864,5 +864,33 @@ export const api = {
       body: JSON.stringify(data),
     });
   },
+
+  async getVaultStats(): Promise<{
+    vaultStatus: string;
+    totalPacts: number;
+    totalReceipts: number;
+    permanentStorage: string;
+    gitSyncActive: boolean;
+    lastSyncTime: string;
+    lastSyncStatus: string;
+    lastSyncMessage: string;
+  }> {
+    return request('/api/vault/stats');
+  },
+
+  async reconcileVault(): Promise<{
+    success: boolean;
+    restoredPacts: number;
+    restoredReceipts: number;
+    totalCommitments: number;
+    totalReceipts: number;
+  }> {
+    const commitments = getCachedVaultList('devolution_vault_commitments');
+    const receipts = getCachedVaultList('devolution_vault_receipts');
+    return request('/api/vault/reconcile', {
+      method: 'POST',
+      body: JSON.stringify({ commitments, receipts }),
+    });
+  },
 };
 
