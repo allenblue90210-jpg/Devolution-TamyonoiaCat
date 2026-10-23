@@ -31,6 +31,36 @@
         "allowDirectVerificationRequests": true
       },
       "createdAt": "2024-03-10T11:00:00.000Z"
+    },
+    {
+      "id": "usr_allen_006",
+      "email": "allenkinetic006@gmail.com",
+      "username": "allenkinetic006",
+      "fullName": "Allen Kinetic",
+      "accountType": "personal",
+      "avatarUrl": "",
+      "headline": "Devolution Network Architect & Verified Trustee",
+      "bio": "Verified digital reputation and evidence-based relationship anchor on Devolution network.",
+      "category": "Software Engineering",
+      "country": "Nigeria",
+      "city": "Lagos",
+      "phone": "+234 803 000 0006",
+      "phoneVerified": true,
+      "emailVerified": true,
+      "identityStatus": "verified",
+      "identityMethod": "Government ID & Biometric Verification",
+      "identityVerifiedAt": "2026-10-23T09:18:35.621Z",
+      "businessVerificationStatus": "unverified",
+      "privacySettings": {
+        "showRelationshipCounts": true,
+        "showCategoryBreakdown": true,
+        "showPublicEndorsers": true,
+        "showTrustReceipts": true,
+        "showCredentials": true,
+        "showLocationCityOnly": true,
+        "allowDirectVerificationRequests": true
+      },
+      "createdAt": "2026-10-23T09:18:35.622Z"
     }
   ],
   "evidence": [],
@@ -103,7 +133,7 @@
   ],
   "impressions": {
     "network": {
-      "impressions": 10,
+      "impressions": 11,
       "witnessCount": 0
     }
   },
