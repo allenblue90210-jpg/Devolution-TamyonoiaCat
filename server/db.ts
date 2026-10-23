@@ -41,6 +41,84 @@ interface DatabaseSchema {
 }
 
 const DB_FILE = path.resolve(process.cwd(), 'data', 'db.json');
+const VAULT_DIR = path.resolve(process.cwd(), 'data', 'vault');
+const VAULT_PACTS_FILE = path.join(VAULT_DIR, 'permanent_pacts.json');
+const VAULT_RECEIPTS_FILE = path.join(VAULT_DIR, 'permanent_receipts.json');
+const VAULT_LEDGER_FILE = path.join(VAULT_DIR, 'immutable_ledger.jsonl');
+const VAULT_BACKUP_FILE = path.join(VAULT_DIR, 'db_backup.json');
+
+function ensureVaultDir() {
+  if (!fs.existsSync(VAULT_DIR)) {
+    fs.mkdirSync(VAULT_DIR, { recursive: true });
+  }
+}
+
+function loadVaultPacts(): Record<string, TrustCommitment> {
+  ensureVaultDir();
+  try {
+    if (fs.existsSync(VAULT_PACTS_FILE)) {
+      const raw = fs.readFileSync(VAULT_PACTS_FILE, 'utf-8');
+      return JSON.parse(raw);
+    }
+  } catch (err) {
+    console.warn('[Vault] Notice reading permanent pacts:', err);
+  }
+  return {};
+}
+
+function saveVaultPacts(pactsMap: Record<string, TrustCommitment>) {
+  ensureVaultDir();
+  try {
+    const tmp = `${VAULT_PACTS_FILE}.tmp`;
+    fs.writeFileSync(tmp, JSON.stringify(pactsMap, null, 2), 'utf-8');
+    fs.renameSync(tmp, VAULT_PACTS_FILE);
+  } catch (err) {
+    console.error('[Vault] Error saving permanent pacts:', err);
+  }
+}
+
+function loadVaultReceipts(): Record<string, TrustReceipt> {
+  ensureVaultDir();
+  try {
+    if (fs.existsSync(VAULT_RECEIPTS_FILE)) {
+      const raw = fs.readFileSync(VAULT_RECEIPTS_FILE, 'utf-8');
+      return JSON.parse(raw);
+    }
+  } catch (err) {
+    console.warn('[Vault] Notice reading permanent receipts:', err);
+  }
+  return {};
+}
+
+function saveVaultReceipts(receiptsMap: Record<string, TrustReceipt>) {
+  ensureVaultDir();
+  try {
+    const tmp = `${VAULT_RECEIPTS_FILE}.tmp`;
+    fs.writeFileSync(tmp, JSON.stringify(receiptsMap, null, 2), 'utf-8');
+    fs.renameSync(tmp, VAULT_RECEIPTS_FILE);
+  } catch (err) {
+    console.error('[Vault] Error saving permanent receipts:', err);
+  }
+}
+
+function appendToImmutableLedger(entry: {
+  type: string;
+  id: string;
+  timestamp: string;
+  data: any;
+}) {
+  ensureVaultDir();
+  try {
+    const hash = crypto
+      .createHash('sha256')
+      .update(`${entry.type}:${entry.id}:${entry.timestamp}:${JSON.stringify(entry.data)}`)
+      .digest('hex');
+    const line = JSON.stringify({ ...entry, hash }) + '\n';
+    fs.appendFileSync(VAULT_LEDGER_FILE, line, 'utf-8');
+  } catch (err) {
+    console.error('[Vault] Error appending to immutable ledger:', err);
+  }
+}
 
 function generateRecordHash(sequence: number, entryType: string, targetId: string, timestamp: string, actor: string): string {
   return crypto
@@ -936,6 +1014,58 @@ class Database {
     this.data = this.load();
   }
 
+  public syncWithVault(parsed: DatabaseSchema): boolean {
+    let updated = false;
+    const vaultPacts = loadVaultPacts();
+    const vaultReceipts = loadVaultReceipts();
+
+    // 1. Ensure all pacts in memory/db are preserved in the vault
+    if (parsed.commitments && Array.isArray(parsed.commitments)) {
+      for (const c of parsed.commitments) {
+        if (!vaultPacts[c.id]) {
+          vaultPacts[c.id] = c;
+          updated = true;
+        }
+      }
+    }
+
+    // 2. Ensure all receipts in memory/db are preserved in the vault
+    if (parsed.receipts && Array.isArray(parsed.receipts)) {
+      for (const r of parsed.receipts) {
+        if (!vaultReceipts[r.id]) {
+          vaultReceipts[r.id] = r;
+          updated = true;
+        }
+      }
+    }
+
+    // 3. Ensure any pact from the vault missing from db is restored
+    if (!parsed.commitments) parsed.commitments = [];
+    const pactIds = new Set(parsed.commitments.map((c) => c.id));
+    for (const [id, pact] of Object.entries(vaultPacts)) {
+      if (!pactIds.has(id)) {
+        parsed.commitments.unshift(pact);
+        updated = true;
+      }
+    }
+
+    // 4. Ensure any receipt from the vault missing from db is restored
+    if (!parsed.receipts) parsed.receipts = [];
+    const receiptIds = new Set(parsed.receipts.map((r) => r.id));
+    for (const [id, receipt] of Object.entries(vaultReceipts)) {
+      if (!receiptIds.has(id)) {
+        parsed.receipts.unshift(receipt);
+        updated = true;
+      }
+    }
+
+    if (updated) {
+      saveVaultPacts(vaultPacts);
+      saveVaultReceipts(vaultReceipts);
+    }
+    return updated;
+  }
+
   private load(): DatabaseSchema {
     try {
       if (fs.existsSync(DB_FILE)) {
@@ -950,17 +1080,7 @@ class Database {
           parsed.receipts = [];
           updated = true;
         }
-        const mockPactOrReceiptIds = new Set(['TC-9041', 'TC-9042', 'TR-89240', 'TR-89241', 'TR-63487']);
-        if (parsed.commitments && parsed.commitments.some((c: any) => mockPactOrReceiptIds.has(c.id))) {
-          parsed.commitments = parsed.commitments.filter((c: any) => !mockPactOrReceiptIds.has(c.id));
-          updated = true;
-        }
-        if (parsed.receipts && parsed.receipts.some((r: any) => mockPactOrReceiptIds.has(r.id))) {
-          parsed.receipts = parsed.receipts.filter((r: any) => !mockPactOrReceiptIds.has(r.id));
-          updated = true;
-        }
-        if (parsed.recordedLedger && parsed.recordedLedger.some((l: any) => mockPactOrReceiptIds.has(l.targetId))) {
-          parsed.recordedLedger = parsed.recordedLedger.filter((l: any) => !mockPactOrReceiptIds.has(l.targetId));
+        if (this.syncWithVault(parsed)) {
           updated = true;
         }
         if (!parsed.goodFaithRatings || parsed.goodFaithRatings.length === 0) {
@@ -988,6 +1108,7 @@ class Database {
       console.warn('Failed to parse database file, reinitializing default data:', err);
     }
     const initial = getInitialData();
+    this.syncWithVault(initial);
     this.save(initial);
     return initial;
   }
@@ -1007,7 +1128,18 @@ class Database {
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
       }
-      fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
+      const tmp = `${DB_FILE}.tmp`;
+      fs.writeFileSync(tmp, JSON.stringify(data, null, 2), 'utf-8');
+      fs.renameSync(tmp, DB_FILE);
+
+      // Snapshot backup in vault
+      ensureVaultDir();
+      try {
+        fs.writeFileSync(VAULT_BACKUP_FILE, JSON.stringify(data, null, 2), 'utf-8');
+      } catch {
+        // ignore backup errors
+      }
+
       if (notify) {
         for (const listener of this.saveListeners) {
           try {
