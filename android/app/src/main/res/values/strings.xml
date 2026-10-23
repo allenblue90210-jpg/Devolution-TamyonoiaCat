@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Devolution</string>
+    <string name="title_activity_main">Devolution</string>
+    <string name="package_name">com.devolution.app</string>
+    <string name="custom_url_scheme">com.devolution.app</string>
+</resources>
