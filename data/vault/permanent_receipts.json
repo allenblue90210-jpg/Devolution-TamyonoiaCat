@@ -284,5 +284,61 @@
     "comments": [],
     "isPublic": true,
     "createdAt": "2026-10-23T07:55:04.626Z"
+  },
+  "TR-66660": {
+    "id": "TR-66660",
+    "creatorId": "usr_allen_006",
+    "creatorName": "Allen Kinetic",
+    "counterpartyName": "Allen Kinetic",
+    "counterpartyContact": "Attested Trust Identity",
+    "counterpartyUserId": "usr_allen_006",
+    "interactionCategory": "Service Contract",
+    "title": "Fulfilled Commitment: Test Task To Finish",
+    "description": "Dual-attested fulfillment of time-locked trust pact (100% Rating, 5★). Testing mark finished and rate. Review: \"Excellent work!\"",
+    "status": "completed",
+    "completionConditions": "Delivered and verified finished at 100% rating (5★).",
+    "isFulfillmentConfirmed": true,
+    "evidenceAttachments": [
+      {
+        "name": "Dual-Signoff_Attestation_TR-66660.pdf",
+        "date": "2026-10-23",
+        "size": "142 KB"
+      }
+    ],
+    "history": [
+      {
+        "timestamp": "2026-10-23T07:58:24.419Z",
+        "actor": "Allen Kinetic",
+        "event": "Pact Request Created"
+      },
+      {
+        "timestamp": "2026-10-23T07:58:24.468Z",
+        "actor": "Allen Kinetic",
+        "event": "Pledge Fulfilled & Handover Submitted"
+      },
+      {
+        "timestamp": "2026-10-23T07:58:24.468Z",
+        "actor": "Allen Blue",
+        "event": "Marked Finished & Rated (100% Rating, 5★)"
+      }
+    ],
+    "ratings": [
+      {
+        "id": "rc_rt_1792742304468",
+        "receiptId": "TR-66660",
+        "authorId": "usr_allen_nuclear",
+        "authorName": "Allen Blue",
+        "authorAvatar": "",
+        "rating": 5,
+        "goodFaithBadge": "100% Exemplary Good Faith Handover",
+        "comment": "Excellent work!",
+        "createdAt": "2026-10-23T07:58:24.468Z"
+      }
+    ],
+    "averageRating": 5,
+    "ratingsCount": 1,
+    "isPublic": true,
+    "createdAt": "2026-10-23T07:58:24.419Z",
+    "completedAt": "2026-10-23T07:58:24.468Z"
   }
 }

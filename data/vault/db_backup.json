@@ -313,6 +313,62 @@
   "relationships": [],
   "receipts": [
     {
+      "id": "TR-66660",
+      "creatorId": "usr_allen_006",
+      "creatorName": "Allen Kinetic",
+      "counterpartyName": "Allen Kinetic",
+      "counterpartyContact": "Attested Trust Identity",
+      "counterpartyUserId": "usr_allen_006",
+      "interactionCategory": "Service Contract",
+      "title": "Fulfilled Commitment: Test Task To Finish",
+      "description": "Dual-attested fulfillment of time-locked trust pact (100% Rating, 5★). Testing mark finished and rate. Review: \"Excellent work!\"",
+      "status": "completed",
+      "completionConditions": "Delivered and verified finished at 100% rating (5★).",
+      "isFulfillmentConfirmed": true,
+      "evidenceAttachments": [
+        {
+          "name": "Dual-Signoff_Attestation_TR-66660.pdf",
+          "date": "2026-10-23",
+          "size": "142 KB"
+        }
+      ],
+      "history": [
+        {
+          "timestamp": "2026-10-23T07:58:24.419Z",
+          "actor": "Allen Kinetic",
+          "event": "Pact Request Created"
+        },
+        {
+          "timestamp": "2026-10-23T07:58:24.468Z",
+          "actor": "Allen Kinetic",
+          "event": "Pledge Fulfilled & Handover Submitted"
+        },
+        {
+          "timestamp": "2026-10-23T07:58:24.468Z",
+          "actor": "Allen Blue",
+          "event": "Marked Finished & Rated (100% Rating, 5★)"
+        }
+      ],
+      "ratings": [
+        {
+          "id": "rc_rt_1792742304468",
+          "receiptId": "TR-66660",
+          "authorId": "usr_allen_nuclear",
+          "authorName": "Allen Blue",
+          "authorAvatar": "",
+          "rating": 5,
+          "goodFaithBadge": "100% Exemplary Good Faith Handover",
+          "comment": "Excellent work!",
+          "createdAt": "2026-10-23T07:58:24.468Z"
+        }
+      ],
+      "averageRating": 5,
+      "ratingsCount": 1,
+      "isPublic": true,
+      "createdAt": "2026-10-23T07:58:24.419Z",
+      "completedAt": "2026-10-23T07:58:24.468Z"
+    },
+    {
       "id": "TR-98019",
       "creatorId": "usr_allen_006",
       "creatorName": "Allen Kinetic",
@@ -603,6 +659,26 @@
   "disputes": [],
   "notifications": [
     {
+      "id": "notif_1792742304518",
+      "userId": "usr_allen_006",
+      "type": "receipt_action",
+      "title": "Task Marked Finished & Rated (5★)!",
+      "message": "Allen Blue marked 'Test Task To Finish' as FINISHED and rated you 5★ (100% Exemplary Good Faith Handover): \"Excellent work!\" Dual-signed Trust Receipt TR-66660 generated!",
+      "link": "/commitments",
+      "isRead": false,
+      "createdAt": "2026-10-23T07:58:24.468Z"
+    },
+    {
+      "id": "notif_1792742304446",
+      "userId": "usr_allen_006",
+      "type": "receipt_action",
+      "title": "New Commitment Request Received",
+      "message": "Allen Kinetic created a commitment pact: 'Test Task To Finish'. Sign your pledge and confirmed delivery time.",
+      "link": "/commitments",
+      "isRead": false,
+      "createdAt": "2026-10-23T07:58:24.446Z"
+    },
+    {
       "id": "notif_1792742104647",
       "link": "/receipts",
       "type": "receipt_action",
@@ -626,6 +702,86 @@
   "businesses": [],
   "phoneOtps": {},
   "commitments": [
+    {
+      "id": "TC-4884",
+      "title": "Test Task To Finish",
+      "description": "Testing mark finished and rate",
+      "category": "Vehicle & Transportation",
+      "requesterId": "usr_allen_006",
+      "requesterName": "Allen Kinetic",
+      "requesterAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+      "committerId": "usr_allen_006",
+      "committerName": "Allen Kinetic",
+      "committerAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+      "promisedUserId": "usr_allen_006",
+      "promisedUserName": "Allen Kinetic",
+      "promisedUserAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+      "creatorRole": "requester",
+      "deadline": "2026-10-23T08:58:24.262Z",
+      "status": "completed",
+      "trustRewardPoints": 25,
+      "penaltyRateDailyPercent": 30,
+      "penaltyCurrentDeductionPercent": 0,
+      "isOverdue": false,
+      "daysOverdue": 0,
+      "isPublic": true,
+      "impressions": 1,
+      "witnessCount": 0,
+      "positiveImpressions": 0,
+      "hasWitnessed": false,
+      "comments": [
+        {
+          "id": "pcmt_1792742304505_sz4i",
+          "commitmentId": "TC-4884",
+          "authorId": "usr_allen_nuclear",
+          "authorName": "Allen Blue",
+          "authorAvatar": "",
+          "authorRole": "Committer",
+          "text": "Marked finished with 5★ rating: \"Excellent work!\"",
+          "ratingPercent": 100,
+          "createdAt": "2026-10-23T07:58:24.468Z"
+        }
+      ],
+      "createdAt": "2026-10-23T07:58:24.419Z",
+      "history": [
+        {
+          "timestamp": "2026-10-23T07:58:24.419Z",
+          "actor": "Allen Kinetic",
+          "event": "Commitment pact recorded on ledger (Public Ledger)"
+        },
+        {
+          "timestamp": "2026-10-23T07:58:24.483Z",
+          "actor": "Network Ledger",
+          "event": "Status changed to \"completed\""
+        },
+        {
+          "timestamp": "2026-10-23T07:58:24.487Z",
+          "actor": "Network Ledger",
+          "event": "Dual-signed Trust Receipt #TR-66660 generated and permanently linked to pact"
+        }
+      ],
+      "checkedOutByRequesterAt": "2026-10-23T07:58:24.468Z",
+      "completedAt": "2026-10-23T07:58:24.468Z",
+      "linkedReceiptId": "TR-66660",
+      "ratingPercent": 100,
+      "ratingBadge": "100% Exemplary Good Faith Handover",
+      "averageRating": 5,
+      "ratingsCount": 1,
+      "ratingsList": [
+        {
+          "id": "pct_rate_1792742304494_wrl6",
+          "commitmentId": "TC-4884",
+          "authorId": "usr_allen_nuclear",
+          "authorName": "Allen Blue",
+          "authorAvatar": "",
+          "rating": 5,
+          "ratingPercent": 100,
+          "badge": "100% Exemplary Good Faith Handover",
+          "comment": "Excellent work!",
+          "createdAt": "2026-10-23T07:58:24.468Z"
+        }
+      ]
+    },
     {
       "id": "TC-9023",
       "title": "Industrial 3D Calibration Tooling Rig Return",
@@ -941,7 +1097,24 @@
       ]
     }
   ],
-  "goodFaithRatings": [],
+  "goodFaithRatings": [
+    {
+      "id": "gfr_1792742304511_07xp",
+      "targetUserId": "usr_allen_006",
+      "targetUsername": "allenkinetic006",
+      "authorId": "usr_allen_nuclear",
+      "authorName": "Allen Blue",
+      "authorAvatar": "",
+      "authorTitle": "Founder & Lead Architect | Devolution Platform",
+      "rating": 5,
+      "goodFaithBadge": "Exemplary Integrity",
+      "comment": "Excellent work!",
+      "context": "Task Completion: Test Task To Finish",
+      "impressions": 1,
+      "helpfulCount": 0,
+      "createdAt": "2026-10-23T07:58:24.468Z"
+    }
+  ],
   "impressions": {
     "network": {
       "impressions": 1,
@@ -950,6 +1123,72 @@
   },
   "rememberRecords": [],
   "recordedLedger": [
+    {
+      "id": "REC-00004",
+      "sequence": 4,
+      "recordHash": "f72f70805bbd52b619939b3cd0f69c38594e39a3f39963a127d2d4706cc1a782",
+      "entryType": "COMMITMENT_CHECKED_OUT",
+      "targetId": "TC-4884",
+      "targetTitle": "Test Task To Finish",
+      "actorId": "usr_allen_006",
+      "actorName": "Allen Kinetic",
+      "actorAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+      "counterpartyId": "usr_allen_006",
+      "counterpartyName": "Allen Kinetic",
+      "counterpartyAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+      "category": "Vehicle & Transportation",
+      "summary": "Commitment #TC-4884 status changed to \"COMPLETED\". Recorded and validated on ledger.",
+      "isPublic": true,
+      "status": "completed",
+      "gitSynced": true,
+      "timestamp": "2026-10-23T07:58:24.483Z"
+    },
+    {
+      "id": "REC-00003",
+      "sequence": 3,
+      "recordHash": "eb2a0c502df481787dd2e518d2005241a8acbd64dbc0729e47f38ee5e419f16d",
+      "entryType": "RECEIPT_DROPPED",
+      "targetId": "TR-66660",
+      "targetTitle": "Fulfilled Commitment: Test Task To Finish",
+      "actorId": "usr_allen_006",
+      "actorName": "Allen Kinetic",
+      "counterpartyId": "usr_allen_006",
+      "counterpartyName": "Allen Kinetic",
+      "category": "Service Contract",
+      "summary": "Receipt dropped: \"Fulfilled Commitment: Test Task To Finish\" (Service Contract) between Allen Kinetic and Allen Kinetic. Status: COMPLETED.",
+      "isPublic": true,
+      "status": "completed",
+      "gitSynced": true,
+      "metadata": {
+        "completionConditions": "Delivered and verified finished at 100% rating (5★)."
+      },
+      "timestamp": "2026-10-23T07:58:24.470Z"
+    },
+    {
+      "id": "REC-00002",
+      "sequence": 2,
+      "recordHash": "d75e1d06a6fc4b375ed3e8054bcc0a64caf0e80a25a3ff75219087ef8540484b",
+      "entryType": "COMMITMENT_DROPPED",
+      "targetId": "TC-4884",
+      "targetTitle": "Test Task To Finish",
+      "actorId": "usr_allen_006",
+      "actorName": "Allen Kinetic",
+      "actorAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+      "counterpartyId": "usr_allen_006",
+      "counterpartyName": "Allen Kinetic",
+      "counterpartyAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+      "category": "Vehicle & Transportation",
+      "summary": "Commitment dropped / pledged: \"Test Task To Finish\" (Vehicle & Transportation) by Allen Kinetic to Allen Kinetic. Deadline: 10/23/2026, 8:58:24 AM.",
+      "isPublic": true,
+      "status": "pending_acceptance",
+      "gitSynced": true,
+      "metadata": {
+        "deadline": "2026-10-23T08:58:24.262Z",
+        "trustRewardPoints": 25,
+        "creatorRole": "requester"
+      },
+      "timestamp": "2026-10-23T07:58:24.429Z"
+    },
     {
       "id": "REC-00001",
       "status": "pending",

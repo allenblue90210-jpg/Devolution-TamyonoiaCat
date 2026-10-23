@@ -312,5 +312,85 @@
     "checkedOutByRequesterAt": null,
     "penaltyRateDailyPercent": 30,
     "penaltyCurrentDeductionPercent": 90
+  },
+  "TC-4884": {
+    "id": "TC-4884",
+    "title": "Test Task To Finish",
+    "description": "Testing mark finished and rate",
+    "category": "Vehicle & Transportation",
+    "requesterId": "usr_allen_006",
+    "requesterName": "Allen Kinetic",
+    "requesterAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+    "committerId": "usr_allen_006",
+    "committerName": "Allen Kinetic",
+    "committerAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+    "promisedUserId": "usr_allen_006",
+    "promisedUserName": "Allen Kinetic",
+    "promisedUserAvatar": "/src/assets/images/avatar_founder_1792334631930.jpg",
+    "creatorRole": "requester",
+    "deadline": "2026-10-23T08:58:24.262Z",
+    "status": "completed",
+    "trustRewardPoints": 25,
+    "penaltyRateDailyPercent": 30,
+    "penaltyCurrentDeductionPercent": 0,
+    "isOverdue": false,
+    "daysOverdue": 0,
+    "isPublic": true,
+    "impressions": 1,
+    "witnessCount": 0,
+    "positiveImpressions": 0,
+    "hasWitnessed": false,
+    "comments": [
+      {
+        "id": "pcmt_1792742304505_sz4i",
+        "commitmentId": "TC-4884",
+        "authorId": "usr_allen_nuclear",
+        "authorName": "Allen Blue",
+        "authorAvatar": "",
+        "authorRole": "Committer",
+        "text": "Marked finished with 5★ rating: \"Excellent work!\"",
+        "ratingPercent": 100,
+        "createdAt": "2026-10-23T07:58:24.468Z"
+      }
+    ],
+    "createdAt": "2026-10-23T07:58:24.419Z",
+    "history": [
+      {
+        "timestamp": "2026-10-23T07:58:24.419Z",
+        "actor": "Allen Kinetic",
+        "event": "Commitment pact recorded on ledger (Public Ledger)"
+      },
+      {
+        "timestamp": "2026-10-23T07:58:24.483Z",
+        "actor": "Network Ledger",
+        "event": "Status changed to \"completed\""
+      },
+      {
+        "timestamp": "2026-10-23T07:58:24.487Z",
+        "actor": "Network Ledger",
+        "event": "Dual-signed Trust Receipt #TR-66660 generated and permanently linked to pact"
+      }
+    ],
+    "checkedOutByRequesterAt": "2026-10-23T07:58:24.468Z",
+    "completedAt": "2026-10-23T07:58:24.468Z",
+    "linkedReceiptId": "TR-66660",
+    "ratingPercent": 100,
+    "ratingBadge": "100% Exemplary Good Faith Handover",
+    "averageRating": 5,
+    "ratingsCount": 1,
+    "ratingsList": [
+      {
+        "id": "pct_rate_1792742304494_wrl6",
+        "commitmentId": "TC-4884",
+        "authorId": "usr_allen_nuclear",
+        "authorName": "Allen Blue",
+        "authorAvatar": "",
+        "rating": 5,
+        "ratingPercent": 100,
+        "badge": "100% Exemplary Good Faith Handover",
+        "comment": "Excellent work!",
+        "createdAt": "2026-10-23T07:58:24.468Z"
+      }
+    ]
   }
 }
