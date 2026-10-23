@@ -1,0 +1,33 @@
+{
+  "id": "/",
+  "name": "Devolution — Digital Trust & Reputation Platform",
+  "short_name": "Devolution",
+  "description": "Evidence-based digital trust and reputation platform featuring identity verification, confirmed real-world relationships, trust receipts, and portable reputation infrastructure.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "/tanmi.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/tanmi.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/tanmi.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["business", "finance", "productivity"]
+}
