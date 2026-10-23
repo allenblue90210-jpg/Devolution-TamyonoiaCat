@@ -1237,20 +1237,50 @@ app.get('/api/receipts/:id', (req: Request, res: Response) => {
 
 app.patch('/api/receipts/:id', (req: Request, res: Response) => {
   const { id } = req.params;
-  const { isPublic, counterpartyUserId, counterpartyName, counterpartyContact, counterpartyAvatar } = req.body;
+  const {
+    isPublic,
+    targetSide, // 'counterparty' | 'creator'
+    counterpartyUserId,
+    counterpartyName,
+    counterpartyContact,
+    counterpartyAvatar,
+    creatorId,
+    creatorName,
+    creatorAvatar,
+  } = req.body;
   const receipt = db.getReceiptById(id);
   if (!receipt) return res.status(404).json({ error: 'Trust receipt not found' });
+  const userId = getSessionUserId(req);
+  const actingUser = userId ? db.getUserById(userId) : null;
+  const actorName = actingUser?.fullName || receipt.creatorName || 'Deal Participant';
 
   if (isPublic !== undefined) {
     receipt.isPublic = Boolean(isPublic);
     receipt.history.push({
       timestamp: new Date().toISOString(),
-      actor: receipt.creatorName,
+      actor: actorName,
       event: `Receipt visibility changed to ${receipt.isPublic ? 'Public Ledger' : 'Private Counterparty Only'}`,
     });
   }
 
-  if (counterpartyName || counterpartyUserId) {
+  // Allow updating either deal partner: Initiator (User A) or Counterparty (User B)
+  if (targetSide === 'creator' || creatorId || creatorName) {
+    let target = creatorId && creatorId !== 'other' ? db.getUserById(creatorId) : null;
+    const name = target ? target.fullName : (creatorName || receipt.creatorName);
+    const avatar = target ? target.avatarUrl : (creatorAvatar || receipt.creatorAvatar);
+
+    receipt.creatorId = target ? target.id : (creatorId === 'other' ? `usr_ext_${Date.now()}` : (creatorId || receipt.creatorId));
+    receipt.creatorName = name;
+    if (avatar) receipt.creatorAvatar = avatar;
+
+    receipt.history.push({
+      timestamp: new Date().toISOString(),
+      actor: actorName,
+      event: `Deal partner (Initiator) updated to ${name}`,
+    });
+  }
+
+  if (targetSide !== 'creator' && (counterpartyName || counterpartyUserId)) {
     let target = counterpartyUserId && counterpartyUserId !== 'other' ? db.getUserById(counterpartyUserId) : null;
     const name = target ? target.fullName : (counterpartyName || receipt.counterpartyName);
     const contact = target
@@ -1265,8 +1295,8 @@ app.patch('/api/receipts/:id', (req: Request, res: Response) => {
 
     receipt.history.push({
       timestamp: new Date().toISOString(),
-      actor: receipt.creatorName,
-      event: `Counterparty updated to ${name}`,
+      actor: actorName,
+      event: `Deal partner (Counterparty) updated to ${name}`,
     });
   }
 
@@ -1726,27 +1756,57 @@ app.patch('/api/commitments/:id', (req: Request, res: Response) => {
     isPublic,
     committerId,
     committerName,
+    committerAvatar,
+    requesterId,
+    requesterName,
+    requesterAvatar,
     promisedUserId,
     promisedUserName,
     counterpartyName,
     counterpartyUserId,
+    targetRole, // 'committer' | 'requester' | 'counterparty'
   } = req.body;
   const commitment = db.getCommitmentById(id);
   if (!commitment) return res.status(404).json({ error: 'Commitment not found' });
+  const userId = getSessionUserId(req);
+  const actingUser = userId ? db.getUserById(userId) : null;
+  const actorName = actingUser?.fullName || 'Deal Participant';
 
   if (isPublic !== undefined) {
     commitment.isPublic = Boolean(isPublic);
   }
 
-  const newTargetId = counterpartyUserId || committerId || promisedUserId;
-  const newTargetName = counterpartyName || committerName || promisedUserName;
+  const newTargetId = counterpartyUserId || committerId || requesterId || promisedUserId;
+  const newTargetName = counterpartyName || committerName || requesterName || promisedUserName;
 
   if (newTargetId || newTargetName) {
     let target = newTargetId && newTargetId !== 'other' ? db.getUserById(newTargetId) : null;
-    const targetName = target ? target.fullName : (newTargetName || 'Counterparty');
-    const targetAvatar = target ? target.avatarUrl : '';
+    const targetName = target ? target.fullName : (newTargetName || 'Deal Counterparty');
+    const targetAvatar = target ? target.avatarUrl : (committerAvatar || requesterAvatar || '');
 
-    if (commitment.creatorRole === 'promisor') {
+    // Determine which role in the deal to update:
+    let roleToUpdate = targetRole;
+    if (!roleToUpdate) {
+      if (committerId || committerName) {
+        roleToUpdate = 'committer';
+      } else if (requesterId || requesterName) {
+        roleToUpdate = 'requester';
+      } else {
+        // If actor is the committer, they are changing their requester:
+        if (userId === commitment.committerId) {
+          roleToUpdate = 'requester';
+        } else if (userId === commitment.requesterId) {
+          // If actor is the requester, they are changing their committer:
+          roleToUpdate = 'committer';
+        } else if (commitment.creatorRole === 'promisor') {
+          roleToUpdate = 'requester';
+        } else {
+          roleToUpdate = 'committer';
+        }
+      }
+    }
+
+    if (roleToUpdate === 'requester') {
       commitment.requesterId = target ? target.id : `ext_${Date.now()}`;
       commitment.requesterName = targetName;
       commitment.requesterAvatar = targetAvatar;
@@ -1758,6 +1818,13 @@ app.patch('/api/commitments/:id', (req: Request, res: Response) => {
       commitment.committerName = targetName;
       commitment.committerAvatar = targetAvatar;
     }
+
+    if (!commitment.history) commitment.history = [];
+    commitment.history.push({
+      timestamp: new Date().toISOString(),
+      actor: actorName,
+      event: `Deal partner (${roleToUpdate === 'requester' ? 'Requester / Client' : 'Committer / Performer'}) updated to ${targetName}`,
+    });
   }
 
   const updated = db.updateCommitment(id, commitment);
