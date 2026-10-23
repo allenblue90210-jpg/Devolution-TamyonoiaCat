@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: devolution-trust-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm install --legacy-peer-deps && npm run build
+    startCommand: npx tsx server.ts
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
