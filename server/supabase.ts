@@ -449,26 +449,39 @@ export async function syncPactToSupabase(pact: any): Promise<boolean> {
   if (!client || !pact?.id) return false;
 
   try {
+    const row: any = {
+      id: pact.id,
+      title: pact.title || '',
+      description: pact.description || '',
+      category: pact.category || 'General',
+      status: pact.status || 'pending_acceptance',
+      requester_id: pact.requesterId || null,
+      committer_id: pact.committerId || null,
+      deadline: pact.deadline || null,
+      trust_reward_points: pact.trustRewardPoints ?? 20,
+      is_public: pact.isPublic ?? true,
+      data: pact,
+      updated_at: new Date().toISOString(),
+    };
+
     const { error } = await client
       .from('devolution_commitments')
-      .upsert({
-        id: pact.id,
-        title: pact.title || '',
-        description: pact.description || '',
-        category: pact.category || 'General',
-        status: pact.status || 'pending_acceptance',
-        requester_id: pact.requesterId || 'unknown',
-        committer_id: pact.committerId || 'unknown',
-        deadline: pact.deadline || null,
-        trust_reward_points: pact.trustRewardPoints ?? 20,
-        is_public: pact.isPublic ?? true,
-        data: pact,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: 'id' });
+      .upsert(row, { onConflict: 'id' });
 
     if (error) {
-      // If FK constraint fails (external users), fall back gracefully
-      console.warn('[Supabase Pact Sync Notice]:', error.message);
+      // FK constraint failure — retry with NULL FK columns (data JSONB keeps the IDs)
+      if (error.message.includes('foreign key constraint')) {
+        row.requester_id = null;
+        row.committer_id = null;
+        const { error: retryErr } = await client
+          .from('devolution_commitments')
+          .upsert(row, { onConflict: 'id' });
+        if (retryErr) {
+          console.warn('[Supabase Pact Sync Notice]:', retryErr.message);
+        }
+      } else {
+        console.warn('[Supabase Pact Sync Notice]:', error.message);
+      }
     }
     return true;
   } catch (err: any) {
@@ -482,23 +495,36 @@ export async function syncReceiptToSupabase(receipt: any): Promise<boolean> {
   if (!client || !receipt?.id) return false;
 
   try {
+    const row: any = {
+      id: receipt.id,
+      title: receipt.title || '',
+      description: receipt.description || '',
+      transaction_value: receipt.transactionValue || null,
+      status: receipt.status || 'pending',
+      creator_id: receipt.creatorId || null,
+      counterparty_name: receipt.counterpartyName || receipt.counterpartyUserId || null,
+      counterparty_contact: receipt.counterpartyContact || null,
+      is_fulfillment_confirmed: receipt.isFulfillmentConfirmed ?? false,
+      data: receipt,
+    };
+
     const { error } = await client
       .from('devolution_receipts')
-      .upsert({
-        id: receipt.id,
-        title: receipt.title || '',
-        description: receipt.description || '',
-        transaction_value: receipt.transactionValue || null,
-        status: receipt.status || 'pending',
-        creator_id: receipt.creatorId || 'unknown',
-        counterparty_name: receipt.counterpartyName || receipt.counterpartyUserId || 'unknown',
-        counterparty_contact: receipt.counterpartyContact || null,
-        is_fulfillment_confirmed: receipt.isFulfillmentConfirmed ?? false,
-        data: receipt,
-      }, { onConflict: 'id' });
+      .upsert(row, { onConflict: 'id' });
 
     if (error) {
-      console.warn('[Supabase Receipt Sync Notice]:', error.message);
+      // FK constraint failure — retry with NULL FK columns (data JSONB keeps the IDs)
+      if (error.message.includes('foreign key constraint')) {
+        row.creator_id = null;
+        const { error: retryErr } = await client
+          .from('devolution_receipts')
+          .upsert(row, { onConflict: 'id' });
+        if (retryErr) {
+          console.warn('[Supabase Receipt Sync Notice]:', retryErr.message);
+        }
+      } else {
+        console.warn('[Supabase Receipt Sync Notice]:', error.message);
+      }
     }
     return true;
   } catch (err: any) {
