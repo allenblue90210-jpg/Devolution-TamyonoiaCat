@@ -8,5 +8,7 @@ coverage/
 !.env.example
 .github_token
 .supabase_credentials
+.supabase_token
+.supabase_config.json
 
 bun.lock
