@@ -485,6 +485,20 @@ class Database {
     return this.data.users[idx];
   }
 
+  public deleteUser(id: string): boolean {
+    const idx = this.data.users.findIndex((u) => u.id === id);
+    if (idx === -1) return false;
+    this.data.users.splice(idx, 1);
+    this.data.notifications = this.data.notifications.filter((n) => n.userId !== id);
+    this.data.evidence = this.data.evidence.filter((e) => e.userId !== id);
+    this.data.relationships = this.data.relationships.filter(
+      (r) => r.inviterId !== id && r.recipientUserId !== id
+    );
+    this.data.businesses = this.data.businesses.filter((b) => b.ownerUserId !== id);
+    this.persist();
+    return true;
+  }
+
   // Evidence queries
   public getEvidenceByUserId(userId: string): EvidenceItem[] {
     return this.data.evidence.filter((e) => e.userId === userId);
