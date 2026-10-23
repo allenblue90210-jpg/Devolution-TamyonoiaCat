@@ -104,6 +104,16 @@
   "disputes": [],
   "notifications": [
     {
+      "id": "notif_1792766235721",
+      "userId": "usr_1792766055954_q6c5",
+      "type": "receipt_action",
+      "title": "New Timed Commitment Promised to You",
+      "message": "Fanan made a time-locked promise to you: 'yep'. Deadline: 24/10/2026, 02:00:00.",
+      "link": "/commitments",
+      "isRead": false,
+      "createdAt": "2026-10-23T14:37:15.721Z"
+    },
+    {
       "id": "notif_1792766055960",
       "userId": "usr_1792766055954_q6c5",
       "type": "evidence_status",
@@ -187,6 +197,44 @@
   "businesses": [],
   "phoneOtps": {},
   "commitments": [
+    {
+      "id": "TC-1565",
+      "title": "yep",
+      "description": "yep",
+      "category": "Vehicle & Transportation",
+      "requesterId": "usr_1792766055954_q6c5",
+      "requesterName": "Ghost",
+      "requesterAvatar": "",
+      "committerId": "usr_1792751667628_nce6",
+      "committerName": "Fanan",
+      "committerAvatar": "",
+      "promisedUserId": "usr_1792766055954_q6c5",
+      "promisedUserName": "Ghost",
+      "promisedUserAvatar": "",
+      "creatorRole": "promisor",
+      "deadline": "2026-10-24T09:00:00.000Z",
+      "committerPledgeNote": "yep",
+      "status": "active",
+      "trustRewardPoints": 25,
+      "penaltyRateDailyPercent": 30,
+      "penaltyCurrentDeductionPercent": 0,
+      "isOverdue": false,
+      "daysOverdue": 0,
+      "isPublic": true,
+      "impressions": 1,
+      "witnessCount": 0,
+      "positiveImpressions": 0,
+      "hasWitnessed": false,
+      "comments": [],
+      "createdAt": "2026-10-23T14:37:15.683Z",
+      "history": [
+        {
+          "timestamp": "2026-10-23T14:37:15.683Z",
+          "actor": "Fanan",
+          "event": "Commitment pact recorded on ledger (Public Ledger)"
+        }
+      ]
+    },
     {
       "id": "TC-7144",
       "title": "go",
@@ -636,5 +684,31 @@
     }
   },
   "rememberRecords": [],
-  "recordedLedger": []
+  "recordedLedger": [
+    {
+      "id": "REC-00001",
+      "sequence": 1,
+      "recordHash": "fcb0298e2a3481294690bc62099530be904b6d68b60dabe81331aaaee98af5c6",
+      "entryType": "COMMITMENT_DROPPED",
+      "targetId": "TC-1565",
+      "targetTitle": "yep",
+      "actorId": "usr_1792751667628_nce6",
+      "actorName": "Fanan",
+      "actorAvatar": "",
+      "counterpartyId": "usr_1792766055954_q6c5",
+      "counterpartyName": "Ghost",
+      "counterpartyAvatar": "",
+      "category": "Vehicle & Transportation",
+      "summary": "Commitment dropped / pledged: \"yep\" (Vehicle & Transportation) by Fanan to Ghost. Deadline: 24/10/2026, 02:00:00.",
+      "isPublic": true,
+      "status": "active",
+      "gitSynced": true,
+      "metadata": {
+        "deadline": "2026-10-24T09:00:00.000Z",
+        "trustRewardPoints": 25,
+        "creatorRole": "promisor"
+      },
+      "timestamp": "2026-10-23T14:37:15.714Z"
+    }
+  ]
 }
