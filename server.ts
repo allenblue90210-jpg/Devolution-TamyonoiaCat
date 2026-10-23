@@ -2684,6 +2684,8 @@ async function performGitSync(customMessage?: string) {
           });
         }
         db.reload();
+        db.syncWithVault(db.getState());
+        db.persist(false);
         console.log('[Git Sync] Successfully pulled updates from GitHub and reloaded database state.');
       }
     } catch (fetchErr: any) {

@@ -1675,6 +1675,18 @@ class Database {
       });
     }
     this.data.commitments[idx] = { ...current, ...updates, history };
+
+    // Update in permanent vault
+    const vaultPacts = loadVaultPacts();
+    vaultPacts[id] = this.data.commitments[idx];
+    saveVaultPacts(vaultPacts);
+    appendToImmutableLedger({
+      type: 'PACT_UPDATED',
+      id,
+      timestamp: new Date().toISOString(),
+      data: this.data.commitments[idx],
+    });
+
     this.persist();
     return this.data.commitments[idx];
   }
@@ -1711,6 +1723,11 @@ class Database {
     if (!commitment) return null;
     if (!commitment.comments) commitment.comments = [];
     commitment.comments.push(comment);
+
+    const vaultPacts = loadVaultPacts();
+    vaultPacts[commitmentId] = commitment;
+    saveVaultPacts(vaultPacts);
+
     this.persist();
     return commitment;
   }
@@ -1720,6 +1737,11 @@ class Database {
     if (!commitment) return null;
     commitment.ratingPercent = ratingPercent;
     if (ratingBadge) commitment.ratingBadge = ratingBadge;
+
+    const vaultPacts = loadVaultPacts();
+    vaultPacts[commitmentId] = commitment;
+    saveVaultPacts(vaultPacts);
+
     this.persist();
     return commitment;
   }
@@ -1739,6 +1761,11 @@ class Database {
     if (pactRating.badge) {
       commitment.ratingBadge = pactRating.badge;
     }
+
+    const vaultPacts = loadVaultPacts();
+    vaultPacts[commitmentId] = commitment;
+    saveVaultPacts(vaultPacts);
+
     this.persist();
     return commitment;
   }
@@ -1752,8 +1779,59 @@ class Database {
     receipt.averageRating = Number(
       (receipt.ratings.reduce((acc, r) => acc + (r.rating || 5), 0) / receipt.ratings.length).toFixed(1)
     );
+
+    const vaultReceipts = loadVaultReceipts();
+    vaultReceipts[receiptId] = receipt;
+    saveVaultReceipts(vaultReceipts);
+
     this.persist();
     return receipt;
+  }
+
+  public getReceipts(): TrustReceipt[] {
+    return [...this.data.receipts];
+  }
+
+  public reconcileExternalPacts(pacts: TrustCommitment[]): number {
+    let count = 0;
+    const vaultPacts = loadVaultPacts();
+    for (const p of pacts) {
+      if (!p || !p.id) continue;
+      if (!vaultPacts[p.id]) {
+        vaultPacts[p.id] = p;
+        count++;
+      }
+      if (!this.data.commitments.some((c) => c.id === p.id)) {
+        this.data.commitments.unshift(p);
+        count++;
+      }
+    }
+    if (count > 0) {
+      saveVaultPacts(vaultPacts);
+      this.persist();
+    }
+    return count;
+  }
+
+  public reconcileExternalReceipts(receipts: TrustReceipt[]): number {
+    let count = 0;
+    const vaultReceipts = loadVaultReceipts();
+    for (const r of receipts) {
+      if (!r || !r.id) continue;
+      if (!vaultReceipts[r.id]) {
+        vaultReceipts[r.id] = r;
+        count++;
+      }
+      if (!this.data.receipts.some((rec) => rec.id === r.id)) {
+        this.data.receipts.unshift(r);
+        count++;
+      }
+    }
+    if (count > 0) {
+      saveVaultReceipts(vaultReceipts);
+      this.persist();
+    }
+    return count;
   }
 
   // Remember & Evidence Ledger Methods
