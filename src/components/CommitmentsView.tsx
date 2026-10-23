@@ -87,6 +87,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
   const [editCounterpartySearch, setEditCounterpartySearch] = useState('');
   const [editSelectedUser, setEditSelectedUser] = useState<any>(null);
   const [editExternalName, setEditExternalName] = useState('');
+  const [editTargetRole, setEditTargetRole] = useState<'committer' | 'requester'>('requester');
   const [isUpdatingCounterparty, setIsUpdatingCounterparty] = useState(false);
 
   // Form State for Accepting / Writing Pledge
@@ -396,6 +397,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
     try {
       setIsUpdatingCounterparty(true);
       await api.updateCommitment(editingCommitment.id, {
+        targetRole: editTargetRole,
         counterpartyUserId: isOther ? 'other' : chosenUser?.id,
         counterpartyName: finalName,
       });
@@ -404,12 +406,12 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
       setEditSelectedUser(null);
       setEditCounterpartySearch('');
       setEditExternalName('');
-      setActionSuccessMessage(`Counterparty successfully changed to "${finalName}"!`);
+      setActionSuccessMessage(`Deal partner (${editTargetRole === 'requester' ? 'Requester / Client' : 'Committer / Performer'}) successfully changed to "${finalName}"!`);
       setTimeout(() => setActionSuccessMessage(null), 4000);
       await loadCommitments();
       onRefreshAllData();
     } catch (err: any) {
-      alert(err.message || 'Failed to update counterparty');
+      alert(err.message || 'Failed to update deal partner');
     } finally {
       setIsUpdatingCounterparty(false);
     }
@@ -978,14 +980,16 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                           type="button"
                           onClick={() => {
                             setEditingCommitment(c);
+                            setEditTargetRole(currentUser?.id === c.committerId ? 'requester' : 'committer');
                             setEditSelectedUser(null);
                             setEditCounterpartySearch('');
                             setEditExternalName('');
                           }}
                           className="text-[11px] text-indigo-600 hover:text-indigo-800 font-semibold hover:underline flex items-center gap-1 cursor-pointer"
+                          title="Change or add the person doing this deal with"
                         >
                           <UserCheck className="w-3.5 h-3.5" />
-                          <span>Change Counterparty</span>
+                          <span>Change / Add Deal Partner</span>
                         </button>
                       </div>
                     )}
