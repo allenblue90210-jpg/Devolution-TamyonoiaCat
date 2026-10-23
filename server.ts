@@ -53,45 +53,6 @@ const PORT = 3000;
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
-// Ensure real user for allenkinetic006@gmail.com exists for immediate accessibility
-(function ensurePrimaryUser() {
-  const targetEmail = 'allenkinetic006@gmail.com';
-  const existing = db.getUserByEmail(targetEmail);
-  if (!existing) {
-    const primaryUser: User = {
-      id: 'usr_allen_006',
-      email: targetEmail,
-      username: 'allenkinetic006',
-      fullName: 'Allen Kinetic',
-      accountType: 'personal',
-      avatarUrl: '',
-      headline: 'Devolution Network Architect & Verified Trustee',
-      bio: 'Verified digital reputation and evidence-based relationship anchor on Devolution network.',
-      category: 'Software Engineering',
-      country: 'Nigeria',
-      city: 'Lagos',
-      phone: '+234 803 000 0006',
-      phoneVerified: true,
-      emailVerified: true,
-      identityStatus: 'verified',
-      identityMethod: 'Government ID & Biometric Verification',
-      identityVerifiedAt: new Date().toISOString(),
-      businessVerificationStatus: 'unverified',
-      privacySettings: {
-        showRelationshipCounts: true,
-        showCategoryBreakdown: true,
-        showPublicEndorsers: true,
-        showTrustReceipts: true,
-        showCredentials: true,
-        showLocationCityOnly: true,
-        allowDirectVerificationRequests: true,
-      },
-      createdAt: new Date().toISOString(),
-    };
-    db.createUser(primaryUser);
-    syncUserToSupabase(primaryUser).catch(() => {});
-  }
-})();
 
 // Session helper: in this full-stack environment, we track active user by header 'x-user-id'.
 // Defaults to primary account 'usr_allen_nuclear' (allennuclear001@gmail.com) unless explicitly guest.
@@ -487,7 +448,6 @@ app.post('/api/auth/reset-password', (req: Request, res: Response) => {
 
 app.get('/api/users/list', (_req: Request, res: Response) => {
   const users = db.getState().users.map((u) => {
-    const isReal = u.id.startsWith('usr_17') || u.id === 'usr_allen_006' || u.id === 'usr_allen_004';
     return {
       id: u.id,
       username: u.username,
@@ -497,7 +457,7 @@ app.get('/api/users/list', (_req: Request, res: Response) => {
       avatarUrl: u.avatarUrl,
       email: u.email,
       identityStatus: u.identityStatus,
-      isReal,
+      isReal: true,
       createdAt: u.createdAt,
     };
   });
@@ -506,7 +466,6 @@ app.get('/api/users/list', (_req: Request, res: Response) => {
 
 app.get('/api/users', (_req: Request, res: Response) => {
   const users = db.getState().users.map((u) => {
-    const isReal = u.id.startsWith('usr_17') || u.id === 'usr_allen_006' || u.id === 'usr_allen_004';
     return {
       id: u.id,
       username: u.username,
@@ -516,7 +475,7 @@ app.get('/api/users', (_req: Request, res: Response) => {
       avatarUrl: u.avatarUrl,
       email: u.email,
       identityStatus: u.identityStatus,
-      isReal,
+      isReal: true,
       createdAt: u.createdAt,
     };
   });
@@ -3123,6 +3082,7 @@ async function startServer() {
               u.id !== 'usr_allen_001' &&
               u.id !== 'usr_sarah_002' &&
               u.id !== 'usr_fatima_003' &&
+              u.id !== 'usr_allen_006' &&
               u.id !== 'usr_1792419706090_6uj2' &&
               !u.email?.includes('example.com') &&
               !u.email?.includes('cloudworks.ng') &&

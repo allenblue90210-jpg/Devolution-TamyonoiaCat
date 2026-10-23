@@ -286,7 +286,7 @@ export default function App() {
     if (currentTab === 'profile' || currentTab.startsWith('profile-')) {
       const username = currentTab.startsWith('profile-')
         ? currentTab.replace('profile-', '')
-        : (currentUser?.username || 'allenkinetic006');
+        : (currentUser?.username || 'allenblue');
       return (
         <PublicProfileView
           key={username}

@@ -1403,7 +1403,7 @@ export const PublicLedgerModal: React.FC<PublicLedgerModalProps> = ({
                     required
                     value={recCounterpartyName}
                     onChange={(e) => setRecCounterpartyName(e.target.value)}
-                    placeholder="e.g. Lola or Counterparty Name"
+                    placeholder="e.g. Counterparty or Partner Name"
                     className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg"
                   />
                 </div>
