@@ -327,39 +327,39 @@
       "isFulfillmentConfirmed": true,
       "evidenceAttachments": [
         {
-          "name": "Dual-Signoff_Attestation_TR-66660.pdf",
           "date": "2026-10-23",
+          "name": "Dual-Signoff_Attestation_TR-66660.pdf",
           "size": "142 KB"
         }
       ],
       "history": [
         {
-          "timestamp": "2026-10-23T07:58:24.419Z",
           "actor": "Allen Kinetic",
-          "event": "Pact Request Created"
+          "event": "Pact Request Created",
+          "timestamp": "2026-10-23T07:58:24.419Z"
         },
         {
-          "timestamp": "2026-10-23T07:58:24.468Z",
           "actor": "Allen Kinetic",
-          "event": "Pledge Fulfilled & Handover Submitted"
+          "event": "Pledge Fulfilled & Handover Submitted",
+          "timestamp": "2026-10-23T07:58:24.468Z"
         },
         {
-          "timestamp": "2026-10-23T07:58:24.468Z",
           "actor": "Allen Blue",
-          "event": "Marked Finished & Rated (100% Rating, 5★)"
+          "event": "Marked Finished & Rated (100% Rating, 5★)",
+          "timestamp": "2026-10-23T07:58:24.468Z"
         }
       ],
       "ratings": [
         {
           "id": "rc_rt_1792742304468",
-          "receiptId": "TR-66660",
+          "rating": 5,
+          "comment": "Excellent work!",
           "authorId": "usr_allen_nuclear",
+          "createdAt": "2026-10-23T07:58:24.468Z",
+          "receiptId": "TR-66660",
           "authorName": "Allen Blue",
           "authorAvatar": "",
-          "rating": 5,
-          "goodFaithBadge": "100% Exemplary Good Faith Handover",
-          "comment": "Excellent work!",
-          "createdAt": "2026-10-23T07:58:24.468Z"
+          "goodFaithBadge": "100% Exemplary Good Faith Handover"
         }
       ],
       "averageRating": 5,
@@ -387,16 +387,16 @@
       "isOverdue": false,
       "evidenceAttachments": [
         {
-          "name": "backword__spec.pdf",
           "date": "2026-10-23",
+          "name": "backword__spec.pdf",
           "size": "280 KB"
         }
       ],
       "history": [
         {
-          "timestamp": "2026-10-23T07:55:04.619Z",
           "actor": "Allen Kinetic",
-          "event": "Trust Receipt Created with Timed Deadline (10/25/2026, 1:00:00 AM) & Awaiting Counterparty Confirmation"
+          "event": "Trust Receipt Created with Timed Deadline (10/25/2026, 1:00:00 AM) & Awaiting Counterparty Confirmation",
+          "timestamp": "2026-10-23T07:55:04.619Z"
         }
       ],
       "comments": [],
@@ -732,32 +732,32 @@
       "comments": [
         {
           "id": "pcmt_1792742304505_sz4i",
-          "commitmentId": "TC-4884",
-          "authorId": "usr_allen_nuclear",
-          "authorName": "Allen Blue",
-          "authorAvatar": "",
-          "authorRole": "Committer",
           "text": "Marked finished with 5★ rating: \"Excellent work!\"",
-          "ratingPercent": 100,
-          "createdAt": "2026-10-23T07:58:24.468Z"
+          "authorId": "usr_allen_nuclear",
+          "createdAt": "2026-10-23T07:58:24.468Z",
+          "authorName": "Allen Blue",
+          "authorRole": "Committer",
+          "authorAvatar": "",
+          "commitmentId": "TC-4884",
+          "ratingPercent": 100
         }
       ],
       "createdAt": "2026-10-23T07:58:24.419Z",
       "history": [
         {
-          "timestamp": "2026-10-23T07:58:24.419Z",
           "actor": "Allen Kinetic",
-          "event": "Commitment pact recorded on ledger (Public Ledger)"
+          "event": "Commitment pact recorded on ledger (Public Ledger)",
+          "timestamp": "2026-10-23T07:58:24.419Z"
         },
         {
-          "timestamp": "2026-10-23T07:58:24.483Z",
           "actor": "Network Ledger",
-          "event": "Status changed to \"completed\""
+          "event": "Status changed to \"completed\"",
+          "timestamp": "2026-10-23T07:58:24.483Z"
         },
         {
-          "timestamp": "2026-10-23T07:58:24.487Z",
           "actor": "Network Ledger",
-          "event": "Dual-signed Trust Receipt #TR-66660 generated and permanently linked to pact"
+          "event": "Dual-signed Trust Receipt #TR-66660 generated and permanently linked to pact",
+          "timestamp": "2026-10-23T07:58:24.487Z"
         }
       ],
       "checkedOutByRequesterAt": "2026-10-23T07:58:24.468Z",
@@ -770,15 +770,15 @@
       "ratingsList": [
         {
           "id": "pct_rate_1792742304494_wrl6",
-          "commitmentId": "TC-4884",
+          "badge": "100% Exemplary Good Faith Handover",
+          "rating": 5,
+          "comment": "Excellent work!",
           "authorId": "usr_allen_nuclear",
+          "createdAt": "2026-10-23T07:58:24.468Z",
           "authorName": "Allen Blue",
           "authorAvatar": "",
-          "rating": 5,
-          "ratingPercent": 100,
-          "badge": "100% Exemplary Good Faith Handover",
-          "comment": "Excellent work!",
-          "createdAt": "2026-10-23T07:58:24.468Z"
+          "commitmentId": "TC-4884",
+          "ratingPercent": 100
         }
       ]
     },
@@ -1090,9 +1090,9 @@
       "createdAt": "2026-10-23T06:52:59.587Z",
       "history": [
         {
-          "timestamp": "2026-10-23T06:52:59.587Z",
           "actor": "Allen Kinetic",
-          "event": "Commitment pact recorded on ledger (Public Ledger)"
+          "event": "Commitment pact recorded on ledger (Public Ledger)",
+          "timestamp": "2026-10-23T06:52:59.587Z"
         }
       ]
     }
@@ -1117,7 +1117,7 @@
   ],
   "impressions": {
     "network": {
-      "impressions": 6,
+      "impressions": 7,
       "witnessCount": 0
     }
   },
