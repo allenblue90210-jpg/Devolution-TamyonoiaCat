@@ -311,12 +311,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
     window.location.href = '/api/export-data';
   };
 
-  const handleDeleteAccount = () => {
-    if (confirm('Are you certain you wish to request irreversible account and evidence ledger erasure? This process initiates legal retention deletion pursuant to NDPR/GDPR Article 17.')) {
-      alert('Your deletion request has been registered in the compliance revocation ledger. An attestation receipt has been issued.');
-    }
-  };
-
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* Top Back Navigation Bar */}
