@@ -94,7 +94,7 @@ app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 })();
 
 // Session helper: in this full-stack environment, we track active user by header 'x-user-id'.
-// Defaults to real assigned user 'usr_allen_006' (allenkinetic006@gmail.com) unless explicitly guest.
+// Defaults to primary account 'usr_allen_nuclear' (allennuclear001@gmail.com) unless explicitly guest.
 function getSessionUserId(req: Request): string {
   const headerUserId = req.headers['x-user-id'] as string;
   if (headerUserId === 'guest' || headerUserId === 'none' || headerUserId === 'null') {
@@ -103,13 +103,11 @@ function getSessionUserId(req: Request): string {
   if (headerUserId && db.getUserById(headerUserId)) {
     return headerUserId;
   }
-  if (db.getUserById('usr_allen_006')) {
-    return 'usr_allen_006';
-  }
   if (db.getUserById('usr_allen_nuclear')) {
     return 'usr_allen_nuclear';
   }
-  return 'usr_allen_006';
+  const firstUser = db.getState().users[0];
+  return firstUser ? firstUser.id : '';
 }
 
 /* ==========================================================================
