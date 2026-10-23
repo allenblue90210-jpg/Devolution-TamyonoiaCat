@@ -559,7 +559,37 @@
       "createdAt": "2026-03-01T09:00:00.000Z"
     }
   ],
-  "receipts": [],
+  "receipts": [
+    {
+      "id": "TR-19471",
+      "creatorId": "usr_allen_006",
+      "creatorName": "Allen Kinetic",
+      "counterpartyName": "Aegis Logistics Hub",
+      "counterpartyContact": "logistics@aegis.network",
+      "counterpartyUserId": null,
+      "counterpartyAvatar": "",
+      "interactionCategory": "Goods Delivery",
+      "title": "Hardware Delivery & Integrity Attestation",
+      "description": "Delivery of tamper-evident cryptographically sealed tracking modules.",
+      "transactionValue": "₦1,250,000",
+      "status": "pending",
+      "completionConditions": "Modules received, physical inspection passed, serial numbers verified.",
+      "isFulfillmentConfirmed": false,
+      "deadline": null,
+      "isOverdue": false,
+      "evidenceAttachments": [],
+      "history": [
+        {
+          "timestamp": "2026-10-23T06:39:58.501Z",
+          "actor": "Allen Kinetic",
+          "event": "Trust Receipt Created & Awaiting Counterparty Confirmation"
+        }
+      ],
+      "comments": [],
+      "isPublic": true,
+      "createdAt": "2026-10-23T06:39:58.501Z"
+    }
+  ],
   "references": [
     {
       "id": "ref_01",
@@ -603,6 +633,16 @@
   ],
   "disputes": [],
   "notifications": [
+    {
+      "id": "notif_1792737598507",
+      "userId": "usr_allen_006",
+      "type": "receipt_action",
+      "title": "Trust Receipt Created",
+      "message": "Receipt TR-19471 for \"Hardware Delivery & Integrity Attestation\" has been created and awaits confirmation.",
+      "link": "/receipts",
+      "isRead": false,
+      "createdAt": "2026-10-23T06:39:58.507Z"
+    },
     {
       "id": "notif_1792693745468",
       "userId": "usr_1792419058259_ehg5",
@@ -1019,6 +1059,30 @@
     }
   ],
   "recordedLedger": [
+    {
+      "id": "REC-00029",
+      "sequence": 29,
+      "recordHash": "61cdbfe824d811c4fa9383f5944cea7079d9691c22d363d9457f6a30365e5bc7",
+      "entryType": "RECEIPT_DROPPED",
+      "targetId": "TR-19471",
+      "targetTitle": "Hardware Delivery & Integrity Attestation",
+      "actorId": "usr_allen_006",
+      "actorName": "Allen Kinetic",
+      "counterpartyId": null,
+      "counterpartyName": "Aegis Logistics Hub",
+      "counterpartyAvatar": "",
+      "category": "Goods Delivery",
+      "summary": "Receipt dropped: \"Hardware Delivery & Integrity Attestation\" (Goods Delivery) between Allen Kinetic and Aegis Logistics Hub. Status: PENDING.",
+      "isPublic": true,
+      "status": "pending",
+      "gitSynced": true,
+      "metadata": {
+        "transactionValue": "₦1,250,000",
+        "completionConditions": "Modules received, physical inspection passed, serial numbers verified.",
+        "deadline": null
+      },
+      "timestamp": "2026-10-23T06:39:58.501Z"
+    },
     {
       "id": "REC-00028",
       "sequence": 28,

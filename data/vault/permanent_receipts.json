@@ -1,0 +1,31 @@
+{
+  "TR-19471": {
+    "id": "TR-19471",
+    "creatorId": "usr_allen_006",
+    "creatorName": "Allen Kinetic",
+    "counterpartyName": "Aegis Logistics Hub",
+    "counterpartyContact": "logistics@aegis.network",
+    "counterpartyUserId": null,
+    "counterpartyAvatar": "",
+    "interactionCategory": "Goods Delivery",
+    "title": "Hardware Delivery & Integrity Attestation",
+    "description": "Delivery of tamper-evident cryptographically sealed tracking modules.",
+    "transactionValue": "₦1,250,000",
+    "status": "pending",
+    "completionConditions": "Modules received, physical inspection passed, serial numbers verified.",
+    "isFulfillmentConfirmed": false,
+    "deadline": null,
+    "isOverdue": false,
+    "evidenceAttachments": [],
+    "history": [
+      {
+        "timestamp": "2026-10-23T06:39:58.501Z",
+        "actor": "Allen Kinetic",
+        "event": "Trust Receipt Created & Awaiting Counterparty Confirmation"
+      }
+    ],
+    "comments": [],
+    "isPublic": true,
+    "createdAt": "2026-10-23T06:39:58.501Z"
+  }
+}
