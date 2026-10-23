@@ -321,6 +321,7 @@ export interface TrustReceipt {
   id: string; // e.g. TR-89241
   creatorId: string;
   creatorName: string;
+  creatorAvatar?: string;
   counterpartyName: string;
   counterpartyContact: string;
   counterpartyUserId?: string | null;

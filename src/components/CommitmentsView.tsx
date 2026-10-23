@@ -2387,7 +2387,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
               <div className="flex items-center gap-2">
                 <UserCheck className="w-5 h-5 text-indigo-600" />
-                <h3 className="text-sm font-bold text-slate-900">Change Counterparty</h3>
+                <h3 className="text-sm font-bold text-slate-900">Change / Add Deal Partner</h3>
               </div>
               <button
                 type="button"
@@ -2399,16 +2399,54 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
             </div>
 
             <div className="mb-3 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs">
-              <span className="text-slate-400 block text-[10px] uppercase font-semibold">Commitment:</span>
+              <span className="text-slate-400 block text-[10px] uppercase font-semibold">Pact / Commitment:</span>
               <span className="font-bold text-slate-900 block truncate">{editingCommitment.title}</span>
-              <span className="text-slate-500 text-[11px] mt-0.5 block">
-                Current Counterparty: <strong>{editingCommitment.creatorRole === 'promisor' ? editingCommitment.requesterName : editingCommitment.committerName}</strong>
-              </span>
+            </div>
+
+            {/* Deal Role Selector: Which person is being changed or added */}
+            <div className="mb-3 bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1.5">
+              <span className="text-[11px] font-semibold text-slate-700 block">Select which deal party to change/add:</span>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditTargetRole('requester');
+                    setEditSelectedUser(null);
+                    setEditExternalName('');
+                  }}
+                  className={`p-2 rounded-lg text-left text-xs border transition-all cursor-pointer ${
+                    editTargetRole === 'requester'
+                      ? 'bg-indigo-50 border-indigo-400 text-indigo-950 font-bold ring-1 ring-indigo-200'
+                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="text-[10px] uppercase font-semibold text-slate-400">Requester / Client</div>
+                  <div className="truncate font-bold text-slate-900">{editingCommitment.requesterName}</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditTargetRole('committer');
+                    setEditSelectedUser(null);
+                    setEditExternalName('');
+                  }}
+                  className={`p-2 rounded-lg text-left text-xs border transition-all cursor-pointer ${
+                    editTargetRole === 'committer'
+                      ? 'bg-indigo-50 border-indigo-400 text-indigo-950 font-bold ring-1 ring-indigo-200'
+                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="text-[10px] uppercase font-semibold text-slate-400">Committer / Performer</div>
+                  <div className="truncate font-bold text-slate-900">{editingCommitment.committerName}</div>
+                </button>
+              </div>
             </div>
 
             <form onSubmit={handleUpdateCommitmentCounterparty} className="space-y-3 text-xs">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Search & Select New Counterparty</label>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Search & Select New {editTargetRole === 'requester' ? 'Requester / Client' : 'Committer / Performer'}
+                </label>
                 <div className="relative">
                   <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
