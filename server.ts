@@ -2927,6 +2927,17 @@ app.get('/api/vault/stats', (_req: Request, res: Response) => {
   });
 });
 
+app.post('/api/vault/clear-mocks', async (_req: Request, res: Response) => {
+  db.clearMockPactsAndReceipts();
+  await triggerGitSyncImmediate('clear mock and fake pacts/receipts to start clean real ledger');
+  res.json({
+    success: true,
+    message: 'All mock and fake pacts and receipts deleted. Vault and ledger are clean and ready for real receipts and pacts.',
+    totalCommitments: 0,
+    totalReceipts: 0,
+  });
+});
+
 /* ==========================================================================
    IMMUTABLE PUBLIC RECORDED LEDGER & DROPPED AUDIT TRAIL
    ========================================================================== */

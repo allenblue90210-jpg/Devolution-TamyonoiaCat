@@ -1834,6 +1834,30 @@ class Database {
     return count;
   }
 
+  public clearMockPactsAndReceipts(): void {
+    this.data.commitments = [];
+    this.data.receipts = [];
+    if (this.data.recordedLedger) {
+      this.data.recordedLedger = this.data.recordedLedger.filter(
+        (l) =>
+          !l.targetId?.startsWith('TC-') &&
+          !l.targetId?.startsWith('TR-') &&
+          !l.entryType?.startsWith('RECEIPT_') &&
+          !l.entryType?.startsWith('COMMITMENT_')
+      );
+    }
+    saveVaultPacts({});
+    saveVaultReceipts({});
+    try {
+      if (fs.existsSync(VAULT_LEDGER_FILE)) {
+        fs.writeFileSync(VAULT_LEDGER_FILE, '', 'utf-8');
+      }
+    } catch {
+      // ignore
+    }
+    this.persist();
+  }
+
   // Remember & Evidence Ledger Methods
   public getRememberRecords(tag?: string, filter?: string, q?: string): RememberRecord[] {
     let list = this.data.rememberRecords || [];

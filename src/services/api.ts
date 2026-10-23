@@ -37,6 +37,20 @@ export function getSessionUserId(): string {
   return currentSessionUserId;
 }
 
+// Clean slate: purge any stale test/mock pacts and receipts from browser storage
+if (typeof window !== 'undefined') {
+  try {
+    const purgeFlag = localStorage.getItem('devolution_vault_purged_mock_v2');
+    if (!purgeFlag) {
+      localStorage.removeItem('devolution_vault_commitments');
+      localStorage.removeItem('devolution_vault_receipts');
+      localStorage.setItem('devolution_vault_purged_mock_v2', 'true');
+    }
+  } catch {
+    // ignore
+  }
+}
+
 function cacheVaultItems(key: string, items: any[]) {
   try {
     const raw = localStorage.getItem(key);
@@ -890,6 +904,20 @@ export const api = {
     return request('/api/vault/reconcile', {
       method: 'POST',
       body: JSON.stringify({ commitments, receipts }),
+    });
+  },
+
+  async clearMockPactsAndReceipts(): Promise<{ success: boolean; message: string }> {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('devolution_vault_commitments');
+        localStorage.removeItem('devolution_vault_receipts');
+      } catch {
+        // ignore
+      }
+    }
+    return request('/api/vault/clear-mocks', {
+      method: 'POST',
     });
   },
 };
