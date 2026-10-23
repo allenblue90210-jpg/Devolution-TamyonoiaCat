@@ -1711,7 +1711,7 @@ class Database {
         this.data.impressions[targetId].witnessCount = (this.data.impressions[targetId].witnessCount || 0) + 1;
       }
     }
-    this.persist();
+    this.persist(false);
     return this.data.impressions[targetId];
   }
 

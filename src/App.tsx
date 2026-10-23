@@ -282,13 +282,6 @@ export default function App() {
 
   // Render view router based on currentTab
   const renderContent = () => {
-    if (loading && !currentUser && currentTab !== 'landing' && currentTab !== 'public-ledger' && currentTab !== 'directory') {
-      return (
-        <div className="min-h-[70vh] flex items-center justify-center text-xs text-slate-500">
-          Initializing secure cryptographic trust ledger...
-        </div>
-      );
-    }
     // Check for profile route: profile or dynamic profile-{username}
     if (currentTab === 'profile' || currentTab.startsWith('profile-')) {
       const username = currentTab.startsWith('profile-')
@@ -296,12 +289,21 @@ export default function App() {
         : (currentUser?.username || 'allenkinetic006');
       return (
         <PublicProfileView
+          key={username}
           username={username}
           currentUser={currentUser}
           onNavigateTab={handleSelectTab}
           onBack={handleBack}
           onOpenAvatarUpload={() => setShowAvatarModal(true)}
         />
+      );
+    }
+
+    if (loading && !currentUser && currentTab !== 'landing' && currentTab !== 'public-ledger' && currentTab !== 'directory') {
+      return (
+        <div className="min-h-[70vh] flex items-center justify-center text-xs text-slate-500">
+          Initializing secure cryptographic trust ledger...
+        </div>
       );
     }
 

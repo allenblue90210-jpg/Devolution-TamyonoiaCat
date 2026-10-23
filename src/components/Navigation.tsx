@@ -297,12 +297,17 @@ export const Navigation: React.FC<NavigationProps> = ({
                   onClick={() => {
                     if (link.id === 'profile') {
                       if (currentUser) {
-                        onSelectTab(`profile-${currentUser.username}`);
+                        const target = `profile-${currentUser.username}`;
+                        if (currentTab !== target) {
+                          onSelectTab(target);
+                        }
                       } else {
                         onOpenAuth();
                       }
                     } else {
-                      onSelectTab(link.id);
+                      if (currentTab !== link.id) {
+                        onSelectTab(link.id);
+                      }
                     }
                   }}
                   className={`hover:text-slate-900 transition-colors whitespace-nowrap shrink-0 py-1.5 px-2.5 rounded-lg flex items-center gap-1.5 cursor-pointer ${
@@ -894,7 +899,10 @@ export const Navigation: React.FC<NavigationProps> = ({
         <button
           onClick={() => {
             if (currentUser) {
-              onSelectTab(`profile-${currentUser.username}`);
+              const target = `profile-${currentUser.username}`;
+              if (currentTab !== target) {
+                onSelectTab(target);
+              }
             } else {
               onOpenAuth();
             }

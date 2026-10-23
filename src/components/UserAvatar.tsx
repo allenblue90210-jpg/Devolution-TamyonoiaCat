@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User as UserIcon } from 'lucide-react';
 
 export function isRealAvatarUrl(url?: string | null): boolean {
@@ -39,6 +39,10 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
 }) => {
   const [hasError, setHasError] = useState(false);
   const effectiveSrc = src || avatarUrl;
+
+  useEffect(() => {
+    setHasError(false);
+  }, [effectiveSrc]);
 
   const valid = !hasError && isRealAvatarUrl(effectiveSrc);
 
