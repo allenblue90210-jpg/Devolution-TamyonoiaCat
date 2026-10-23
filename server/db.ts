@@ -1176,6 +1176,62 @@ class Database {
     return this.data;
   }
 
+  public mergeState(remote: Partial<DatabaseSchema>): DatabaseSchema {
+    if (!remote) return this.data;
+
+    const mergeList = <T extends { id: string }>(currentList: T[] = [], remoteList: T[] = []): T[] => {
+      const map = new Map<string, T>();
+      for (const item of currentList) {
+        if (item && item.id) map.set(item.id, item);
+      }
+      for (const item of remoteList) {
+        if (item && item.id) {
+          const existing = map.get(item.id);
+          map.set(item.id, existing ? { ...existing, ...item } : item);
+        }
+      }
+      return Array.from(map.values());
+    };
+
+    if (remote.users && Array.isArray(remote.users)) {
+      this.data.users = mergeList(this.data.users, remote.users);
+    }
+    if (remote.evidence && Array.isArray(remote.evidence)) {
+      this.data.evidence = mergeList(this.data.evidence, remote.evidence);
+    }
+    if (remote.relationships && Array.isArray(remote.relationships)) {
+      this.data.relationships = mergeList(this.data.relationships, remote.relationships);
+    }
+    if (remote.businesses && Array.isArray(remote.businesses)) {
+      this.data.businesses = mergeList(this.data.businesses, remote.businesses);
+    }
+    if (remote.references && Array.isArray(remote.references)) {
+      this.data.references = mergeList(this.data.references, remote.references);
+    }
+    if (remote.notifications && Array.isArray(remote.notifications)) {
+      this.data.notifications = mergeList(this.data.notifications, remote.notifications);
+    }
+    if (remote.commitments && Array.isArray(remote.commitments)) {
+      this.data.commitments = mergeList(this.data.commitments, remote.commitments);
+    }
+    if (remote.receipts && Array.isArray(remote.receipts)) {
+      this.data.receipts = mergeList(this.data.receipts, remote.receipts);
+    }
+    if (remote.goodFaithRatings && Array.isArray(remote.goodFaithRatings)) {
+      this.data.goodFaithRatings = mergeList(this.data.goodFaithRatings, remote.goodFaithRatings);
+    }
+    if (remote.rememberRecords && Array.isArray(remote.rememberRecords)) {
+      this.data.rememberRecords = mergeList(this.data.rememberRecords, remote.rememberRecords);
+    }
+    if (remote.recordedLedger && Array.isArray(remote.recordedLedger)) {
+      this.data.recordedLedger = mergeList(this.data.recordedLedger, remote.recordedLedger);
+    }
+
+    this.syncWithVault(this.data);
+    this.save(this.data);
+    return this.data;
+  }
+
   // User queries
   public getUserById(id: string): User | undefined {
     return this.data.users.find((u) => u.id === id);

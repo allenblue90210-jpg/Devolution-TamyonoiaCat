@@ -3045,7 +3045,7 @@ app.post('/api/supabase/pull', async (_req: Request, res: Response) => {
   try {
     const result = await pullFromSupabase();
     if (result.success && result.data) {
-      db.replaceState(result.data);
+      db.mergeState(result.data);
       res.json({ success: true, message: result.message });
     } else {
       res.status(400).json({ success: false, message: result.message });
@@ -3103,8 +3103,25 @@ async function startServer() {
     });
   }
 
-  app.listen(Number(PORT), '0.0.0.0', () => {
+  app.listen(Number(PORT), '0.0.0.0', async () => {
     console.log(`Trust Platform running on http://0.0.0.0:${PORT}`);
+
+    // Harmonize and safeguard people's work with Supabase on startup
+    const sbCfg = getResolvedSupabaseConfig();
+    if (sbCfg.url && sbCfg.key) {
+      console.log('[Supabase Startup] Supabase key configured. Ensuring all user work is saved...');
+      try {
+        const pullRes = await pullFromSupabase();
+        if (pullRes.success && pullRes.data) {
+          db.mergeState(pullRes.data);
+          console.log('[Supabase Startup] Merged people\'s work from Supabase into active ledger.');
+        }
+        await syncToSupabase(db.getState());
+        console.log('[Supabase Startup] Synchronized current state to Supabase.');
+      } catch (sbErr: any) {
+        console.warn('[Supabase Startup Sync Notice]:', sbErr.message);
+      }
+    }
   });
 }
 
