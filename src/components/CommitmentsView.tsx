@@ -296,18 +296,14 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
     setDeadlineDate(dateStr);
   }, []);
 
-  // Initialize default counterparty only when modal opens and user hasn't cleared it
-  useEffect(() => {
-    if (showCreateModal && !hasManuallyClearedCounterparty && !selectedCounterpartyUser && !targetCommitterId) {
-      if (availableUsers.length > 0) {
-        const otherUser = availableUsers.find((u) => u.id !== currentUser?.id) || availableUsers[0];
-        if (otherUser) {
-          setTargetCommitterId(otherUser.id);
-          setSelectedCounterpartyUser(otherUser);
-        }
-      }
-    }
-  }, [showCreateModal, availableUsers, currentUser]);
+  const openCreateModal = () => {
+    setSelectedCounterpartyUser(null);
+    setTargetCommitterId('');
+    setExternalCommitterName('');
+    setCounterpartySearch('');
+    setHasManuallyClearedCounterparty(true);
+    setShowCreateModal(true);
+  };
 
   const setCommitmentDeadlinePreset = (preset: '2h' | '6h' | 'tomorrow_2am' | '24h' | '3d' | '7d') => {
     const d = new Date();
@@ -669,7 +665,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
 
         <div className="flex flex-col items-stretch sm:items-end gap-1.5 shrink-0">
           <button
-            onClick={() => setShowCreateModal(true)}
+            onClick={openCreateModal}
             className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4 text-white" />
@@ -781,8 +777,8 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
             Create a commitment request (like a loaner vehicle return or service milestone) to start an escrowed trust pact with live timer tracking.
           </p>
           <button
-            onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 bg-indigo-600 text-white text-xs font-semibold rounded-lg hover:bg-indigo-700"
+            onClick={openCreateModal}
+            className="px-4 py-2 bg-indigo-600 text-white text-xs font-semibold rounded-lg hover:bg-indigo-700 cursor-pointer"
           >
             Create First Commitment
           </button>

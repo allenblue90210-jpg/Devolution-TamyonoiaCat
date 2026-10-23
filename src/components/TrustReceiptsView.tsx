@@ -130,19 +130,14 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
   const [disputeReason, setDisputeReason] = useState('Unfulfilled Deliverables');
   const [disputeDesc, setDisputeDesc] = useState('');
 
-  // Auto-select other user when create modal opens if not manually cleared
-  useEffect(() => {
-    if (showCreateModal && !hasUserClearedReceiptCounterparty && !targetCounterpartyId) {
-      if (availableUsers.length > 0) {
-        const otherUser = availableUsers.find((u) => u.id !== user.id) || availableUsers[0];
-        if (otherUser) {
-          setTargetCounterpartyId(otherUser.id);
-          setCounterpartyName(otherUser.fullName);
-          setCounterpartyContact(otherUser.email || `${otherUser.username}@devolution.network`);
-        }
-      }
-    }
-  }, [showCreateModal, availableUsers, user.id]);
+  const openCreateModal = () => {
+    setTargetCounterpartyId('');
+    setCounterpartyName('');
+    setCounterpartyContact('');
+    setReceiptCounterpartySearch('');
+    setHasUserClearedReceiptCounterparty(true);
+    setShowCreateModal(true);
+  };
 
   // Initial default deadline: tomorrow 18:00
   useEffect(() => {
