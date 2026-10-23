@@ -3112,8 +3112,7 @@ async function startServer() {
       console.log('[Supabase Startup] Supabase key configured. Ensuring all user work is saved...');
       try {
         const pullRes = await pullFromSupabase();
-        if (pullRes.success && pullRes.data) {
-          if (pullRes.data.users && Array.isArray(pullRes.data.users)) {
+           if (pullRes.data.users && Array.isArray(pullRes.data.users)) {
             pullRes.data.users = pullRes.data.users.filter((u: any) =>
               u.id !== 'usr_allen_001' &&
               u.id !== 'usr_sarah_002' &&
@@ -3124,15 +3123,12 @@ async function startServer() {
               !u.email?.includes('horizonlogistics.com')
             );
           }
-          // Never re-import fake pacts/receipts from remote snapshot
-          if (pullRes.data.commitments && Array.isArray(pullRes.data.commitments)) {
-            pullRes.data.commitments = pullRes.data.commitments.filter((c: any) => !c.id?.startsWith('TC-'));
-          }
-          if (pullRes.data.receipts && Array.isArray(pullRes.data.receipts)) {
-            pullRes.data.receipts = pullRes.data.receipts.filter((r: any) => !r.id?.startsWith('TR-'));
-          }
+          // IMPORTANT: Preserve ALL real pacts and receipts from Supabase.
+          // Previously this filter was removing everything with TC-/TR- prefixes,
+          // which wiped ALL user-created pacts and receipts on every restart.
+          // Now we merge them properly to ensure zero data loss.
           db.mergeState(pullRes.data);
-          console.log('[Supabase Startup] Merged people\'s work from Supabase into active ledger.');
+          console.log('[Supabase Startup] Merged people\'s work (users, pacts, receipts) from Supabase into active ledger.');ple\'s work from Supabase into active ledger.');
         }
         await syncToSupabase(db.getState());
         console.log('[Supabase Startup] Synchronized current state to Supabase.');
