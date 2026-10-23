@@ -3113,6 +3113,24 @@ async function startServer() {
       try {
         const pullRes = await pullFromSupabase();
         if (pullRes.success && pullRes.data) {
+          if (pullRes.data.users && Array.isArray(pullRes.data.users)) {
+            pullRes.data.users = pullRes.data.users.filter((u: any) =>
+              u.id !== 'usr_allen_001' &&
+              u.id !== 'usr_sarah_002' &&
+              u.id !== 'usr_fatima_003' &&
+              u.id !== 'usr_1792419706090_6uj2' &&
+              !u.email?.includes('example.com') &&
+              !u.email?.includes('cloudworks.ng') &&
+              !u.email?.includes('horizonlogistics.com')
+            );
+          }
+          // Never re-import fake pacts/receipts from remote snapshot
+          if (pullRes.data.commitments && Array.isArray(pullRes.data.commitments)) {
+            pullRes.data.commitments = pullRes.data.commitments.filter((c: any) => !c.id?.startsWith('TC-'));
+          }
+          if (pullRes.data.receipts && Array.isArray(pullRes.data.receipts)) {
+            pullRes.data.receipts = pullRes.data.receipts.filter((r: any) => !r.id?.startsWith('TR-'));
+          }
           db.mergeState(pullRes.data);
           console.log('[Supabase Startup] Merged people\'s work from Supabase into active ledger.');
         }
