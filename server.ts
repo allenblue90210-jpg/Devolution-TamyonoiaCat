@@ -1379,6 +1379,7 @@ app.post('/api/receipts', (req: Request, res: Response) => {
   };
 
   db.addReceipt(newReceipt);
+  syncReceiptToSupabase(newReceipt).catch(() => {});
   triggerGitSyncImmediate(`receipt ${newReceipt.id} ("${newReceipt.title}")`);
 
   // Notify creator
@@ -1907,6 +1908,7 @@ app.post('/api/commitments', (req: Request, res: Response) => {
   };
 
   db.createCommitment(newCommitment);
+  syncPactToSupabase(newCommitment).catch(() => {});
   triggerGitSyncImmediate(`pact ${newCommitment.id} ("${newCommitment.title}")`);
 
   if (targetUser) {
