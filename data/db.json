@@ -1175,17 +1175,54 @@
   },
   "commitments": [
     {
+      "id": "TC-2588",
+      "title": "Eagke ",
+      "description": "by tomorrow ",
+      "category": "Vehicle & Transportation",
+      "requesterId": "usr_allen_006",
+      "requesterName": "Allen Kinetic",
+      "requesterAvatar": "",
+      "committerId": "usr_allen_nuclear",
+      "committerName": "Allen Blue",
+      "committerAvatar": "",
+      "promisedUserId": "usr_allen_006",
+      "promisedUserName": "Allen Kinetic",
+      "promisedUserAvatar": "",
+      "creatorRole": "requester",
+      "deadline": "2026-10-24T09:00:00.000Z",
+      "status": "pending_acceptance",
+      "trustRewardPoints": 25,
+      "penaltyRateDailyPercent": 30,
+      "penaltyCurrentDeductionPercent": 0,
+      "isOverdue": false,
+      "daysOverdue": 0,
+      "isPublic": true,
+      "impressions": 1,
+      "witnessCount": 0,
+      "positiveImpressions": 0,
+      "hasWitnessed": false,
+      "comments": [],
+      "createdAt": "2026-10-23T06:52:59.587Z",
+      "history": [
+        {
+          "timestamp": "2026-10-23T06:52:59.587Z",
+          "actor": "Allen Kinetic",
+          "event": "Commitment pact recorded on ledger (Public Ledger)"
+        }
+      ]
+    },
+    {
       "id": "TC-3464",
       "title": "Commitment ",
-      "status": "pending_acceptance",
+      "status": "overdue",
       "category": "Vehicle & Transportation",
       "comments": [],
       "deadline": "2026-10-20T09:00:00.000Z",
       "isPublic": true,
       "createdAt": "2026-10-19T15:29:39.390Z",
-      "isOverdue": false,
+      "isOverdue": true,
       "committerId": "usr_allen_001",
-      "daysOverdue": 0,
+      "daysOverdue": 3,
       "description": "loan will be handled ",
       "impressions": 1,
       "ratingBadge": "100% Exemplary Good Faith",
@@ -1200,20 +1237,20 @@
       "trustRewardPoints": 25,
       "positiveImpressions": 0,
       "penaltyRateDailyPercent": 30,
-      "penaltyCurrentDeductionPercent": 0
+      "penaltyCurrentDeductionPercent": 90
     },
     {
       "id": "TC-4351",
       "title": "Payback by October 23rd, 2026",
-      "status": "pending_acceptance",
+      "status": "overdue",
       "category": "Vehicle & Transportation",
       "comments": [],
       "deadline": "2026-10-20T09:00:00.000Z",
       "isPublic": true,
       "createdAt": "2026-10-19T14:28:27.484Z",
-      "isOverdue": false,
+      "isOverdue": true,
       "committerId": "usr_allen_001",
-      "daysOverdue": 0,
+      "daysOverdue": 3,
       "description": "pay me till tomorrow ",
       "impressions": 1,
       "ratingBadge": "100% Exemplary Good Faith",
@@ -1228,7 +1265,7 @@
       "trustRewardPoints": 25,
       "positiveImpressions": 0,
       "penaltyRateDailyPercent": 30,
-      "penaltyCurrentDeductionPercent": 0
+      "penaltyCurrentDeductionPercent": 90
     },
     {
       "id": "TC-9482",
@@ -1348,7 +1385,7 @@
       "createdAt": "2026-10-18T09:15:43.602Z",
       "isOverdue": true,
       "committerId": "usr_sarah_002",
-      "daysOverdue": 1,
+      "daysOverdue": 4,
       "description": "Vehicle loaner agreement: User A (Allen) loaning Mercedes C300 to User B (Sarah) for regional tech summit transit. Promised to be returned and parked at Lekki Phase 1 secure garage by 2:00 AM.",
       "impressions": 2150,
       "ratingBadge": "100% Exemplary Good Faith",
@@ -1366,7 +1403,7 @@
       "checkedOutByCommitterAt": null,
       "checkedOutByRequesterAt": null,
       "penaltyRateDailyPercent": 30,
-      "penaltyCurrentDeductionPercent": 30
+      "penaltyCurrentDeductionPercent": 90
     },
     {
       "id": "TC-7041",
@@ -1413,7 +1450,7 @@
     {
       "id": "TC-9023",
       "title": "Industrial 3D Calibration Tooling Rig Return",
-      "status": "pending_acceptance",
+      "status": "overdue",
       "category": "Equipment & Machinery",
       "comments": [
         {
@@ -1430,9 +1467,9 @@
       "deadline": "2026-10-20T10:15:43.602Z",
       "isPublic": true,
       "createdAt": "2026-10-18T13:15:43.602Z",
-      "isOverdue": false,
+      "isOverdue": true,
       "committerId": "usr_fatima_003",
-      "daysOverdue": 0,
+      "daysOverdue": 3,
       "description": "Temporary loan of high-precision CNC tool head and laser calibration jig.",
       "impressions": 890,
       "ratingBadge": "100% Exemplary Good Faith",
@@ -1449,7 +1486,7 @@
       "checkedOutByCommitterAt": null,
       "checkedOutByRequesterAt": null,
       "penaltyRateDailyPercent": 30,
-      "penaltyCurrentDeductionPercent": 0
+      "penaltyCurrentDeductionPercent": 90
     }
   ],
   "goodFaithRatings": [
@@ -1519,7 +1556,7 @@
   ],
   "impressions": {
     "network": {
-      "impressions": 4945,
+      "impressions": 4946,
       "witnessCount": 560
     },
     "usr_1792413526573_1z1j": {
