@@ -21,6 +21,7 @@ import {
   ChevronUp,
   Camera,
   Key,
+  LogOut,
 } from 'lucide-react';
 
 interface SettingsViewProps {
@@ -28,9 +29,10 @@ interface SettingsViewProps {
   onProfileUpdated: (updatedUser: User) => void;
   onBack?: () => void;
   onOpenAvatarUpload?: () => void;
+  onLogout?: () => void;
 }
 
-export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdated, onBack, onOpenAvatarUpload }) => {
+export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdated, onBack, onOpenAvatarUpload, onLogout }) => {
   const [headline, setHeadline] = useState(user.headline);
   const [bio, setBio] = useState(user.bio);
   const [category, setCategory] = useState(user.category);
@@ -892,6 +894,31 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
           </button>
         </div>
       </div>
+
+      {/* Account Session & Log Out */}
+      {onLogout && (
+        <div className="bg-white rounded-xl border border-slate-200 hover:border-red-200 p-6 shadow-sm space-y-4 transition-all">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <LogOut className="w-4 h-4 text-red-500" />
+                <span>Active Trustee Session</span>
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">
+                You are currently signed in as <strong>{user.fullName}</strong> ({user.email}).
+              </p>
+            </div>
+            <button
+              onClick={onLogout}
+              className="px-4 py-2 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-2xs"
+              title="End active session and log out"
+            >
+              <LogOut className="w-3.5 h-3.5 text-red-500" />
+              <span>Log Out of Devolution</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -295,6 +295,7 @@ export default function App() {
           onNavigateTab={handleSelectTab}
           onBack={handleBack}
           onOpenAvatarUpload={() => setShowAvatarModal(true)}
+          onLogout={handleLogout}
         />
       );
     }
@@ -470,6 +471,7 @@ export default function App() {
             }}
             onBack={handleBack}
             onOpenAvatarUpload={() => setShowAvatarModal(true)}
+            onLogout={handleLogout}
           />
         ) : (
           renderSignInPrompt('Settings', 'Configure privacy thresholds, profile attributes, and verification options.')
