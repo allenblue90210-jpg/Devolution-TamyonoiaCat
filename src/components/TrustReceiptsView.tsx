@@ -122,6 +122,7 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
   const [editReceiptSearch, setEditReceiptSearch] = useState('');
   const [editReceiptSelectedUser, setEditReceiptSelectedUser] = useState<any>(null);
   const [editReceiptExternalName, setEditReceiptExternalName] = useState('');
+  const [editReceiptTargetSide, setEditReceiptTargetSide] = useState<'counterparty' | 'creator'>('counterparty');
   const [isUpdatingReceiptCounterparty, setIsUpdatingReceiptCounterparty] = useState(false);
 
   // Dispute modal state
@@ -374,22 +375,32 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
 
     try {
       setIsUpdatingReceiptCounterparty(true);
-      await api.updateReceipt(editingReceipt.id, {
-        counterpartyUserId: isOther ? 'other' : chosen?.id,
-        counterpartyName: finalName,
-        counterpartyContact: chosen?.email || `${finalName.toLowerCase().replace(/\s+/g, '.')}@devolution.network`,
-        counterpartyAvatar: chosen?.avatarUrl || '',
-      });
+      if (editReceiptTargetSide === 'creator') {
+        await api.updateReceipt(editingReceipt.id, {
+          targetSide: 'creator',
+          creatorId: isOther ? 'other' : chosen?.id,
+          creatorName: finalName,
+          creatorAvatar: chosen?.avatarUrl || '',
+        });
+      } else {
+        await api.updateReceipt(editingReceipt.id, {
+          targetSide: 'counterparty',
+          counterpartyUserId: isOther ? 'other' : chosen?.id,
+          counterpartyName: finalName,
+          counterpartyContact: chosen?.email || `${finalName.toLowerCase().replace(/\s+/g, '.')}@devolution.network`,
+          counterpartyAvatar: chosen?.avatarUrl || '',
+        });
+      }
 
       setEditingReceipt(null);
       setEditReceiptSelectedUser(null);
       setEditReceiptSearch('');
       setEditReceiptExternalName('');
-      setToastMessage(`Counterparty updated to "${finalName}" successfully!`);
+      setToastMessage(`Deal partner (${editReceiptTargetSide === 'creator' ? 'Initiator' : 'Counterparty'}) updated to "${finalName}" successfully!`);
       setTimeout(() => setToastMessage(null), 4000);
       if (onRefreshAllData) onRefreshAllData();
     } catch (err: any) {
-      alert(err.message || 'Failed to update counterparty');
+      alert(err.message || 'Failed to update deal partner');
     } finally {
       setIsUpdatingReceiptCounterparty(false);
     }
@@ -697,6 +708,25 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                       <span>Rate</span>
                     </button>
 
+                    {rc.status !== 'completed' && rc.status !== 'cancelled' && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingReceipt(rc);
+                          setEditReceiptTargetSide(user.id === rc.counterpartyUserId ? 'creator' : 'counterparty');
+                          setEditReceiptSelectedUser(null);
+                          setEditReceiptSearch('');
+                          setEditReceiptExternalName('');
+                        }}
+                        className="px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 text-indigo-700 border border-slate-200 hover:border-indigo-300 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                        title="Change or add the person doing this deal with"
+                      >
+                        <UserCheck className="w-3.5 h-3.5 text-indigo-600" />
+                        <span>Change Partner</span>
+                      </button>
+                    )}
+
                     <button
                       type="button"
                       onClick={(e) => {
@@ -927,18 +957,20 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
                 <div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-400 block">Promised Counterparty:</span>
-                    {selectedReceipt.status === 'pending' && selectedReceipt.creatorId === user.id && (
+                    {selectedReceipt.status !== 'completed' && selectedReceipt.status !== 'cancelled' && (
                       <button
                         type="button"
                         onClick={() => {
                           setEditingReceipt(selectedReceipt);
+                          setEditReceiptTargetSide(user.id === selectedReceipt.counterpartyUserId ? 'creator' : 'counterparty');
                           setEditReceiptSelectedUser(null);
                           setEditReceiptSearch('');
                           setEditReceiptExternalName('');
                         }}
-                        className="text-[10px] text-indigo-600 hover:text-indigo-800 font-semibold hover:underline cursor-pointer"
+                        className="text-[10px] text-indigo-600 hover:text-indigo-800 font-semibold hover:underline cursor-pointer flex items-center gap-1"
                       >
-                        Change Counterparty
+                        <Users className="w-3 h-3 text-indigo-600" />
+                        <span>Change / Add Deal Partner</span>
                       </button>
                     )}
                   </div>
@@ -1774,10 +1806,10 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
               <div>
                 <h3 className="text-base font-bold text-slate-900 flex items-center gap-1.5">
                   <Users className="w-4 h-4 text-indigo-600" />
-                  <span>Change Counterparty</span>
+                  <span>Change / Add Deal Partner</span>
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Select a registered network participant or specify an external counterparty for Receipt #{editingReceipt.id}
+                  Update or assign either deal participant on Receipt #{editingReceipt.id}
                 </p>
               </div>
               <button
@@ -1788,9 +1820,50 @@ export const TrustReceiptsView: React.FC<TrustReceiptsViewProps> = ({
               </button>
             </div>
 
+            {/* Deal Role Selector: Which person is being changed or added */}
+            <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1.5">
+              <span className="text-[11px] font-semibold text-slate-700 block">Select which deal party to change/add:</span>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditReceiptTargetSide('counterparty');
+                    setEditReceiptSelectedUser(null);
+                    setEditReceiptExternalName('');
+                  }}
+                  className={`p-2 rounded-lg text-left text-xs border transition-all cursor-pointer ${
+                    editReceiptTargetSide === 'counterparty'
+                      ? 'bg-indigo-50 border-indigo-400 text-indigo-950 font-bold ring-1 ring-indigo-200'
+                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="text-[10px] uppercase font-semibold text-slate-400">Promised Counterparty</div>
+                  <div className="truncate font-bold text-slate-900">{editingReceipt.counterpartyName || 'Not Assigned'}</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditReceiptTargetSide('creator');
+                    setEditReceiptSelectedUser(null);
+                    setEditReceiptExternalName('');
+                  }}
+                  className={`p-2 rounded-lg text-left text-xs border transition-all cursor-pointer ${
+                    editReceiptTargetSide === 'creator'
+                      ? 'bg-indigo-50 border-indigo-400 text-indigo-950 font-bold ring-1 ring-indigo-200'
+                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="text-[10px] uppercase font-semibold text-slate-400">Initiator / Creator</div>
+                  <div className="truncate font-bold text-slate-900">{editingReceipt.creatorName}</div>
+                </button>
+              </div>
+            </div>
+
             <form onSubmit={handleUpdateReceiptCounterparty} className="space-y-4 text-xs">
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">Search Network Members</label>
+                <label className="block text-slate-700 font-semibold mb-1">
+                  Search & Select New {editReceiptTargetSide === 'creator' ? 'Initiator' : 'Counterparty'}
+                </label>
                 <div className="relative">
                   <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                   <input
