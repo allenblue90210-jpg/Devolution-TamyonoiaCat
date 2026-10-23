@@ -3137,6 +3137,30 @@ async function startServer() {
           db.mergeState(pullRes.data);
           console.log('[Supabase Startup] Merged people\'s work (users, pacts, receipts) from Supabase into active ledger.');
         }
+
+        // Also pull pacts and receipts from their dedicated Supabase tables
+        // This provides a second safety net beyond the unified state blob
+        try {
+          const [remotePacts, remoteReceipts] = await Promise.all([
+            pullPactsFromSupabase(),
+            pullReceiptsFromSupabase(),
+          ]);
+          if (remotePacts.length > 0) {
+            const restoredPacts = db.reconcileExternalPacts(remotePacts);
+            if (restoredPacts > 0) {
+              console.log(`[Supabase Startup] Restored ${restoredPacts} pact(s) from dedicated Supabase table.`);
+            }
+          }
+          if (remoteReceipts.length > 0) {
+            const restoredReceipts = db.reconcileExternalReceipts(remoteReceipts);
+            if (restoredReceipts > 0) {
+              console.log(`[Supabase Startup] Restored ${restoredReceipts} receipt(s) from dedicated Supabase table.`);
+            }
+          }
+        } catch (pullDetailErr: any) {
+          console.warn('[Supabase Startup Detail Pull Notice]:', pullDetailErr.message);
+        }
+
         await syncToSupabase(db.getState());
         console.log('[Supabase Startup] Synchronized current state to Supabase.');
       } catch (sbErr: any) {
