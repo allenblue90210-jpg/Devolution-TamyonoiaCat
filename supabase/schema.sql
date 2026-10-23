@@ -58,6 +58,8 @@ create policy "Allow service role manage users"
   with check (true);
 
 -- 3. Trust Commitments Table (Pacts & Bilateral Agreements)
+-- NOTE: FK constraints removed to support external/unregistered counterparties.
+-- The full pact object is stored in the 'data' JSONB column for zero-loss persistence.
 create table if not exists public.devolution_commitments (
   id text primary key,
   title text not null,
@@ -65,8 +67,9 @@ create table if not exists public.devolution_commitments (
   category text not null,
   other_category_details text,
   status text not null default 'pending_acceptance',
-  requester_id text not null references public.devolution_users(id) on delete cascade,
-  committer_id text not null references public.devolution_users(id) on delete cascade,
+  requester_id text not null,
+  committer_id text not null,
+  data jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -85,6 +88,8 @@ create policy "Allow service role manage commitments"
   with check (true);
 
 -- 4. Dual-Signed Trust Receipts Table
+-- NOTE: FK constraints removed to support external/unregistered counterparties.
+-- The full receipt object is stored in the 'data' JSONB column for zero-loss persistence.
 create table if not exists public.devolution_receipts (
   id text primary key,
   title text not null,
@@ -93,8 +98,9 @@ create table if not exists public.devolution_receipts (
   amount text,
   currency text default 'NGN',
   status text not null default 'pending',
-  creator_id text not null references public.devolution_users(id) on delete cascade,
-  counterparty_id text not null references public.devolution_users(id) on delete cascade,
+  creator_id text not null,
+  counterparty_id text not null,
+  data jsonb not null default '{}'::jsonb,
   creator_signed_at timestamptz,
   counterparty_signed_at timestamptz,
   created_at timestamptz not null default now(),
@@ -175,7 +181,27 @@ create or replace trigger on_devolution_state_update
   before update on public.devolution_state
   for each row execute function public.handle_updated_at();
 
+create or replace trigger on_devolution_commitments_update
+  before update on public.devolution_commitments
+  for each row execute function public.handle_updated_at();
+
+create or replace trigger on_devolution_receipts_update
+  before update on public.devolution_receipts
+  for each row execute function public.handle_updated_at();
+
 -- Seed initial record for state synchronization
 insert into public.devolution_state (id, data, user_count, receipt_count, commitment_count)
 values ('primary', '{}'::jsonb, 0, 0, 0)
 on conflict (id) do nothing;
+
+-- ==============================================================================
+-- MIGRATION: If tables already exist without 'data' column, add it:
+-- ==============================================================================
+-- ALTER TABLE public.devolution_commitments ADD COLUMN IF NOT EXISTS data jsonb not null default '{}'::jsonb;
+-- ALTER TABLE public.devolution_receipts ADD COLUMN IF NOT EXISTS data jsonb not null default '{}'::jsonb;
+-- 
+-- If tables have FK constraints that block inserts, drop them:
+-- ALTER TABLE public.devolution_commitments DROP CONSTRAINT IF EXISTS devolution_commitments_requester_id_fkey;
+-- ALTER TABLE public.devolution_commitments DROP CONSTRAINT IF EXISTS devolution_commitments_committer_id_fkey;
+-- ALTER TABLE public.devolution_receipts DROP CONSTRAINT IF EXISTS devolution_receipts_creator_id_fkey;
+-- ALTER TABLE public.devolution_receipts DROP CONSTRAINT IF EXISTS devolution_receipts_counterparty_id_fkey;

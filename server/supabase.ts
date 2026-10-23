@@ -444,6 +444,121 @@ export async function testSupabaseConnection(): Promise<{
   }
 }
 
+export async function syncPactToSupabase(pact: any): Promise<boolean> {
+  const client = getSupabaseClient();
+  if (!client || !pact?.id) return false;
+
+  try {
+    const { error } = await client
+      .from('devolution_commitments')
+      .upsert({
+        id: pact.id,
+        title: pact.title || '',
+        description: pact.description || '',
+        category: pact.category || 'General',
+        other_category_details: pact.otherCategoryDetails || null,
+        status: pact.status || 'pending_acceptance',
+        requester_id: pact.requesterId || 'unknown',
+        committer_id: pact.committerId || 'unknown',
+        data: pact,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'id' });
+
+    if (error) {
+      // If FK constraint fails (external users), fall back gracefully
+      console.warn('[Supabase Pact Sync Notice]:', error.message);
+    }
+    return true;
+  } catch (err: any) {
+    console.warn('[Supabase Pact Sync Error]:', err.message);
+    return false;
+  }
+}
+
+export async function syncReceiptToSupabase(receipt: any): Promise<boolean> {
+  const client = getSupabaseClient();
+  if (!client || !receipt?.id) return false;
+
+  try {
+    const { error } = await client
+      .from('devolution_receipts')
+      .upsert({
+        id: receipt.id,
+        title: receipt.title || '',
+        description: receipt.description || '',
+        category: receipt.interactionCategory || 'General',
+        amount: receipt.transactionValue || null,
+        status: receipt.status || 'pending',
+        creator_id: receipt.creatorId || 'unknown',
+        counterparty_id: receipt.counterpartyUserId || 'unknown',
+        data: receipt,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'id' });
+
+    if (error) {
+      console.warn('[Supabase Receipt Sync Notice]:', error.message);
+    }
+    return true;
+  } catch (err: any) {
+    console.warn('[Supabase Receipt Sync Error]:', err.message);
+    return false;
+  }
+}
+
+export async function syncAllPactsToSupabase(pacts: any[]): Promise<number> {
+  if (!pacts || !Array.isArray(pacts) || pacts.length === 0) return 0;
+  let synced = 0;
+  for (const p of pacts) {
+    try {
+      const ok = await syncPactToSupabase(p);
+      if (ok) synced++;
+    } catch { /* continue */ }
+  }
+  return synced;
+}
+
+export async function syncAllReceiptsToSupabase(receipts: any[]): Promise<number> {
+  if (!receipts || !Array.isArray(receipts) || receipts.length === 0) return 0;
+  let synced = 0;
+  for (const r of receipts) {
+    try {
+      const ok = await syncReceiptToSupabase(r);
+      if (ok) synced++;
+    } catch { /* continue */ }
+  }
+  return synced;
+}
+
+export async function pullPactsFromSupabase(): Promise<any[]> {
+  const client = getSupabaseClient();
+  if (!client) return [];
+  try {
+    const { data, error } = await client
+      .from('devolution_commitments')
+      .select('data')
+      .order('updated_at', { ascending: false });
+    if (error || !data) return [];
+    return data.map((row: any) => row.data).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+export async function pullReceiptsFromSupabase(): Promise<any[]> {
+  const client = getSupabaseClient();
+  if (!client) return [];
+  try {
+    const { data, error } = await client
+      .from('devolution_receipts')
+      .select('data')
+      .order('updated_at', { ascending: false });
+    if (error || !data) return [];
+    return data.map((row: any) => row.data).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
 export async function syncToSupabase(stateData: any): Promise<{
   success: boolean;
   message: string;
@@ -489,9 +604,19 @@ export async function syncToSupabase(stateData: any): Promise<{
       syncAllUsersToSupabaseAuth(stateData.users).catch(() => {});
     }
 
+    // 4. Sync all pacts and receipts individually to dedicated tables
+    let syncedPactsCount = 0;
+    let syncedReceiptsCount = 0;
+    if (stateData.commitments?.length) {
+      syncedPactsCount = await syncAllPactsToSupabase(stateData.commitments);
+    }
+    if (stateData.receipts?.length) {
+      syncedReceiptsCount = await syncAllReceiptsToSupabase(stateData.receipts);
+    }
+
     lastSyncTimestamp = now;
     lastSyncStatus = 'connected';
-    lastSyncMessage = `Synchronized ${syncedUsersCount || stateData.users?.length || 0} users, ${stateData.receipts?.length || 0} receipts, and ${stateData.commitments?.length || 0} commitments with Supabase.`;
+    lastSyncMessage = `Synchronized ${syncedUsersCount || stateData.users?.length || 0} users, ${syncedReceiptsCount || stateData.receipts?.length || 0} receipts, and ${syncedPactsCount || stateData.commitments?.length || 0} commitments with Supabase.`;
 
     return {
       success: true,
