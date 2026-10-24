@@ -69,20 +69,17 @@ app.use((_req, res, next) => {
 
 
 // Session helper: in this full-stack environment, we track active user by header 'x-user-id'.
-// Defaults to primary account 'usr_allen_nuclear' (allennuclear001@gmail.com) unless explicitly guest.
+// Returns empty string (unauthenticated) when no valid user header is provided.
 function getSessionUserId(req: Request): string {
   const headerUserId = req.headers['x-user-id'] as string;
-  if (headerUserId === 'guest' || headerUserId === 'none' || headerUserId === 'null') {
+  if (!headerUserId || headerUserId === 'guest' || headerUserId === 'none' || headerUserId === 'null') {
     return '';
   }
-  if (headerUserId && db.getUserById(headerUserId)) {
+  if (db.getUserById(headerUserId)) {
     return headerUserId;
   }
-  if (db.getUserById('usr_allen_nuclear')) {
-    return 'usr_allen_nuclear';
-  }
-  const firstUser = db.getState().users[0];
-  return firstUser ? firstUser.id : '';
+  // Header provided a user ID that doesn't exist in DB — treat as unauthenticated
+  return '';
 }
 
 // Dynamically extract the public app origin (e.g. https://devolution-web.vercel.app)

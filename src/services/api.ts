@@ -21,7 +21,7 @@ import {
   LedgerStats,
 } from '../types/trust.js';
 
-let currentSessionUserId = localStorage.getItem('aegis_session_user_id') || 'usr_allen_nuclear';
+let currentSessionUserId = localStorage.getItem('aegis_session_user_id') || 'guest';
 
 export function setSessionUserId(id: string) {
   currentSessionUserId = id;
