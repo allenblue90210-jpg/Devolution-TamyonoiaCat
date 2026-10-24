@@ -28,9 +28,39 @@ export function setSessionUserId(id: string) {
   localStorage.setItem('aegis_session_user_id', id);
 }
 
+export function saveActiveUser(user: User | null) {
+  if (user && user.id) {
+    currentSessionUserId = user.id;
+    localStorage.setItem('aegis_session_user_id', user.id);
+    try {
+      localStorage.setItem('devolution_active_user', JSON.stringify(user));
+    } catch {
+      // ignore
+    }
+  } else {
+    clearSessionUserId();
+  }
+}
+
+export function getCachedActiveUser(): User | null {
+  try {
+    const raw = localStorage.getItem('devolution_active_user');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && parsed.id && parsed.id !== 'guest') {
+      currentSessionUserId = parsed.id;
+      return parsed as User;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
 export function clearSessionUserId() {
   currentSessionUserId = 'guest';
   localStorage.setItem('aegis_session_user_id', 'guest');
+  localStorage.removeItem('devolution_active_user');
 }
 
 export function getSessionUserId(): string {
@@ -170,7 +200,7 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ targetUserId: userId }),
     });
-    setSessionUserId(res.user.id);
+    saveActiveUser(res.user);
     return res;
   },
   async signIn(login: string, passwordOrTargetUserId?: string, targetUserId?: string): Promise<{ user: User; message: string }> {
@@ -192,7 +222,7 @@ export const api = {
         targetUserId: resolvedTargetUserId,
       }),
     });
-    setSessionUserId(res.user.id);
+    saveActiveUser(res.user);
     return res;
   },
   async loginWithSupabaseEmail(email: string, password?: string): Promise<{ user: User; message: string }> {
@@ -200,7 +230,7 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
-    setSessionUserId(res.user.id);
+    saveActiveUser(res.user);
     return res;
   },
   async assignRealUser(email = 'allenkinetic004@gmail.com'): Promise<{ user: User; message: string }> {
@@ -208,7 +238,7 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ email }),
     });
-    setSessionUserId(res.user.id);
+    saveActiveUser(res.user);
     return res;
   },
   async sendMagicLink(email: string): Promise<{ success: boolean; message: string }> {
@@ -222,7 +252,7 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ accessToken }),
     });
-    setSessionUserId(res.user.id);
+    saveActiveUser(res.user);
     return res;
   },
   async signUp(data: Record<string, any>): Promise<{ user: User; message: string }> {
@@ -230,14 +260,18 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(data),
     });
-    setSessionUserId(res.user.id);
+    saveActiveUser(res.user);
     return res;
   },
   async updateProfile(updates: Partial<User>): Promise<{ user: User; message: string }> {
-    return request('/api/auth/update-profile', {
+    const res = await request<{ user: User; message: string }>('/api/auth/update-profile', {
       method: 'POST',
       body: JSON.stringify(updates),
     });
+    if (res?.user) {
+      saveActiveUser(res.user);
+    }
+    return res;
   },
   async uploadAvatar(avatarUrl: string): Promise<{ success: boolean; user: User; message: string }> {
     return request('/api/user/upload-avatar', {

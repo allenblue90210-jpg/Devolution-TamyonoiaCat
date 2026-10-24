@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { api, setSessionUserId, clearSessionUserId } from './services/api.js';
+import { api, setSessionUserId, clearSessionUserId, saveActiveUser, getCachedActiveUser } from './services/api.js';
 import { ShieldCheck, LogIn } from 'lucide-react';
 import {
   User,
@@ -34,9 +34,16 @@ import { AvatarUploadModal } from './components/AvatarUploadModal.js';
 import { SupabaseModal } from './components/SupabaseModal.js';
 
 export default function App() {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(() => getCachedActiveUser());
   const [availableUsers, setAvailableUsers] = useState<UserSummary[]>([]);
-  const [currentTab, setCurrentTab] = useState<string>('landing');
+  const [currentTab, setCurrentTab] = useState<string>(() => {
+    const rawHash = window.location.hash.replace(/^#/, '');
+    if (rawHash && rawHash !== 'landing') {
+      return rawHash;
+    }
+    const cached = getCachedActiveUser();
+    return cached ? 'dashboard' : 'landing';
+  });
   const [loading, setLoading] = useState<boolean>(true);
 
   // Core Data
@@ -78,8 +85,8 @@ export default function App() {
             .sessionFromToken(token)
             .then((res) => {
               if (res?.user) {
+                saveActiveUser(res.user);
                 setCurrentUser(res.user);
-                setSessionUserId(res.user.id);
                 setCurrentTab('dashboard');
                 window.history.replaceState(null, '', window.location.pathname + '#dashboard');
                 refreshData();
@@ -167,6 +174,12 @@ export default function App() {
 
       if (userRes && userRes.user) {
         setCurrentUser(userRes.user);
+        saveActiveUser(userRes.user);
+      } else if (!userRes?.user) {
+        const cached = getCachedActiveUser();
+        if (cached) {
+          setCurrentUser(cached);
+        }
       }
       if (usersListRes && usersListRes.users) {
         setAvailableUsers(usersListRes.users);
@@ -219,8 +232,10 @@ export default function App() {
     try {
       await api.logout();
     } catch {
-      clearSessionUserId();
+      // ignore
     }
+    saveActiveUser(null);
+    clearSessionUserId();
     setCurrentUser(null);
     setEvidence([]);
     setRelationships([]);
@@ -560,6 +575,7 @@ export default function App() {
         <AuthModal
           onClose={() => setShowAuthModal(false)}
           onSuccess={(u) => {
+            saveActiveUser(u);
             setCurrentUser(u);
             refreshData();
             handleSelectTab('dashboard');

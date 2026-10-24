@@ -71,15 +71,11 @@ app.use((_req, res, next) => {
 // Session helper: in this full-stack environment, we track active user by header 'x-user-id'.
 // Returns empty string (unauthenticated) when no valid user header is provided.
 function getSessionUserId(req: Request): string {
-  const headerUserId = req.headers['x-user-id'] as string;
-  if (!headerUserId || headerUserId === 'guest' || headerUserId === 'none' || headerUserId === 'null') {
+  const headerUserId = (req.headers['x-user-id'] as string || '').trim();
+  if (!headerUserId || headerUserId === 'guest' || headerUserId === 'none' || headerUserId === 'null' || headerUserId === 'undefined') {
     return '';
   }
-  if (db.getUserById(headerUserId)) {
-    return headerUserId;
-  }
-  // Header provided a user ID that doesn't exist in DB — treat as unauthenticated
-  return '';
+  return headerUserId;
 }
 
 // Dynamically extract the public app origin (e.g. https://devolution-web.vercel.app)
@@ -115,12 +111,66 @@ function getAppOrigin(req: Request): string {
    AUTHENTICATION & PROFILE ENDPOINTS
    ========================================================================== */
 
-app.get('/api/auth/me', (req: Request, res: Response) => {
+app.get('/api/auth/me', async (req: Request, res: Response) => {
   const userId = getSessionUserId(req);
   if (!userId) {
     return res.json({ user: null });
   }
-  const user = db.getUserById(userId);
+
+  let user = db.getUserById(userId);
+
+  // If not found in in-memory state (e.g. serverless cold start), retrieve from Supabase
+  if (!user) {
+    try {
+      const { getSupabaseClient } = await import('./server/supabase.js');
+      const client = getSupabaseClient();
+      if (client) {
+        const { data, error } = await client
+          .from('devolution_users')
+          .select('*')
+          .or(`id.eq.${userId},email.eq.${userId}`)
+          .maybeSingle();
+
+        if (data && !error) {
+          user = {
+            id: data.id,
+            email: data.email || '',
+            username: data.username || data.id,
+            fullName: data.full_name || data.username || 'User',
+            accountType: data.account_type || 'personal',
+            avatarUrl: data.avatar_url || '',
+            headline: data.headline || 'Independent Professional',
+            bio: data.bio || '',
+            category: data.category || 'General Professional',
+            country: data.country || 'Nigeria',
+            city: data.city || 'Lagos',
+            phone: data.phone || '',
+            phoneVerified: !!data.phone,
+            emailVerified: true,
+            identityStatus: data.is_verified ? 'verified' : 'unverified',
+            identityMethod: data.identity_method || 'None submitted',
+            identityVerifiedAt: data.identity_verified_at || null,
+            businessVerificationStatus: 'unverified',
+            supabaseAuthId: data.supabase_auth_id || undefined,
+            privacySettings: data.privacy_settings || {
+              showRelationshipCounts: true,
+              showCategoryBreakdown: true,
+              showPublicEndorsers: true,
+              showTrustReceipts: true,
+              showCredentials: true,
+              showLocationCityOnly: true,
+              allowDirectVerificationRequests: true,
+            },
+            createdAt: data.created_at || new Date().toISOString(),
+          };
+          db.createUser(user);
+        }
+      }
+    } catch (err: any) {
+      console.warn('[Supabase Me Restore Notice]:', err.message);
+    }
+  }
+
   if (!user) {
     return res.json({ user: null });
   }
