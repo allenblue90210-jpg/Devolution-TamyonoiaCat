@@ -217,6 +217,14 @@ export const api = {
       body: JSON.stringify({ email }),
     });
   },
+  async sessionFromToken(accessToken: string): Promise<{ user: User; message: string }> {
+    const res = await request<{ user: User; message: string }>('/api/auth/session-from-token', {
+      method: 'POST',
+      body: JSON.stringify({ accessToken }),
+    });
+    setSessionUserId(res.user.id);
+    return res;
+  },
   async signUp(data: Record<string, any>): Promise<{ user: User; message: string }> {
     const res = await request<{ user: User; message: string }>('/api/auth/signup', {
       method: 'POST',

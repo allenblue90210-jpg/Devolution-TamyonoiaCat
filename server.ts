@@ -26,6 +26,8 @@ import {
   syncReceiptToSupabase,
   pullPactsFromSupabase,
   pullReceiptsFromSupabase,
+  getSupabaseUserByToken,
+  autoConfirmSupabaseUser,
 } from './server/supabase.js';
 import {
   User,
@@ -81,6 +83,35 @@ function getSessionUserId(req: Request): string {
   }
   const firstUser = db.getState().users[0];
   return firstUser ? firstUser.id : '';
+}
+
+// Dynamically extract the public app origin (e.g. https://devolution-web.vercel.app)
+// Never redirects to localhost when invoked from a live web deployment
+function getAppOrigin(req: Request): string {
+  const origin = req.headers.origin as string;
+  if (origin && !origin.includes('localhost') && !origin.includes('127.0.0.1')) {
+    return origin.replace(/\/$/, '');
+  }
+  const referer = req.headers.referer as string;
+  if (referer) {
+    try {
+      const u = new URL(referer);
+      if (!u.origin.includes('localhost') && !u.origin.includes('127.0.0.1')) {
+        return u.origin.replace(/\/$/, '');
+      }
+    } catch {
+      // ignore
+    }
+  }
+  const host = req.headers.host as string;
+  if (host && !host.includes('localhost') && !host.includes('127.0.0.1')) {
+    const proto = (req.headers['x-forwarded-proto'] as string) || 'https';
+    return `${proto}://${host}`.replace(/\/$/, '');
+  }
+  if (process.env.APP_URL && !process.env.APP_URL.includes('localhost')) {
+    return process.env.APP_URL.replace(/\/$/, '');
+  }
+  return origin || process.env.APP_URL || 'http://localhost:3000';
 }
 
 /* ==========================================================================
@@ -161,13 +192,75 @@ app.post('/api/auth/send-magic-link', async (req: Request, res: Response) => {
   if (!user) {
     return res.status(401).json({ error: 'This email is not registered. Please sign up first.' });
   }
-  const otpRes = await supabaseAuthSendOtp(query);
+  const appOrigin = getAppOrigin(req);
+  const otpRes = await supabaseAuthSendOtp(query, `${appOrigin}/#auth_confirmed=true`);
   if (otpRes.success) {
     return res.json({ success: true, message: otpRes.message });
   }
   res.json({
     success: true,
     message: `Verification link dispatched to ${query}.`,
+  });
+});
+
+app.post('/api/auth/session-from-token', async (req: Request, res: Response) => {
+  const { accessToken } = req.body;
+  if (!accessToken || typeof accessToken !== 'string') {
+    return res.status(400).json({ error: 'Access token is required' });
+  }
+
+  const sbUser = await getSupabaseUserByToken(accessToken);
+  if (!sbUser || !sbUser.email) {
+    return res.status(401).json({ error: 'Invalid or expired confirmation token' });
+  }
+
+  const cleanEmail = sbUser.email.trim().toLowerCase();
+  let user = db.getState().users.find((u) => u.email && u.email.toLowerCase() === cleanEmail);
+
+  if (!user) {
+    const cleanName = sbUser.user_metadata?.full_name || cleanEmail.split('@')[0];
+    const cleanUsername = (sbUser.user_metadata?.username || cleanEmail.split('@')[0]).toLowerCase().replace(/[^a-z0-9_]/g, '');
+    user = {
+      id: `usr_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      email: cleanEmail,
+      username: cleanUsername,
+      fullName: cleanName,
+      accountType: sbUser.user_metadata?.account_type || 'personal',
+      avatarUrl: '',
+      headline: 'Independent Professional',
+      bio: '',
+      category: 'General Professional',
+      country: 'Nigeria',
+      city: 'Lagos',
+      phone: sbUser.phone || '',
+      phoneVerified: !!sbUser.phone,
+      emailVerified: true,
+      identityStatus: 'unverified',
+      identityMethod: 'None submitted',
+      identityVerifiedAt: null,
+      businessVerificationStatus: 'unverified',
+      supabaseAuthId: sbUser.id,
+      privacySettings: {
+        showRelationshipCounts: true,
+        showCategoryBreakdown: true,
+        showPublicEndorsers: true,
+        showTrustReceipts: true,
+        showCredentials: true,
+        showLocationCityOnly: true,
+        allowDirectVerificationRequests: true,
+      },
+      createdAt: new Date().toISOString(),
+    };
+    db.createUser(user);
+    syncUserToSupabase(user).catch(() => {});
+  } else {
+    db.updateUser(user.id, { emailVerified: true, supabaseAuthId: sbUser.id });
+    user = db.getUserById(user.id) || user;
+  }
+
+  res.json({
+    user,
+    message: `Signed in as ${user.email} via confirmed Supabase credentials`,
   });
 });
 
@@ -187,12 +280,61 @@ app.post('/api/auth/signin', async (req: Request, res: Response) => {
   }
 
   const query = login.trim().toLowerCase();
-  const user = db.getState().users.find((u) =>
+  let user = db.getState().users.find((u) =>
     (u.email && u.email.toLowerCase() === query) ||
     (u.username && u.username.toLowerCase() === query)
   );
 
   if (!user) {
+    // If user does not exist in local state, try authenticating with Supabase Auth directly
+    if (query.includes('@')) {
+      const sbResult = await supabaseAuthSignIn(query, password);
+      if (sbResult.success && sbResult.user) {
+        const cleanName = sbResult.user.user_metadata?.full_name || query.split('@')[0];
+        const cleanUsername = (sbResult.user.user_metadata?.username || query.split('@')[0]).toLowerCase().replace(/[^a-z0-9_]/g, '');
+        const inputHash = crypto.createHash('sha256').update(password).digest('hex');
+        const restoredUser: User = {
+          id: `usr_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+          email: query,
+          username: cleanUsername,
+          fullName: cleanName,
+          accountType: sbResult.user.user_metadata?.account_type || 'personal',
+          avatarUrl: '',
+          headline: 'Independent Professional',
+          bio: '',
+          category: 'General Professional',
+          country: 'Nigeria',
+          city: 'Lagos',
+          phone: '',
+          phoneVerified: false,
+          emailVerified: true,
+          identityStatus: 'unverified',
+          identityMethod: 'None submitted',
+          identityVerifiedAt: null,
+          businessVerificationStatus: 'unverified',
+          passwordHash: inputHash,
+          supabaseAuthId: sbResult.user.id,
+          privacySettings: {
+            showRelationshipCounts: true,
+            showCategoryBreakdown: true,
+            showPublicEndorsers: true,
+            showTrustReceipts: true,
+            showCredentials: true,
+            showLocationCityOnly: true,
+            allowDirectVerificationRequests: true,
+          },
+          createdAt: new Date().toISOString(),
+        };
+        db.createUser(restoredUser);
+        syncUserToSupabase(restoredUser).catch(() => {});
+        return res.json({
+          user: restoredUser,
+          supabaseSession: sbResult.session,
+          authProvider: 'supabase',
+          message: `Authenticated via Supabase Auth as ${query}`,
+        });
+      }
+    }
     return res.status(401).json({ error: 'This account is not registered. Please sign up first to create an account.' });
   }
 
@@ -280,13 +422,19 @@ app.post('/api/auth/signup', async (req: Request, res: Response) => {
   const cleanEmail = email.trim().toLowerCase();
 
   try {
+    const appOrigin = getAppOrigin(req);
     // First try the client-side signUp (creates auth.users + session)
-    supabaseAuthResult = await supabaseAuthSignUp(cleanEmail, password, {
-      full_name: fullName,
-      username: username.toLowerCase().replace(/[^a-z0-9_]/g, ''),
-      account_type: accountType || 'personal',
-      email_verified: true,
-    });
+    supabaseAuthResult = await supabaseAuthSignUp(
+      cleanEmail,
+      password,
+      {
+        full_name: fullName,
+        username: username.toLowerCase().replace(/[^a-z0-9_]/g, ''),
+        account_type: accountType || 'personal',
+        email_verified: true,
+      },
+      `${appOrigin}/#auth_confirmed=true`
+    );
 
     // If client signUp fails (e.g. signups disabled), try admin API
     if (!supabaseAuthResult?.success) {

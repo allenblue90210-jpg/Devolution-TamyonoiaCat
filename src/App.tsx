@@ -56,10 +56,51 @@ export default function App() {
 
   const [tabHistory, setTabHistory] = useState<string[]>([]);
 
-  // Hash Navigation listener
+  // Hash Navigation & Supabase Auth redirect listener
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '');
+      const rawHash = window.location.hash;
+      if (!rawHash) return;
+
+      // Handle Supabase Auth tokens and verification callbacks from email
+      if (
+        rawHash.includes('access_token') ||
+        rawHash.includes('auth_confirmed') ||
+        rawHash.includes('type=signup') ||
+        rawHash.includes('type=recovery')
+      ) {
+        const hashStr = rawHash.replace(/^#/, '');
+        const searchParams = new URLSearchParams(hashStr);
+        const token = searchParams.get('access_token');
+
+        if (token) {
+          api
+            .sessionFromToken(token)
+            .then((res) => {
+              if (res?.user) {
+                setCurrentUser(res.user);
+                setSessionUserId(res.user.id);
+                setCurrentTab('dashboard');
+                window.history.replaceState(null, '', window.location.pathname + '#dashboard');
+                refreshData();
+              }
+            })
+            .catch((err) => {
+              console.warn('Notice processing auth token:', err);
+              window.history.replaceState(null, '', window.location.pathname + '#dashboard');
+              setCurrentTab('dashboard');
+              refreshData();
+            });
+          return;
+        }
+
+        window.history.replaceState(null, '', window.location.pathname + '#dashboard');
+        setCurrentTab('dashboard');
+        refreshData();
+        return;
+      }
+
+      const hash = rawHash.replace('#', '');
       if (hash) {
         setCurrentTab((prev) => {
           if (prev !== hash) {

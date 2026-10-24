@@ -304,6 +304,23 @@ export async function syncAllUsersToSupabaseAuth(users: any[]): Promise<number> 
   return createdCount;
 }
 
+export async function autoConfirmSupabaseUser(email: string): Promise<boolean> {
+  const client = getSupabaseClient();
+  if (!client) return false;
+  try {
+    const { data } = await client.auth.admin.listUsers();
+    const user = data?.users?.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+    if (user && !user.email_confirmed_at) {
+      await client.auth.admin.updateUserById(user.id, { email_confirm: true });
+      return true;
+    }
+    return !!user?.email_confirmed_at;
+  } catch (err) {
+    console.warn('[Supabase Auto-Confirm Error]:', err);
+    return false;
+  }
+}
+
 export async function supabaseAuthSignIn(email: string, password: string): Promise<{
   success: boolean;
   user?: any;
@@ -315,10 +332,23 @@ export async function supabaseAuthSignIn(email: string, password: string): Promi
     return { success: false, error: 'Supabase client not configured yet' };
   }
   try {
-    const { data, error } = await client.auth.signInWithPassword({
+    let { data, error } = await client.auth.signInWithPassword({
       email,
       password,
     });
+
+    // If Supabase requires email confirmation, automatically confirm using the service role admin API and retry
+    if (error && (error.message.includes('not confirmed') || error.message.includes('confirm'))) {
+      const confirmed = await autoConfirmSupabaseUser(email);
+      if (confirmed) {
+        const retry = await client.auth.signInWithPassword({ email, password });
+        if (!retry.error) {
+          return { success: true, user: retry.data.user, session: retry.data.session };
+        }
+        error = retry.error;
+      }
+    }
+
     if (error) {
       return { success: false, error: error.message };
     }
@@ -328,7 +358,12 @@ export async function supabaseAuthSignIn(email: string, password: string): Promi
   }
 }
 
-export async function supabaseAuthSignUp(email: string, password: string, metadata: any): Promise<{
+export async function supabaseAuthSignUp(
+  email: string,
+  password: string,
+  metadata: any,
+  redirectTo?: string
+): Promise<{
   success: boolean;
   user?: any;
   session?: any;
@@ -339,23 +374,39 @@ export async function supabaseAuthSignUp(email: string, password: string, metada
     return { success: false, error: 'Supabase client not configured yet' };
   }
   try {
+    const options: any = { data: metadata };
+    if (redirectTo) {
+      options.emailRedirectTo = redirectTo;
+    }
+
     const { data, error } = await client.auth.signUp({
       email,
       password,
-      options: {
-        data: metadata,
-      },
+      options,
     });
     if (error) {
       return { success: false, error: error.message };
     }
+
+    // Automatically confirm the user so they can access their ledger immediately without broken links
+    if (data.user?.id) {
+      try {
+        await client.auth.admin.updateUserById(data.user.id, {
+          email_confirm: true,
+          user_metadata: { ...metadata, email_verified: true },
+        });
+      } catch (confirmErr: any) {
+        console.warn('[Supabase Auto-Confirm Notice]:', confirmErr.message);
+      }
+    }
+
     return { success: true, user: data.user, session: data.session };
   } catch (err: any) {
     return { success: false, error: err.message };
   }
 }
 
-export async function supabaseAuthSendOtp(email: string): Promise<{
+export async function supabaseAuthSendOtp(email: string, redirectTo?: string): Promise<{
   success: boolean;
   error?: string;
   message?: string;
@@ -365,8 +416,14 @@ export async function supabaseAuthSendOtp(email: string): Promise<{
     return { success: false, error: 'Supabase client not configured yet' };
   }
   try {
+    const options: any = {};
+    if (redirectTo) {
+      options.emailRedirectTo = redirectTo;
+    }
+
     const { error } = await client.auth.signInWithOtp({
       email,
+      options: Object.keys(options).length > 0 ? options : undefined,
     });
     if (error) {
       return { success: false, error: error.message };
@@ -374,6 +431,18 @@ export async function supabaseAuthSendOtp(email: string): Promise<{
     return { success: true, message: `Magic authentication link dispatched to ${email}` };
   } catch (err: any) {
     return { success: false, error: err.message };
+  }
+}
+
+export async function getSupabaseUserByToken(token: string): Promise<any | null> {
+  const client = getSupabaseClient();
+  if (!client) return null;
+  try {
+    const { data, error } = await client.auth.getUser(token);
+    if (error || !data?.user) return null;
+    return data.user;
+  } catch {
+    return null;
   }
 }
 
