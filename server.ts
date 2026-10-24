@@ -1,6 +1,5 @@
 import 'dotenv/config';
 import express, { Request, Response } from 'express';
-import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
@@ -48,10 +47,23 @@ import {
 } from './src/types/trust.js';
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
+// Export for Vercel serverless function
+export { app };
 
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
+
+app.use((_req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, x-user-id');
+  if (_req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  next();
+});
 
 
 // Session helper: in this full-stack environment, we track active user by header 'x-user-id'.
@@ -3232,6 +3244,7 @@ async function startServer() {
   });
 
   if (process.env.NODE_ENV !== 'production') {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: {
         middlewareMode: true,
@@ -3319,6 +3332,14 @@ async function startServer() {
   });
 }
 
-startServer().catch((err) => {
-  console.error('Failed to start server:', err);
-});
+// Only start the persistent server when NOT running as a Vercel serverless function
+if (!process.env.VERCEL) {
+  startServer().catch((err) => {
+    console.error('Failed to start server:', err);
+  });
+} else {
+  // On Vercel: register the API 404 guard immediately (no Vite middleware needed)
+  app.all('/api/*', (req: Request, res: Response) => {
+    res.status(404).json({ error: `API route ${req.method} ${req.path} not found` });
+  });
+}

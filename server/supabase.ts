@@ -82,12 +82,15 @@ function isRealSupabaseKey(key?: string | null): boolean {
   return true;
 }
 
+const DEFAULT_SUPABASE_URL = 'https://sqrhqhoclafdpptqplng.supabase.co';
+const DEFAULT_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxcmhxaG9jbGFmZHBwdHFwbG5nIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MjQwMjIyNSwiZXhwIjoyMTA3OTc4MjI1fQ.nc5zyK1eqHFX_Lr9uI2tP548aubiwp1vB3GFOzXbt7Q';
+
 export function getResolvedSupabaseConfig(): { url: string; key: string } {
   const stored = loadStoredConfig();
   const token = loadStoredToken();
 
   const envUrl = process.env.SUPABASE_URL?.trim();
-  const url = (isRealSupabaseUrl(envUrl) ? envUrl : (isRealSupabaseUrl(stored.url) ? stored.url : '')) || '';
+  const url = (isRealSupabaseUrl(envUrl) ? envUrl : (isRealSupabaseUrl(stored.url) ? stored.url : DEFAULT_SUPABASE_URL)) || DEFAULT_SUPABASE_URL;
 
   const envKey = (
     process.env.SUPABASE_SECRET_KEY ||
@@ -102,8 +105,8 @@ export function getResolvedSupabaseConfig(): { url: string; key: string } {
       ? token
       : isRealSupabaseKey(stored.key)
       ? stored.key
-      : ''
-  ) || '';
+      : DEFAULT_SUPABASE_KEY
+  ) || DEFAULT_SUPABASE_KEY;
 
   return { url, key };
 }

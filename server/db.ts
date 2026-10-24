@@ -48,8 +48,12 @@ const VAULT_LEDGER_FILE = path.join(VAULT_DIR, 'immutable_ledger.jsonl');
 const VAULT_BACKUP_FILE = path.join(VAULT_DIR, 'db_backup.json');
 
 function ensureVaultDir() {
-  if (!fs.existsSync(VAULT_DIR)) {
-    fs.mkdirSync(VAULT_DIR, { recursive: true });
+  try {
+    if (!fs.existsSync(VAULT_DIR)) {
+      fs.mkdirSync(VAULT_DIR, { recursive: true });
+    }
+  } catch {
+    // In read-only environments like Vercel serverless, ignore mkdir error
   }
 }
 
