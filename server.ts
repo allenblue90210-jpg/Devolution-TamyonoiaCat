@@ -944,7 +944,7 @@ app.get('/api/profiles', (req: Request, res: Response) => {
   res.json({ profiles: publicProfiles });
 });
 
-app.get('/api/profiles/:username', (req: Request, res: Response) => {
+app.get('/api/profiles/:username', async (req: Request, res: Response) => {
   const rawParam = req.params.username;
   const clean = decodeURIComponent(rawParam).replace(/^@/, '').trim();
   let user = db.getUserByUsername(clean) || db.getUserById(rawParam) || db.getUserById(clean);
@@ -956,6 +956,60 @@ app.get('/api/profiles/:username', (req: Request, res: Response) => {
         u.id.toLowerCase() === clean.toLowerCase()
     );
   }
+
+  // If not found in in-memory state (e.g. Vercel serverless cold start), try Supabase
+  if (!user) {
+    try {
+      const { getSupabaseClient } = await import('./server/supabase.js');
+      const client = getSupabaseClient();
+      if (client) {
+        const { data, error } = await client
+          .from('devolution_users')
+          .select('*')
+          .or(`username.eq.${clean},email.eq.${clean},id.eq.${clean}`)
+          .maybeSingle();
+
+        if (data && !error) {
+          user = {
+            id: data.id,
+            email: data.email || '',
+            username: data.username || data.id,
+            fullName: data.full_name || data.username || 'User',
+            accountType: data.account_type || 'personal',
+            avatarUrl: data.avatar_url || '',
+            headline: data.headline || 'Independent Professional',
+            bio: data.bio || '',
+            category: data.category || 'General Professional',
+            country: data.country || 'Nigeria',
+            city: data.city || 'Lagos',
+            phone: data.phone || '',
+            phoneVerified: !!data.phone,
+            emailVerified: true,
+            identityStatus: data.is_verified ? 'verified' : 'unverified',
+            identityMethod: data.identity_method || 'None submitted',
+            identityVerifiedAt: data.identity_verified_at || null,
+            businessVerificationStatus: 'unverified',
+            supabaseAuthId: data.supabase_auth_id || undefined,
+            privacySettings: data.privacy_settings || {
+              showRelationshipCounts: true,
+              showCategoryBreakdown: true,
+              showPublicEndorsers: true,
+              showTrustReceipts: true,
+              showCredentials: true,
+              showLocationCityOnly: true,
+              allowDirectVerificationRequests: true,
+            },
+            createdAt: data.created_at || new Date().toISOString(),
+          };
+          // Hydrate into in-memory db so subsequent requests don't hit Supabase again
+          db.createUser(user);
+        }
+      }
+    } catch (err: any) {
+      console.warn('[Supabase Profile Restore Notice]:', err.message);
+    }
+  }
+
   if (!user) {
     return res.status(404).json({ error: 'Profile not found' });
   }
