@@ -1567,10 +1567,6 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                         <div className="min-w-0">
                           <div className="font-bold text-slate-900 text-xs truncate flex items-center gap-1.5">
                             <span>{selectedCounterpartyUser.fullName}</span>
-                            <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-0.5">
-                              <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                              <span>Verified Member</span>
-                            </span>
                           </div>
                           <div className="text-[11px] text-slate-500 font-mono truncate">
                             @{selectedCounterpartyUser.username}

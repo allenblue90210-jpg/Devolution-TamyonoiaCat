@@ -252,12 +252,6 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
             <div className="space-y-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-bold text-slate-900">{user.fullName}</h1>
-                {user.identityStatus === 'verified' && (
-                  <span className="inline-flex items-center gap-1 text-xs text-emerald-700 font-semibold bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-200">
-                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                    <span>Verified Member</span>
-                  </span>
-                )}
                 {user.businessVerificationStatus === 'verified' && (
                   <span className="inline-flex items-center gap-1 text-xs text-indigo-700 font-semibold bg-indigo-50 px-2.5 py-0.5 rounded border border-indigo-200">
                     <Building2 className="w-4 h-4 text-indigo-600" />

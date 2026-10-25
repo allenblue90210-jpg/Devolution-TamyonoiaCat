@@ -233,7 +233,7 @@ export const PeopleSearchModal: React.FC<PeopleSearchModalProps> = ({
 
                       {/* Headline / Title */}
                       <p className="text-xs sm:text-sm text-slate-700 leading-snug">
-                        {person.headline || 'Verified Network Member'}
+                        {person.headline || 'Network Member'}
                       </p>
 
                       {/* Category & City */}
