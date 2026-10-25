@@ -158,6 +158,12 @@ export async function syncUserToSupabase(user: any): Promise<boolean> {
   if (!client) return false;
 
   try {
+    const existingPrivacy = user.privacySettings || {};
+    const privacy = {
+      ...existingPrivacy,
+      avatarUrl: user.avatarUrl || existingPrivacy.avatarUrl || '',
+    };
+
     // 1. Try to upsert into devolution_users table
     const { error: userErr } = await client
       .from('devolution_users')
@@ -175,9 +181,13 @@ export async function syncUserToSupabase(user: any): Promise<boolean> {
         country: user.country || 'Nigeria',
         reputation_score: user.reputationScore || 600,
         is_verified: user.identityStatus === 'verified',
-        privacy_settings: user.privacySettings || {},
+        privacy_settings: privacy,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'id' });
+
+    if (userErr) {
+      console.warn('[Supabase Sync User Notice]:', userErr.message);
+    }
 
     return true;
   } catch (err: any) {

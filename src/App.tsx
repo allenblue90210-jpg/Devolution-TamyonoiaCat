@@ -592,6 +592,7 @@ export default function App() {
           onClose={() => setShowAvatarModal(false)}
           onSuccess={(updated) => {
             setCurrentUser(updated);
+            saveActiveUser(updated);
             refreshData();
           }}
         />

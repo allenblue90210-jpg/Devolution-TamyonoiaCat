@@ -274,10 +274,14 @@ export const api = {
     return res;
   },
   async uploadAvatar(avatarUrl: string): Promise<{ success: boolean; user: User; message: string }> {
-    return request('/api/user/upload-avatar', {
+    const res = await request<{ success: boolean; user: User; message: string }>('/api/user/upload-avatar', {
       method: 'POST',
       body: JSON.stringify({ avatarUrl }),
     });
+    if (res?.user) {
+      saveActiveUser(res.user);
+    }
+    return res;
   },
   async resetPassword(email: string): Promise<{ message: string }> {
     return request('/api/auth/reset-password', {

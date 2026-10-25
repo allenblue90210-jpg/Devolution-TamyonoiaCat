@@ -108,6 +108,117 @@ function getAppOrigin(req: Request): string {
 }
 
 /* ==========================================================================
+   SUPABASE STATE HYDRATION (Crucial for Vercel Serverless Cold Starts)
+   ========================================================================== */
+
+let hasHydrated = false;
+let hydratingPromise: Promise<void> | null = null;
+
+export async function ensureServerHydrated(): Promise<void> {
+  if (hasHydrated) return;
+  if (hydratingPromise) return hydratingPromise;
+
+  hydratingPromise = (async () => {
+    try {
+      // 1. Pull snapshot from devolution_state if available
+      try {
+        const pullRes = await pullFromSupabase();
+        if (pullRes?.success && pullRes.data) {
+          if (pullRes.data.users && Array.isArray(pullRes.data.users)) {
+            pullRes.data.users = pullRes.data.users.filter((u: any) =>
+              u.id !== 'usr_allen_001' &&
+              u.id !== 'usr_sarah_002' &&
+              u.id !== 'usr_fatima_003' &&
+              u.id !== 'usr_allen_006' &&
+              u.id !== 'usr_1792419706090_6uj2' &&
+              !u.email?.includes('example.com') &&
+              !u.email?.includes('cloudworks.ng') &&
+              !u.email?.includes('horizonlogistics.com')
+            );
+          }
+          db.mergeState(pullRes.data);
+        }
+      } catch (e: any) {
+        console.warn('[Hydration State Snapshot Notice]:', e.message);
+      }
+
+      // 2. Pull all registered users from devolution_users table
+      try {
+        const registeredUsers = await pullRegisteredUsersFromSupabase();
+        if (registeredUsers && Array.isArray(registeredUsers) && registeredUsers.length > 0) {
+          const mappedUsers: User[] = registeredUsers.map((data: any) => ({
+            id: data.id,
+            email: data.email || '',
+            username: (data.username || data.id).trim(),
+            fullName: data.full_name || data.username || 'User',
+            accountType: data.account_type || 'personal',
+            avatarUrl: data.privacy_settings?.avatarUrl || data.avatar_url || '',
+            headline: data.headline || 'Independent Professional',
+            bio: data.bio || '',
+            category: data.category || 'General Professional',
+            country: data.country || 'Nigeria',
+            city: data.city || 'Lagos',
+            phone: data.phone || '',
+            phoneVerified: !!data.phone,
+            emailVerified: true,
+            identityStatus: data.is_verified ? 'verified' : 'unverified',
+            identityMethod: data.identity_method || 'None submitted',
+            identityVerifiedAt: data.identity_verified_at || null,
+            businessVerificationStatus: 'unverified',
+            supabaseAuthId: data.supabase_auth_id || undefined,
+            privacySettings: data.privacy_settings || {
+              showRelationshipCounts: true,
+              showCategoryBreakdown: true,
+              showPublicEndorsers: true,
+              showTrustReceipts: true,
+              showCredentials: true,
+              showLocationCityOnly: true,
+              allowDirectVerificationRequests: true,
+            },
+            createdAt: data.created_at || new Date().toISOString(),
+          }));
+          db.mergeState({ users: mappedUsers });
+        }
+      } catch (uErr: any) {
+        console.warn('[Hydration Registered Users Notice]:', uErr.message);
+      }
+
+      // 3. Pull dedicated pacts and receipts
+      try {
+        const [remotePacts, remoteReceipts] = await Promise.all([
+          pullPactsFromSupabase().catch(() => []),
+          pullReceiptsFromSupabase().catch(() => []),
+        ]);
+        if (remotePacts && remotePacts.length > 0) {
+          db.reconcileExternalPacts(remotePacts);
+        }
+        if (remoteReceipts && remoteReceipts.length > 0) {
+          db.reconcileExternalReceipts(remoteReceipts);
+        }
+      } catch (pErr: any) {
+        console.warn('[Hydration Pacts/Receipts Notice]:', pErr.message);
+      }
+
+      hasHydrated = true;
+    } catch (err: any) {
+      console.warn('[Server Hydration Warning]:', err.message);
+    } finally {
+      hydratingPromise = null;
+    }
+  })();
+
+  return hydratingPromise;
+}
+
+// Middleware: ensure Supabase data is hydrated into in-memory db on API calls
+app.use(async (req, _res, next) => {
+  if (req.path.startsWith('/api')) {
+    await ensureServerHydrated();
+  }
+  next();
+});
+
+/* ==========================================================================
    AUTHENTICATION & PROFILE ENDPOINTS
    ========================================================================== */
 
@@ -128,17 +239,17 @@ app.get('/api/auth/me', async (req: Request, res: Response) => {
         const { data, error } = await client
           .from('devolution_users')
           .select('*')
-          .or(`id.eq.${userId},email.eq.${userId}`)
+          .or(`id.eq.${userId},email.ilike.${userId},username.ilike.${userId}`)
           .maybeSingle();
 
         if (data && !error) {
           user = {
             id: data.id,
             email: data.email || '',
-            username: data.username || data.id,
+            username: (data.username || data.id).trim(),
             fullName: data.full_name || data.username || 'User',
             accountType: data.account_type || 'personal',
-            avatarUrl: data.avatar_url || '',
+            avatarUrl: data.privacy_settings?.avatarUrl || data.avatar_url || '',
             headline: data.headline || 'Independent Professional',
             bio: data.bio || '',
             category: data.category || 'General Professional',
@@ -672,9 +783,12 @@ app.post('/api/users/quick-verify', (req: Request, res: Response) => {
   res.json({ success: true, user: updated, message: 'Identity verified and attested successfully (+25 Trust Points).' });
 });
 
-app.post('/api/auth/update-profile', (req: Request, res: Response) => {
+app.post('/api/auth/update-profile', async (req: Request, res: Response) => {
   const userId = getSessionUserId(req);
-  const updates = req.body;
+  if (!userId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  const updates = req.body || {};
   // Security guard: never allow client to manipulate verification statuses directly
   delete updates.id;
   delete updates.identityStatus;
@@ -683,10 +797,35 @@ app.post('/api/auth/update-profile', (req: Request, res: Response) => {
   delete updates.emailVerified;
   delete updates.businessVerificationStatus;
 
+  let user = db.getUserById(userId);
+  if (!user) {
+    await ensureServerHydrated();
+    user = db.getUserById(userId);
+  }
+  if (!user) {
+    return res.status(404).json({ error: 'User not found.' });
+  }
+
+  if (updates.avatarUrl !== undefined) {
+    updates.privacySettings = {
+      ...(user.privacySettings || {}),
+      ...(updates.privacySettings || {}),
+      avatarUrl: updates.avatarUrl,
+    };
+  }
+
   const updated = db.updateUser(userId, updates);
   if (!updated) {
     return res.status(404).json({ error: 'User not found.' });
   }
+
+  try {
+    await syncUserToSupabase(updated);
+    await syncToSupabase(db.getState());
+  } catch (sbErr: any) {
+    console.warn('[Update Profile Supabase Sync Notice]:', sbErr.message);
+  }
+
   res.json({ user: updated, message: 'Profile updated successfully.' });
 });
 
@@ -791,7 +930,7 @@ app.post('/api/users/block', (req: Request, res: Response) => {
   });
 });
 
-app.post('/api/user/upload-avatar', (req: Request, res: Response) => {
+app.post('/api/user/upload-avatar', async (req: Request, res: Response) => {
   const userId = getSessionUserId(req);
   if (!userId) {
     return res.status(401).json({ error: 'You must be signed in to upload a profile picture.' });
@@ -807,7 +946,17 @@ app.post('/api/user/upload-avatar', (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Image must be a valid base64 image data URL or HTTPS image link.' });
   }
 
-  const updated = db.updateUser(userId, { avatarUrl });
+  let user = db.getUserById(userId);
+  if (!user) {
+    await ensureServerHydrated();
+    user = db.getUserById(userId);
+  }
+  if (!user) {
+    return res.status(404).json({ error: 'User not found.' });
+  }
+
+  const updatedPrivacy = { ...(user.privacySettings || {}), avatarUrl };
+  const updated = db.updateUser(userId, { avatarUrl, privacySettings: updatedPrivacy as any });
   if (!updated) {
     return res.status(404).json({ error: 'User not found.' });
   }
@@ -831,6 +980,14 @@ app.post('/api/user/upload-avatar', (req: Request, res: Response) => {
     }
   }
   db.persist();
+
+  // Persist to Supabase immediately so page refresh on Vercel / serverless preserves the avatar
+  try {
+    await syncUserToSupabase(updated);
+    await syncToSupabase(db.getState());
+  } catch (sbErr: any) {
+    console.warn('[Upload Avatar Supabase Sync Notice]:', sbErr.message);
+  }
 
   res.json({ success: true, user: updated, message: 'Profile picture updated successfully.' });
 });
@@ -966,17 +1123,17 @@ app.get('/api/profiles/:username', async (req: Request, res: Response) => {
         const { data, error } = await client
           .from('devolution_users')
           .select('*')
-          .or(`username.eq.${clean},email.eq.${clean},id.eq.${clean}`)
+          .or(`username.ilike.${clean},email.ilike.${clean},id.eq.${clean},full_name.ilike.%${clean}%`)
           .maybeSingle();
 
         if (data && !error) {
           user = {
             id: data.id,
             email: data.email || '',
-            username: data.username || data.id,
+            username: (data.username || data.id).trim(),
             fullName: data.full_name || data.username || 'User',
             accountType: data.account_type || 'personal',
-            avatarUrl: data.avatar_url || '',
+            avatarUrl: data.privacy_settings?.avatarUrl || data.avatar_url || '',
             headline: data.headline || 'Independent Professional',
             bio: data.bio || '',
             category: data.category || 'General Professional',
@@ -3571,6 +3728,9 @@ async function startServer() {
         } catch (pullDetailErr: any) {
           console.warn('[Supabase Startup Detail Pull Notice]:', pullDetailErr.message);
         }
+
+        // Ensure all registered users and state are hydrated
+        await ensureServerHydrated();
 
         await syncToSupabase(db.getState());
         console.log('[Supabase Startup] Synchronized current state to Supabase.');
