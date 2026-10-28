@@ -535,8 +535,19 @@ app.post('/api/users/:userId/location', (req: Request, res: Response) => {
 });
 
 app.post('/api/user/upload-avatar', (req: Request, res: Response) => {
-  const userId = getSessionUserId(req);
-  if (!userId) {
+  const sessionUserId = getSessionUserId(req);
+  const requestedUserId = req.body?.userId || req.body?.id;
+  let targetId = sessionUserId;
+  let targetUser = db.getUserById(targetId);
+  if (!targetUser && requestedUserId) {
+    targetUser = db.getUserById(requestedUserId);
+    if (targetUser) targetId = targetUser.id;
+  }
+  if (!targetUser) {
+    targetUser = db.getState().users.find((u) => u.id === targetId || u.username === targetId || (u.email && u.email === targetId));
+    if (targetUser) targetId = targetUser.id;
+  }
+  if (!targetUser) {
     return res.status(401).json({ error: 'You must be signed in to upload a profile picture.' });
   }
 
@@ -545,12 +556,11 @@ app.post('/api/user/upload-avatar', (req: Request, res: Response) => {
     return res.status(400).json({ error: 'A valid avatar image payload is required.' });
   }
 
-  // Ensure image payload is either an allowed data URI or valid URL
   if (avatarUrl && !avatarUrl.startsWith('data:image/') && !avatarUrl.startsWith('http://') && !avatarUrl.startsWith('https://') && !avatarUrl.startsWith('/')) {
     return res.status(400).json({ error: 'Image must be a valid base64 image data URL or HTTPS image link.' });
   }
 
-  const updated = db.updateUser(userId, { avatarUrl });
+  const updated = db.updateUser(targetId, { avatarUrl });
   if (!updated) {
     return res.status(404).json({ error: 'User not found.' });
   }
@@ -559,18 +569,18 @@ app.post('/api/user/upload-avatar', (req: Request, res: Response) => {
   const state = db.getState();
   if (state.commitments) {
     for (const c of state.commitments) {
-      if (c.requesterId === userId) c.requesterAvatar = avatarUrl;
-      if (c.committerId === userId) c.committerAvatar = avatarUrl;
+      if (c.requesterId === targetId) c.requesterAvatar = avatarUrl;
+      if (c.committerId === targetId) c.committerAvatar = avatarUrl;
     }
   }
   if (state.rememberRecords) {
     for (const r of state.rememberRecords) {
-      if (r.authorId === userId) r.authorAvatar = avatarUrl;
+      if (r.authorId === targetId) r.authorAvatar = avatarUrl;
     }
   }
   if (state.goodFaithRatings) {
     for (const g of state.goodFaithRatings) {
-      if (g.authorId === userId) g.authorAvatar = avatarUrl;
+      if (g.authorId === targetId) g.authorAvatar = avatarUrl;
     }
   }
   db.persist();

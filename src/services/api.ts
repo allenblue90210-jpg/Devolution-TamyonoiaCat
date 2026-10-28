@@ -289,7 +289,7 @@ export const api = {
   async uploadAvatar(avatarUrl: string): Promise<{ success: boolean; user: User; message: string }> {
     const res = await request<{ success: boolean; user: User; message: string }>('/api/user/upload-avatar', {
       method: 'POST',
-      body: JSON.stringify({ avatarUrl }),
+      body: JSON.stringify({ avatarUrl, userId: currentSessionUserId }),
     });
     if (res?.user) {
       saveActiveUser(res.user);

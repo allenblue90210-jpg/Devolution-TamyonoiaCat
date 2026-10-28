@@ -102,6 +102,28 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
     };
   }, [username]);
 
+
+  // Keep profile screen synchronized when currentUser updates (e.g. photo upload, location, profile edits)
+  useEffect(() => {
+    if (currentUser && data) {
+      const isSelf =
+        currentUser.id === data.user.id ||
+        currentUser.username.toLowerCase() === data.user.username.toLowerCase();
+      if (isSelf) {
+        setData((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            user: {
+              ...prev.user,
+              ...currentUser,
+              avatarUrl: currentUser.avatarUrl,
+            },
+          };
+        });
+      }
+    }
+  }, [currentUser]);
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     setCopiedLink(true);
@@ -238,7 +260,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
               }
             >
               <UserAvatar
-                src={user.avatarUrl}
+                src={currentUser?.username === user.username ? (currentUser.avatarUrl || user.avatarUrl) : user.avatarUrl}
                 name={user.fullName}
                 className="w-20 h-20 rounded-full border-2 border-slate-200 group-hover:scale-105 transition-transform"
                 iconClassName="w-10 h-10 text-slate-500"
