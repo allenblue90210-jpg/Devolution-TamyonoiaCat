@@ -277,6 +277,9 @@ export interface UserSummary {
   email?: string;
   identityStatus?: string;
   isReal?: boolean;
+  category?: string;
+  country?: string;
+  city?: string;
   createdAt?: string;
 }
 
@@ -342,6 +345,7 @@ export interface TrustReceipt {
   title: string;
   description: string;
   transactionValue?: string;
+  location?: string; // Physical transaction venue, delivery destination, or jurisdiction
   status: ReceiptStatus;
   completionConditions: string;
   isFulfillmentConfirmed: boolean;

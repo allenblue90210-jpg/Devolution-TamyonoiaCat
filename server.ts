@@ -545,6 +545,8 @@ app.get('/api/users/list', (_req: Request, res: Response) => {
       category: u.category,
       avatarUrl: u.avatarUrl,
       email: u.email,
+      country: u.country || '',
+      city: u.city || '',
       identityStatus: u.identityStatus,
       isReal: true,
       createdAt: u.createdAt,
@@ -563,6 +565,8 @@ app.get('/api/users', (_req: Request, res: Response) => {
       category: u.category,
       avatarUrl: u.avatarUrl,
       email: u.email,
+      country: u.country || '',
+      city: u.city || '',
       identityStatus: u.identityStatus,
       isReal: true,
       createdAt: u.createdAt,
@@ -579,6 +583,7 @@ app.get('/api/profiles', (req: Request, res: Response) => {
   const rawQuery = ((req.query.q as string) || '').trim();
   const query = rawQuery.replace(/^@/, '').toLowerCase();
   const category = (req.query.category as string) || '';
+  const location = ((req.query.location as string) || '').trim().toLowerCase();
   const filterVerified = req.query.verified === 'true';
 
   let list = db.getState().users;
@@ -601,6 +606,14 @@ app.get('/api/profiles', (req: Request, res: Response) => {
     list = list.filter((u) => u.category.toLowerCase().includes(category.toLowerCase()));
   }
 
+  if (location) {
+    list = list.filter(
+      (u) =>
+        (u.city && u.city.toLowerCase().includes(location)) ||
+        (u.country && u.country.toLowerCase().includes(location))
+    );
+  }
+
   if (filterVerified) {
     list = list.filter((u) => u.identityStatus === 'verified' || u.businessVerificationStatus === 'verified');
   }
@@ -618,8 +631,8 @@ app.get('/api/profiles', (req: Request, res: Response) => {
       avatarUrl: u.avatarUrl,
       headline: u.headline,
       category: u.category,
-      country: u.country,
-      city: u.privacySettings.showLocationCityOnly ? u.city : '',
+      country: u.country || '',
+      city: u.city || '',
       identityStatus: u.identityStatus,
       identityMethod: u.identityMethod,
       businessVerificationStatus: u.businessVerificationStatus,
@@ -1370,6 +1383,7 @@ app.post('/api/receipts', (req: Request, res: Response) => {
     title,
     description,
     transactionValue,
+    location,
     completionConditions,
     evidenceAttachments,
     deadline,
@@ -1405,6 +1419,7 @@ app.post('/api/receipts', (req: Request, res: Response) => {
     title,
     description: description || '',
     transactionValue: transactionValue || undefined,
+    location: location?.trim() || undefined,
     status: 'pending', // Starts as pending counterparty signature!
     completionConditions,
     isFulfillmentConfirmed: false,
@@ -1902,6 +1917,7 @@ app.post('/api/commitments', (req: Request, res: Response) => {
     creatorRole,
     pledgeNote,
     isPublic,
+    location,
   } = req.body;
   if (!title || !description || !deadline) {
     return res.status(400).json({ error: 'Title, description, and target deadline are required.' });
@@ -1946,6 +1962,7 @@ app.post('/api/commitments', (req: Request, res: Response) => {
     isOverdue: new Date(deadline).getTime() < Date.now(),
     daysOverdue: 0,
     isPublic: isPublic !== false,
+    location: location?.trim() || undefined,
     impressions: 1,
     witnessCount: 0,
     positiveImpressions: 0,
