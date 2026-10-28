@@ -192,6 +192,7 @@ export interface TrustCommitment {
   checkedOutByRequesterAt?: string | null;
   linkedReceiptId?: string | null;
   isPublic: boolean;
+  location?: string; // Physical meeting point, delivery address, or jurisdiction
   impressions?: number; // Total public views/impressions
   witnessCount?: number; // Total network observers who witnessed pact
   positiveImpressions?: number; // Community confidence endorsements
