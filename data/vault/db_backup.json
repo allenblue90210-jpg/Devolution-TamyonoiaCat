@@ -1025,7 +1025,7 @@
       "createdAt": "2026-10-18T13:15:43.602Z",
       "isOverdue": true,
       "committerId": "usr_fatima_003",
-      "daysOverdue": 8,
+      "daysOverdue": 9,
       "description": "Temporary loan of high-precision CNC tool head and laser calibration jig.",
       "impressions": 890,
       "ratingBadge": "100% Exemplary Good Faith",
@@ -1165,7 +1165,7 @@
   "goodFaithRatings": [],
   "impressions": {
     "network": {
-      "impressions": 43,
+      "impressions": 44,
       "witnessCount": 0
     },
     "usr_allen_nuclear": {
