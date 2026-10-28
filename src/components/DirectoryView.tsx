@@ -34,6 +34,7 @@ export const DirectoryView: React.FC<DirectoryViewProps> = ({ onSelectProfile, o
           q: query,
           category: selectedCategory === 'All Categories' ? '' : selectedCategory,
           verified: onlyVerified,
+          location: locationFilter,
         });
         setProfiles(res.profiles);
       } catch (err) {
@@ -44,7 +45,7 @@ export const DirectoryView: React.FC<DirectoryViewProps> = ({ onSelectProfile, o
     }
     const timer = setTimeout(load, 200);
     return () => clearTimeout(timer);
-  }, [query, selectedCategory, onlyVerified]);
+  }, [query, selectedCategory, locationFilter, onlyVerified]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -75,7 +76,7 @@ export const DirectoryView: React.FC<DirectoryViewProps> = ({ onSelectProfile, o
       </div>
 
       {/* Search and Filters Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col md:flex-row items-center gap-4">
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col md:flex-row items-center gap-3">
         <div className="relative flex-1 w-full">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
@@ -84,6 +85,18 @@ export const DirectoryView: React.FC<DirectoryViewProps> = ({ onSelectProfile, o
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by name, username, or organization..."
             className="w-full pl-10 pr-4 py-2 text-xs border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          />
+        </div>
+
+        {/* Location Filter Input */}
+        <div className="relative w-full md:w-56">
+          <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={locationFilter}
+            onChange={(e) => setLocationFilter(e.target.value)}
+            placeholder="Filter by city/country..."
+            className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
           />
         </div>
 
@@ -146,6 +159,12 @@ export const DirectoryView: React.FC<DirectoryViewProps> = ({ onSelectProfile, o
                     </div>
                     <div className="text-[11px] text-slate-500 font-mono">@{p.username}</div>
                     <div className="text-xs text-slate-600 mt-1 line-clamp-2">{p.headline}</div>
+                    {(p.city || p.country) && (
+                      <div className="flex items-center gap-1 text-[11px] text-slate-500 font-mono pt-1">
+                        <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                        <span className="truncate">{[p.city, p.country].filter(Boolean).join(', ')}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 

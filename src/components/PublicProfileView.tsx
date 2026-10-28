@@ -28,6 +28,7 @@ import {
   Camera,
   LogOut,
   Settings,
+  MapPin,
 } from 'lucide-react';
 
 interface PublicProfileViewProps {
@@ -267,8 +268,15 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
               <p className="text-xs sm:text-sm text-slate-600 max-w-xl">{user.headline}</p>
               <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 font-mono pt-1">
                 <span>@{user.username}</span>
-                <span aria-hidden="true">·</span>
-                <span>{user.city}, {user.country}</span>
+                {(user.city || user.country) && (
+                  <>
+                    <span aria-hidden="true">·</span>
+                    <span className="inline-flex items-center gap-1 text-slate-700 font-sans font-medium">
+                      <MapPin className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                      <span>{[user.city, user.country].filter(Boolean).join(', ')}</span>
+                    </span>
+                  </>
+                )}
                 <span aria-hidden="true">·</span>
                 <span className="text-slate-400">Member since {new Date(user.createdAt).getFullYear()}</span>
               </div>
