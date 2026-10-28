@@ -30,6 +30,7 @@ import {
   UserPlus,
   Search,
   Users,
+  MapPin,
 } from 'lucide-react';
 import { formatTransactionCurrency, CURRENCY_OPTIONS } from '../utils/currency.js';
 
