@@ -159,10 +159,15 @@ export const DirectoryView: React.FC<DirectoryViewProps> = ({ onSelectProfile, o
                     </div>
                     <div className="text-[11px] text-slate-500 font-mono">@{p.username}</div>
                     <div className="text-xs text-slate-600 mt-1 line-clamp-2">{p.headline}</div>
-                    {(p.city || p.country) && (
+                    {(p.city || p.country) ? (
                       <div className="flex items-center gap-1 text-[11px] text-slate-500 font-mono pt-1">
                         <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
                         <span className="truncate">{[p.city, p.country].filter(Boolean).join(', ')}</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 text-[11px] text-indigo-500 font-sans font-medium pt-1">
+                        <MapPin className="w-3 h-3 text-indigo-400 shrink-0" />
+                        <span className="truncate">+ Add Location</span>
                       </div>
                     )}
                   </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User } from '../types/trust.js';
 import { api } from '../services/api.js';
 import {
@@ -20,6 +20,20 @@ interface UpdateLocationModalProps {
   onLocationUpdated: (updatedUser: User) => void;
 }
 
+const POPULAR_LOCATIONS = [
+  { city: 'Lagos', country: 'Nigeria' },
+  { city: 'Abuja', country: 'Nigeria' },
+  { city: 'London', country: 'United Kingdom' },
+  { city: 'New York', country: 'United States' },
+  { city: 'San Francisco', country: 'United States' },
+  { city: 'Toronto', country: 'Canada' },
+  { city: 'Berlin', country: 'Germany' },
+  { city: 'Nairobi', country: 'Kenya' },
+  { city: 'Dubai', country: 'United Arab Emirates' },
+  { city: 'Accra', country: 'Ghana' },
+  { city: 'Johannesburg', country: 'South Africa' },
+];
+
 export const UpdateLocationModal: React.FC<UpdateLocationModalProps> = ({
   isOpen,
   onClose,
@@ -31,6 +45,14 @@ export const UpdateLocationModal: React.FC<UpdateLocationModalProps> = ({
   const [isDetecting, setIsDetecting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setCity(user.city || '');
+      setCountry(user.country || '');
+      setFeedback(null);
+    }
+  }, [isOpen, user]);
 
   if (!isOpen) return null;
 
@@ -118,11 +140,18 @@ export const UpdateLocationModal: React.FC<UpdateLocationModalProps> = ({
     setIsSaving(true);
     setFeedback(null);
     try {
-      const res = await api.updateProfile({
-        city: city.trim(),
-        country: country.trim(),
-      });
-      onLocationUpdated(res.user);
+      let updatedUser: User;
+      if (user?.id) {
+        const res = await api.updateUserLocation(user.id, city.trim(), country.trim());
+        updatedUser = res.user;
+      } else {
+        const res = await api.updateProfile({
+          city: city.trim(),
+          country: country.trim(),
+        });
+        updatedUser = res.user;
+      }
+      onLocationUpdated(updatedUser);
       setFeedback({ text: 'Location updated successfully!', type: 'success' });
       setTimeout(() => {
         onClose();
@@ -155,10 +184,10 @@ export const UpdateLocationModal: React.FC<UpdateLocationModalProps> = ({
             </div>
             <div>
               <h2 id="location-modal-title" className="text-base font-bold text-slate-900">
-                Update Location in Profile
+                {user.city || user.country ? 'Update Location' : 'Add Location to Profile'}
               </h2>
               <p className="text-xs text-slate-500">
-                Update your verified city and country for network discovery and credibility.
+                Verified city and country for <span className="font-semibold text-slate-700">@{user.username}</span> ({user.fullName})
               </p>
             </div>
           </div>
@@ -250,6 +279,34 @@ export const UpdateLocationModal: React.FC<UpdateLocationModalProps> = ({
                   required
                   className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
+              </div>
+            </div>
+
+            {/* Quick Pick Popular Locations */}
+            <div>
+              <div className="text-[11px] font-semibold text-slate-500 mb-1.5 flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-indigo-500" />
+                <span>Quick-Pick Popular Cities:</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {POPULAR_LOCATIONS.map((loc) => (
+                  <button
+                    key={`${loc.city}-${loc.country}`}
+                    type="button"
+                    onClick={() => {
+                      setCity(loc.city);
+                      setCountry(loc.country);
+                    }}
+                    className={`px-2 py-1 rounded text-[11px] font-medium border transition-colors cursor-pointer ${
+                      city.toLowerCase() === loc.city.toLowerCase() &&
+                      country.toLowerCase() === loc.country.toLowerCase()
+                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs'
+                        : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                    }`}
+                  >
+                    {loc.city}, {loc.country === 'United States' ? 'USA' : loc.country === 'United Kingdom' ? 'UK' : loc.country === 'United Arab Emirates' ? 'UAE' : loc.country}
+                  </button>
+                ))}
               </div>
             </div>
           </div>

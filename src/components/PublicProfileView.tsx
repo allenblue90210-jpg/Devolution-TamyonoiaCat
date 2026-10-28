@@ -30,6 +30,7 @@ import {
   Settings,
   MapPin,
   Edit3,
+  Globe,
 } from 'lucide-react';
 import { UpdateLocationModal } from './UpdateLocationModal.js';
 
@@ -273,44 +274,29 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
               <p className="text-xs sm:text-sm text-slate-600 max-w-xl">{user.headline}</p>
               <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 font-mono pt-1">
                 <span>@{user.username}</span>
+                <span aria-hidden="true">·</span>
                 {user.city || user.country ? (
-                  <>
-                    <span aria-hidden="true">·</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (currentUser?.username === user.username) {
-                          setShowLocationModal(true);
-                        }
-                      }}
-                      className={`inline-flex items-center gap-1 text-slate-700 font-sans font-medium transition-colors ${
-                        currentUser?.username === user.username
-                          ? 'hover:text-indigo-600 hover:bg-indigo-50/70 px-1.5 py-0.5 rounded cursor-pointer group'
-                          : ''
-                      }`}
-                      title={currentUser?.username === user.username ? 'Click to update your location' : undefined}
-                    >
-                      <MapPin className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
-                      <span>{[user.city, user.country].filter(Boolean).join(', ')}</span>
-                      {currentUser?.username === user.username && (
-                        <Edit3 className="w-3 h-3 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity ml-0.5" />
-                      )}
-                    </button>
-                  </>
-                ) : currentUser?.username === user.username ? (
-                  <>
-                    <span aria-hidden="true">·</span>
-                    <button
-                      type="button"
-                      onClick={() => setShowLocationModal(true)}
-                      className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-700 font-sans font-medium hover:underline cursor-pointer"
-                      title="Add your location to your profile"
-                    >
-                      <MapPin className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
-                      <span>+ Add Location</span>
-                    </button>
-                  </>
-                ) : null}
+                  <button
+                    type="button"
+                    onClick={() => setShowLocationModal(true)}
+                    className="inline-flex items-center gap-1 text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/70 px-1.5 py-0.5 rounded cursor-pointer group font-sans font-medium transition-colors"
+                    title="Click to update location"
+                  >
+                    <MapPin className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                    <span>{[user.city, user.country].filter(Boolean).join(', ')}</span>
+                    <Edit3 className="w-3 h-3 text-indigo-400 opacity-60 group-hover:opacity-100 transition-opacity ml-0.5" />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowLocationModal(true)}
+                    className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-800 bg-indigo-50/90 hover:bg-indigo-100 px-2 py-0.5 rounded font-sans font-medium transition-colors cursor-pointer border border-indigo-200/70"
+                    title="Add location to this profile"
+                  >
+                    <MapPin className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                    <span>+ Add Location</span>
+                  </button>
+                )}
                 <span aria-hidden="true">·</span>
                 <span className="text-slate-400">Member since {new Date(user.createdAt).getFullYear()}</span>
               </div>
@@ -319,17 +305,19 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
 
           {/* Action buttons */}
           <div className="flex flex-wrap items-center gap-2 shrink-0">
+            {/* Direct Location Button - always available */}
+            <button
+              type="button"
+              onClick={() => setShowLocationModal(true)}
+              className="px-3 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200/80 rounded-lg flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+              title={user.city || user.country ? 'Update location (City & Country)' : 'Add verified location to profile'}
+            >
+              <MapPin className="w-3.5 h-3.5 text-indigo-600" />
+              <span>{user.city || user.country ? 'Update Location' : '+ Add Location'}</span>
+            </button>
+
             {currentUser?.username === user.username ? (
               <>
-                <button
-                  type="button"
-                  onClick={() => setShowLocationModal(true)}
-                  className="px-3 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200/80 rounded-lg flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
-                  title="Update your location (City & Country)"
-                >
-                  <MapPin className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>Update Location</span>
-                </button>
                 {onOpenAvatarUpload && (
                   <button
                     onClick={onOpenAvatarUpload}
@@ -362,7 +350,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
             ) : (
               <button
                 onClick={() => setShowDisputeModal(true)}
-                className="px-3 py-2 text-xs text-slate-500 hover:text-red-600 border border-slate-200 hover:border-red-200 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                className="px-3 py-1.5 text-xs text-slate-500 hover:text-red-600 border border-slate-200 hover:border-red-200 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
               >
                 <AlertTriangle className="w-3.5 h-3.5" />
                 <span>Report Profile</span>
@@ -741,6 +729,84 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
 
         {/* Right 5 cols: Verified Credentials & Evidentiary Attestation */}
         <div className="lg:col-span-5 space-y-6">
+          {/* Geographical Presence & Location Card */}
+          <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4 shadow-2xs">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                  <MapPin className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-slate-900">Geographic Location</h2>
+                  <p className="text-[11px] text-slate-500">Regional verification & community presence</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowLocationModal(true)}
+                className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 cursor-pointer bg-indigo-50/70 hover:bg-indigo-100/70 px-2 py-1 rounded border border-indigo-200/60 transition-colors"
+                title="Edit location"
+              >
+                <Edit3 className="w-3 h-3" />
+                <span>{user.city || user.country ? 'Update' : '+ Add Location'}</span>
+              </button>
+            </div>
+
+            {user.city || user.country ? (
+              <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200/80 space-y-2.5 text-xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-100/60 text-indigo-700 flex items-center justify-center shrink-0">
+                      <Globe className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-slate-900 text-sm">
+                        {[user.city, user.country].filter(Boolean).join(', ')}
+                      </div>
+                      <div className="text-[11px] text-slate-500">
+                        {user.city ? `City: ${user.city}` : ''} {user.city && user.country ? '· ' : ''}{user.country ? `Country: ${user.country}` : ''}
+                      </div>
+                    </div>
+                  </div>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-semibold border border-emerald-200 shrink-0">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                    <span>Verified</span>
+                  </span>
+                </div>
+                <div className="text-[11px] text-slate-500 pt-2 border-t border-slate-200/60 flex items-center justify-between">
+                  <span>Protected Coarse-Level Presence</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowLocationModal(true)}
+                    className="font-medium text-indigo-600 hover:underline cursor-pointer"
+                  >
+                    Change location &rarr;
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="p-4 bg-slate-50 rounded-lg border border-dashed border-slate-300 text-center space-y-2.5 text-xs">
+                <div className="w-9 h-9 mx-auto rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center">
+                  <MapPin className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="font-semibold text-slate-800">No Location Set</div>
+                  <p className="text-[11px] text-slate-500 max-w-xs mx-auto mt-0.5">
+                    Add verified city & country so peers can discover and verify this profile regionally.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowLocationModal(true)}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-2xs transition-colors cursor-pointer"
+                >
+                  <MapPin className="w-3.5 h-3.5" />
+                  <span>+ Add Location to Profile</span>
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* Identity & Legal Attestation */}
           <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
             <div className="flex items-center gap-2">
@@ -927,11 +993,11 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
         </div>
       )}
 
-      {showLocationModal && (currentUser || data.user) && (
+      {showLocationModal && data.user && (
         <UpdateLocationModal
           isOpen={showLocationModal}
           onClose={() => setShowLocationModal(false)}
-          user={currentUser || data.user}
+          user={data.user}
           onLocationUpdated={(updatedUser) => {
             setData((prev) => (prev ? { ...prev, user: updatedUser } : prev));
             if (onProfileUpdated) {

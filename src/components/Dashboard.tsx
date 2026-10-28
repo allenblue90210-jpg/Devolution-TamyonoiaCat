@@ -34,7 +34,10 @@ import {
   Sparkles,
   Search,
   Star,
+  MapPin,
+  Edit3,
 } from 'lucide-react';
+import { UpdateLocationModal } from './UpdateLocationModal.js';
 
 interface DashboardProps {
   user: User;
@@ -76,6 +79,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [copiedLink, setCopiedLink] = React.useState(false);
   const [verifyingIdentity, setVerifyingIdentity] = React.useState(false);
   const [verifyMessage, setVerifyMessage] = React.useState<string | null>(null);
+  const [showLocationModal, setShowLocationModal] = React.useState(false);
 
   const handleQuickVerifyIdentity = async () => {
     setVerifyingIdentity(true);
@@ -106,6 +110,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const completenessSteps = [
     { label: 'Basic Profile & Bio', complete: Boolean(user.bio && user.category) },
     { label: 'Profile Picture / Avatar', complete: Boolean(user.avatarUrl) },
+    { label: 'Verified Location (City & Country)', complete: Boolean(user.city || user.country) },
     { label: 'Confirmed Relationships (2+)', complete: confirmedRelationships.length >= 2 },
     { label: 'Verified Credentials', complete: verifiedCredentials.length >= 1 },
     { label: 'Documented Trust Receipt', complete: completedReceipts.length >= 1 },
@@ -160,7 +165,28 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 font-mono">
                 <span>@{user.username}</span>
                 <span aria-hidden="true">·</span>
-                <span>{user.city}, {user.country}</span>
+                {user.city || user.country ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowLocationModal(true)}
+                    className="inline-flex items-center gap-1 text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/70 px-1.5 py-0.5 rounded cursor-pointer group font-sans font-medium transition-colors"
+                    title="Click to update your location"
+                  >
+                    <MapPin className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                    <span>{[user.city, user.country].filter(Boolean).join(', ')}</span>
+                    <Edit3 className="w-3 h-3 text-indigo-400 opacity-60 group-hover:opacity-100 transition-opacity ml-0.5" />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowLocationModal(true)}
+                    className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-800 bg-indigo-50/90 hover:bg-indigo-100 px-2 py-0.5 rounded font-sans font-medium transition-colors cursor-pointer border border-indigo-200/70"
+                    title="Add location to your profile"
+                  >
+                    <MapPin className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                    <span>+ Add Location</span>
+                  </button>
+                )}
                 {user.businessName && (
                   <>
                     <span aria-hidden="true">·</span>
@@ -171,7 +197,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => setShowLocationModal(true)}
+              className="px-3.5 py-2 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200/80 rounded-lg transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer"
+              title="Add or update location (City & Country)"
+            >
+              <MapPin className="w-3.5 h-3.5 text-indigo-600" />
+              <span>{user.city || user.country ? 'Update Location' : '+ Add Location'}</span>
+            </button>
             {onOpenAvatarUpload && (
               <button
                 onClick={onOpenAvatarUpload}
@@ -914,6 +949,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
       </div>
+
+      {showLocationModal && (
+        <UpdateLocationModal
+          isOpen={showLocationModal}
+          onClose={() => setShowLocationModal(false)}
+          user={user}
+          onLocationUpdated={async () => {
+            if (onRefreshData) {
+              await onRefreshData();
+            }
+          }}
+        />
+      )}
     </div>
   );
 };

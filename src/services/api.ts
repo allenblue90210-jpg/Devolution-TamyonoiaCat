@@ -273,6 +273,19 @@ export const api = {
     }
     return res;
   },
+  async updateUserLocation(userId: string, city: string, country: string): Promise<{ success: boolean; user: User; message: string }> {
+    const res = await request<{ success: boolean; user: User; message: string }>(`/api/users/${encodeURIComponent(userId)}/location`, {
+      method: 'POST',
+      body: JSON.stringify({ city, country }),
+    });
+    if (res?.user) {
+      const active = getCachedActiveUser();
+      if (active && (active.id === res.user.id || active.username.toLowerCase() === res.user.username.toLowerCase())) {
+        saveActiveUser(res.user);
+      }
+    }
+    return res;
+  },
   async uploadAvatar(avatarUrl: string): Promise<{ success: boolean; user: User; message: string }> {
     const res = await request<{ success: boolean; user: User; message: string }>('/api/user/upload-avatar', {
       method: 'POST',

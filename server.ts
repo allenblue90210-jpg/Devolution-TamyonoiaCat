@@ -483,6 +483,27 @@ app.post('/api/auth/update-profile', (req: Request, res: Response) => {
   res.json({ user: updated, message: 'Profile updated successfully.' });
 });
 
+app.post('/api/users/:userId/location', (req: Request, res: Response) => {
+  const { userId } = req.params;
+  const { city, country } = req.body || {};
+  const targetUser = db.getUserById(userId) || db.getUserByUsername(userId);
+  if (!targetUser) {
+    return res.status(404).json({ error: 'User not found.' });
+  }
+
+  const updated = db.updateUser(targetUser.id, {
+    city: typeof city === 'string' ? city.trim() : targetUser.city,
+    country: typeof country === 'string' ? country.trim() : targetUser.country,
+  });
+
+  if (!updated) {
+    return res.status(500).json({ error: 'Failed to update user location.' });
+  }
+
+  syncUserToSupabase(updated).catch(() => {});
+  res.json({ success: true, user: updated, message: 'User location updated successfully.' });
+});
+
 app.post('/api/user/upload-avatar', (req: Request, res: Response) => {
   const userId = getSessionUserId(req);
   if (!userId) {
