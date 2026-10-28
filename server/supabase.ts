@@ -2,8 +2,9 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
 
-const TOKEN_FILE = path.resolve(process.cwd(), '.supabase_token');
-const CONFIG_FILE = path.resolve(process.cwd(), '.supabase_config.json');
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const TOKEN_FILE = isServerless ? path.resolve('/tmp', '.supabase_token') : path.resolve(process.cwd(), '.supabase_token');
+const CONFIG_FILE = isServerless ? path.resolve('/tmp', '.supabase_config.json') : path.resolve(process.cwd(), '.supabase_config.json');
 
 export interface SupabaseConfig {
   url: string;

@@ -191,7 +191,7 @@ export const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({ user, onCl
     setSaving(true);
     setError(null);
     try {
-      const res = await api.uploadAvatar('');
+      const res = await api.uploadAvatar('', user?.id);
       if (res.success && res.user) {
         onSuccess(res.user);
         onClose();
@@ -210,7 +210,7 @@ export const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({ user, onCl
     setError(null);
 
     try {
-      const res = await api.uploadAvatar(previewUrl);
+      const res = await api.uploadAvatar(previewUrl, user?.id);
       if (res.success && res.user) {
         onSuccess(res.user);
         onClose();

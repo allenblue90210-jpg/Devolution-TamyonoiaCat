@@ -203,6 +203,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
   }
 
   const { user, relationshipCounts, publicEndorsers, publicEvidence, publicReceipts, references, reputation } = data;
+  const isOwnProfile = Boolean(currentUser && (currentUser.id === user.id || (currentUser.username && user.username && currentUser.username.toLowerCase() === user.username.toLowerCase()) || (currentUser.email && user.email && currentUser.email.toLowerCase() === user.email.toLowerCase())));
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -226,7 +227,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
           >
             Browse Directory →
           </button>
-          {currentUser?.username === user.username && onLogout && (
+          {isOwnProfile && onLogout && (
             <button
               onClick={onLogout}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg shadow-2xs transition-colors cursor-pointer"
@@ -246,26 +247,26 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
             {/* User Avatar with Quick Upload Trigger for own profile */}
             <div
               onClick={() => {
-                if (currentUser?.username === user.username && onOpenAvatarUpload) {
+                if (isOwnProfile && onOpenAvatarUpload) {
                   onOpenAvatarUpload();
                 }
               }}
               className={`relative group shrink-0 ${
-                currentUser?.username === user.username ? 'cursor-pointer' : ''
+                isOwnProfile ? 'cursor-pointer' : ''
               }`}
               title={
-                currentUser?.username === user.username
+                isOwnProfile
                   ? 'Click to change or create profile picture'
                   : user.fullName
               }
             >
               <UserAvatar
-                src={currentUser?.username === user.username ? (currentUser.avatarUrl || user.avatarUrl) : user.avatarUrl}
+                src={isOwnProfile ? (currentUser.avatarUrl || user.avatarUrl) : user.avatarUrl}
                 name={user.fullName}
                 className="w-20 h-20 rounded-full border-2 border-slate-200 group-hover:scale-105 transition-transform"
                 iconClassName="w-10 h-10 text-slate-500"
               />
-              {currentUser?.username === user.username && onOpenAvatarUpload && (
+              {isOwnProfile && onOpenAvatarUpload && (
                 <>
                   <div className="absolute inset-0 bg-slate-900/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
                     <Camera className="w-5 h-5 drop-shadow" />
@@ -338,7 +339,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
               <span>{user.city || user.country ? 'Update Location' : '+ Add Location'}</span>
             </button>
 
-            {currentUser?.username === user.username ? (
+            {isOwnProfile ? (
               <>
                 {onOpenAvatarUpload && (
                   <button

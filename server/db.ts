@@ -40,8 +40,11 @@ interface DatabaseSchema {
   recordedLedger?: RecordedLedgerEntry[];
 }
 
-const DB_FILE = path.resolve(process.cwd(), 'data', 'db.json');
-const VAULT_DIR = path.resolve(process.cwd(), 'data', 'vault');
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const BUNDLED_DB_FILE = path.resolve(process.cwd(), 'data', 'db.json');
+const BASE_DATA_DIR = isServerless ? '/tmp' : path.resolve(process.cwd(), 'data');
+const DB_FILE = isServerless ? path.resolve('/tmp', 'db.json') : path.resolve(process.cwd(), 'data', 'db.json');
+const VAULT_DIR = path.resolve(BASE_DATA_DIR, 'vault');
 const VAULT_PACTS_FILE = path.join(VAULT_DIR, 'permanent_pacts.json');
 const VAULT_RECEIPTS_FILE = path.join(VAULT_DIR, 'permanent_receipts.json');
 const VAULT_LEDGER_FILE = path.join(VAULT_DIR, 'immutable_ledger.jsonl');
@@ -315,6 +318,14 @@ class Database {
   }
 
   private load(): DatabaseSchema {
+    // In serverless environments, seed /tmp/db.json from bundled static file if needed
+    if (isServerless && !fs.existsSync(DB_FILE) && fs.existsSync(BUNDLED_DB_FILE)) {
+      try {
+        fs.copyFileSync(BUNDLED_DB_FILE, DB_FILE);
+      } catch (err) {
+        console.warn('[DB] Notice seeding /tmp/db.json from bundle:', err);
+      }
+    }
     try {
       if (fs.existsSync(DB_FILE)) {
         const raw = fs.readFileSync(DB_FILE, 'utf-8');

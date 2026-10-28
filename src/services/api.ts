@@ -264,9 +264,12 @@ export const api = {
     return res;
   },
   async updateProfile(updates: Partial<User>): Promise<{ user: User; message: string }> {
+    const active = getCachedActiveUser();
+    const effectiveUserId = updates.id || active?.id || currentSessionUserId;
     const res = await request<{ user: User; message: string }>('/api/auth/update-profile', {
       method: 'POST',
-      body: JSON.stringify(updates),
+      headers: effectiveUserId && effectiveUserId !== 'guest' ? { 'x-user-id': effectiveUserId } : undefined,
+      body: JSON.stringify({ ...updates, userId: effectiveUserId, username: active?.username }),
     });
     if (res?.user) {
       saveActiveUser(res.user);
@@ -286,10 +289,13 @@ export const api = {
     }
     return res;
   },
-  async uploadAvatar(avatarUrl: string): Promise<{ success: boolean; user: User; message: string }> {
+  async uploadAvatar(avatarUrl: string, userId?: string): Promise<{ success: boolean; user: User; message: string }> {
+    const active = getCachedActiveUser();
+    const effectiveUserId = userId || active?.id || currentSessionUserId;
     const res = await request<{ success: boolean; user: User; message: string }>('/api/user/upload-avatar', {
       method: 'POST',
-      body: JSON.stringify({ avatarUrl, userId: currentSessionUserId }),
+      headers: effectiveUserId && effectiveUserId !== 'guest' ? { 'x-user-id': effectiveUserId } : undefined,
+      body: JSON.stringify({ avatarUrl, userId: effectiveUserId, id: effectiveUserId, username: active?.username }),
     });
     if (res?.user) {
       saveActiveUser(res.user);

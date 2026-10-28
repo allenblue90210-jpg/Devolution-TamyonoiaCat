@@ -474,7 +474,11 @@ app.post('/api/auth/update-profile', async (req: Request, res: Response) => {
   let targetId = sessionUserId;
   let targetUser = db.getUserById(targetId);
   if (!targetUser && requestedUserId) {
-    targetUser = db.getUserById(requestedUserId);
+    targetUser = db.getUserById(requestedUserId) || db.getUserByUsername(requestedUserId);
+    if (targetUser) targetId = targetUser.id;
+  }
+  if (!targetUser && req.body?.username) {
+    targetUser = db.getUserByUsername(req.body.username);
     if (targetUser) targetId = targetUser.id;
   }
   if (!targetUser) {
@@ -2634,6 +2638,7 @@ function getResolvedGitHubToken(): string | null {
 }
 
 async function initGitConfig(): Promise<boolean> {
+  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) return false;
   if (isGitInitializing) return false;
   isGitInitializing = true;
   try {
@@ -2900,6 +2905,7 @@ async function performGitSync(customMessage?: string) {
 
 let syncDebounceTimer: NodeJS.Timeout | null = null;
 export function triggerGitSyncDebounced(reason = 'data updated') {
+  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) return;
   if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
   syncDebounceTimer = setTimeout(async () => {
     if (isSyncInProgress) return;
@@ -2912,6 +2918,7 @@ export function triggerGitSyncDebounced(reason = 'data updated') {
 }
 
 export async function triggerGitSyncImmediate(reason = 'immutable record created') {
+  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) return;
   if (syncDebounceTimer) {
     clearTimeout(syncDebounceTimer);
     syncDebounceTimer = null;
@@ -2971,6 +2978,18 @@ setInterval(async () => {
 }, 60000);
 
 app.get('/api/git/status', async (_req: Request, res: Response) => {
+  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    return res.json({
+      configured: true,
+      repoSlug: DEFAULT_REPO_SLUG,
+      branch: 'main',
+      status: 'synced',
+      lastCommitHash: 'cloud-serverless',
+      lastCommitMessage: 'Running in Vercel Cloud Serverless',
+      syncInProgress: false,
+      lastSyncTime: new Date().toISOString(),
+    });
+  }
   const status = await getGitRepoStatus();
   res.json(status);
 });
@@ -3203,7 +3222,9 @@ app.get('/api/supabase/schema', (_req: Request, res: Response) => {
 });
 
 async function startServer() {
-  await initGitConfig();
+  if (!process.env.VERCEL && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    await initGitConfig();
+  }
 
   // API 404 Guard: Ensure unmatched /api routes return JSON 404, preventing fall-through to Vite SPA HTML
   app.all('/api/*', (req: Request, res: Response) => {
