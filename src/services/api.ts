@@ -189,7 +189,45 @@ async function request<T>(endpoint: string, options: RequestInit = {}, retries =
 export const api = {
   // Auth
   async getCurrentUser(): Promise<{ user: User | null }> {
-    return request('/api/auth/me');
+    const cached = getCachedActiveUser();
+    try {
+      const res = await request<{ user: User | null }>('/api/auth/me');
+      if (res?.user) {
+        if (
+          cached &&
+          (cached.id === res.user.id ||
+            (cached.username && res.user.username && cached.username.toLowerCase() === res.user.username.toLowerCase()))
+        ) {
+          const merged: User = {
+            ...res.user,
+            avatarUrl: cached.avatarUrl || res.user.avatarUrl,
+            fullName: cached.fullName || res.user.fullName,
+            headline: cached.headline || res.user.headline,
+            bio: cached.bio || res.user.bio,
+            phone: cached.phone || res.user.phone,
+            city: cached.city || res.user.city,
+            country: cached.country || res.user.country,
+            businessName: cached.businessName || res.user.businessName,
+          };
+
+          if (cached.avatarUrl && !res.user.avatarUrl) {
+            request('/api/user/upload-avatar', {
+              method: 'POST',
+              headers: { 'x-user-id': merged.id },
+              body: JSON.stringify({ avatarUrl: cached.avatarUrl, userId: merged.id }),
+            }).catch(() => {});
+          }
+
+          saveActiveUser(merged);
+          return { user: merged };
+        }
+        saveActiveUser(res.user);
+        return res;
+      }
+    } catch {
+      // ignore
+    }
+    return { user: cached };
   },
   async logout(): Promise<{ success: boolean; message: string }> {
     clearSessionUserId();

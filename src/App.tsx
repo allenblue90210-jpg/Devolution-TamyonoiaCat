@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { api, setSessionUserId, clearSessionUserId } from './services/api.js';
+import { api, setSessionUserId, clearSessionUserId, getCachedActiveUser } from './services/api.js';
 import { ShieldCheck, LogIn } from 'lucide-react';
 import {
   User,
@@ -34,10 +34,14 @@ import { AvatarUploadModal } from './components/AvatarUploadModal.js';
 import { SupabaseModal } from './components/SupabaseModal.js';
 
 export default function App() {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(() => getCachedActiveUser());
   const [availableUsers, setAvailableUsers] = useState<UserSummary[]>([]);
-  const [currentTab, setCurrentTab] = useState<string>('landing');
-  const [loading, setLoading] = useState<boolean>(true);
+  const [currentTab, setCurrentTab] = useState<string>(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (hash) return hash;
+    return getCachedActiveUser() ? 'dashboard' : 'landing';
+  });
+  const [loading, setLoading] = useState<boolean>(() => !getCachedActiveUser());
 
   // Core Data
   const [evidence, setEvidence] = useState<EvidenceItem[]>([]);

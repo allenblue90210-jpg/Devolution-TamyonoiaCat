@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../services/api.js';
+import { api, getCachedActiveUser } from '../services/api.js';
 import { User, EvidenceItem, ProfessionalReference, ReputationBreakdown, TrustCommitment } from '../types/trust.js';
 import { UserAvatar } from './UserAvatar.js';
 import {
@@ -83,6 +83,19 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
         if (!data) setLoading(true);
         const res = await api.getProfileByUsername(username);
         if (!isCancelled) {
+          const active = currentUser || getCachedActiveUser();
+          const isOwn =
+            active &&
+            (active.id === res.user.id ||
+              (active.username && res.user.username && active.username.toLowerCase() === res.user.username.toLowerCase()) ||
+              (active.email && res.user.email && active.email.toLowerCase() === res.user.email.toLowerCase()));
+          if (isOwn) {
+            res.user = {
+              ...res.user,
+              ...active,
+              avatarUrl: active.avatarUrl || res.user.avatarUrl,
+            };
+          }
           setData(res);
           setError(null);
         }
