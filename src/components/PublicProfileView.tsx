@@ -926,6 +926,20 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
           </div>
         </div>
       )}
+
+      {showLocationModal && (currentUser || data.user) && (
+        <UpdateLocationModal
+          isOpen={showLocationModal}
+          onClose={() => setShowLocationModal(false)}
+          user={currentUser || data.user}
+          onLocationUpdated={(updatedUser) => {
+            setData((prev) => (prev ? { ...prev, user: updatedUser } : prev));
+            if (onProfileUpdated) {
+              onProfileUpdated(updatedUser);
+            }
+          }}
+        />
+      )}
     </div>
   );
 };

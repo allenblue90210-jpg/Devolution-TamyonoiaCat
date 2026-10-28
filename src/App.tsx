@@ -296,6 +296,10 @@ export default function App() {
           onBack={handleBack}
           onOpenAvatarUpload={() => setShowAvatarModal(true)}
           onLogout={handleLogout}
+          onProfileUpdated={(updated) => {
+            setCurrentUser(updated);
+            refreshData();
+          }}
         />
       );
     }
