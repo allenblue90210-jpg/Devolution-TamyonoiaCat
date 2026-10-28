@@ -126,6 +126,9 @@ export default function App() {
 
       if (userRes && userRes.user) {
         setCurrentUser(userRes.user);
+        if (!window.location.hash || window.location.hash === '#' || window.location.hash === '#landing') {
+          setCurrentTab('dashboard');
+        }
       }
       if (usersListRes && usersListRes.users) {
         setAvailableUsers(usersListRes.users);
