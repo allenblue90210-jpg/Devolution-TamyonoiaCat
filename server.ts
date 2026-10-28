@@ -2541,7 +2541,7 @@ app.post('/api/remember/:id/corroborate', (req: Request, res: Response) => {
 
 const execAsync = promisify(exec);
 
-const DEFAULT_REPO_SLUG = 'tamiyanoiacat-web/Devolution-web';
+const DEFAULT_REPO_SLUG = 'allenblue90210-jpg/Devolution-TamyonoiaCat';
 const DEFAULT_REPO_URL = `https://github.com/${DEFAULT_REPO_SLUG}.git`;
 
 let lastSyncTime: string | null = new Date().toISOString();
@@ -2582,13 +2582,13 @@ async function initGitConfig(): Promise<boolean> {
       await execAsync('git init -b main');
     }
 
-    await execAsync('git config user.name "tamiyanoiacat-web"');
-    await execAsync('git config user.email "tamiyanoiacat@gmail.com"');
+    await execAsync('git config user.name "allenblue90210-jpg"');
+    await execAsync('git config user.email "allennuclear001@gmail.com"');
     await execAsync('git config pull.rebase false');
 
     const token = getResolvedGitHubToken();
     const authRemoteUrl = token
-      ? `https://x-access-token:${token}@github.com/${DEFAULT_REPO_SLUG}.git`
+      ? `https://${token}@github.com/${DEFAULT_REPO_SLUG}.git`
       : DEFAULT_REPO_URL;
 
     try {
