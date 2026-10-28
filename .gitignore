@@ -12,3 +12,4 @@ coverage/
 .supabase_config.json
 
 bun.lock
+.vercel
