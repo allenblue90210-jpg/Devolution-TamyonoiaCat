@@ -286,6 +286,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
     } finally {
       setIsSavingToken(false);
     }
+  };
+
   const handleDetectCurrentLocation = () => {
     if (!('geolocation' in navigator)) {
       setLocationNotice({ text: 'Geolocation is not supported by your browser.', type: 'error' });
