@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import express, { Request, Response } from 'express';
-import { createServer as createViteServer } from 'vite';
+// Dynamic import used in startServer to avoid bundling Vite in production serverless environments
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
@@ -3169,6 +3169,7 @@ async function startServer() {
   });
 
   if (process.env.NODE_ENV !== 'production') {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: {
         middlewareMode: true,
