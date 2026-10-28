@@ -941,7 +941,7 @@
       "createdAt": "2026-10-18T09:15:43.602Z",
       "isOverdue": true,
       "committerId": "usr_sarah_002",
-      "daysOverdue": 9,
+      "daysOverdue": 10,
       "description": "Vehicle loaner agreement: User A (Allen) loaning Mercedes C300 to User B (Sarah) for regional tech summit transit. Promised to be returned and parked at Lekki Phase 1 secure garage by 2:00 AM.",
       "impressions": 2150,
       "ratingBadge": "100% Exemplary Good Faith",
@@ -1165,7 +1165,7 @@
   "goodFaithRatings": [],
   "impressions": {
     "network": {
-      "impressions": 42,
+      "impressions": 43,
       "witnessCount": 0
     },
     "usr_allen_nuclear": {
@@ -1173,7 +1173,7 @@
       "witnessCount": 0
     },
     "usr_1792751667628_nce6": {
-      "impressions": 6,
+      "impressions": 7,
       "witnessCount": 0
     }
   },
