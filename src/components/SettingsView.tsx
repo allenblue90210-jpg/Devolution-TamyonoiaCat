@@ -26,6 +26,8 @@ import {
   FileText,
   Globe,
   Server,
+  MapPin,
+  Navigation,
   X,
 } from 'lucide-react';
 
@@ -43,6 +45,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
   const [category, setCategory] = useState(user.category);
   const [city, setCity] = useState(user.city);
   const [country, setCountry] = useState(user.country);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [locationNotice, setLocationNotice] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   const [privacy, setPrivacy] = useState<UserPrivacySettings>(user.privacySettings);
   const [saving, setSaving] = useState(false);

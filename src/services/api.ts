@@ -313,10 +313,11 @@ export const api = {
   },
 
   // Public Profiles
-  async getProfiles(params: { q?: string; category?: string; verified?: boolean } = {}): Promise<{ profiles: any[] }> {
+  async getProfiles(params: { q?: string; category?: string; verified?: boolean; location?: string } = {}): Promise<{ profiles: any[] }> {
     const query = new URLSearchParams();
     if (params.q) query.set('q', params.q);
     if (params.category) query.set('category', params.category);
+    if (params.location) query.set('location', params.location);
     if (params.verified) query.set('verified', 'true');
     return request(`/api/profiles?${query.toString()}`);
   },
@@ -585,6 +586,7 @@ export const api = {
     pledgeNote?: string;
     promisedUserId?: string;
     isPublic?: boolean;
+    location?: string;
   }): Promise<{ commitment: TrustCommitment; message: string }> {
     const res = await request<{ commitment: TrustCommitment; message: string }>('/api/commitments', {
       method: 'POST',
