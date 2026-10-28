@@ -35,6 +35,7 @@ import {
   Search,
   Award,
   Lock,
+  MapPin,
 } from 'lucide-react';
 
 interface CommitmentsViewProps {
@@ -80,6 +81,7 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
   const [deadlineTime, setDeadlineTime] = useState('02:00');
   const [rewardPoints, setRewardPoints] = useState(25);
   const [isPublic, setIsPublic] = useState(true);
+  const [location, setLocation] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   // Edit / Reassign Counterparty on existing commitment
@@ -351,10 +353,12 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
           ? (customPledgeText.trim() || `I promise to fulfill: ${title} by deadline`)
           : undefined,
         isPublic,
+        location: location.trim() || undefined,
       });
 
       setShowCreateModal(false);
       setIsPublic(true);
+      setLocation('');
       setTitle('');
       setDescription('');
       setOtherCategoryDetails('');
@@ -835,6 +839,12 @@ export const CommitmentsView: React.FC<CommitmentsViewProps> = ({
                       ) : (
                         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
                           Private
+                        </span>
+                      )}
+                      {c.location && (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                          <MapPin className="w-3 h-3 text-indigo-500 shrink-0" />
+                          <span className="truncate max-w-[150px]">{c.location}</span>
                         </span>
                       )}
                     </div>
