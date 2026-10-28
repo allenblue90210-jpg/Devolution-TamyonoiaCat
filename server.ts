@@ -465,22 +465,52 @@ app.post('/api/users/quick-verify', (req: Request, res: Response) => {
   res.json({ success: true, user: updated, message: 'Identity verified and attested successfully (+25 Trust Points).' });
 });
 
-app.post('/api/auth/update-profile', (req: Request, res: Response) => {
-  const userId = getSessionUserId(req);
-  const updates = req.body;
-  // Security guard: never allow client to manipulate verification statuses directly
+app.post('/api/auth/update-profile', async (req: Request, res: Response) => {
+  const sessionUserId = getSessionUserId(req);
+  const requestedUserId = req.body.id || req.body.userId;
+  const updates = { ...req.body };
+
+  // Resolve target user: prefer explicit user id if provided, fallback to session or username/email
+  let targetId = sessionUserId;
+  let targetUser = db.getUserById(targetId);
+  if (!targetUser && requestedUserId) {
+    targetUser = db.getUserById(requestedUserId);
+    if (targetUser) targetId = targetUser.id;
+  }
+  if (!targetUser) {
+    targetUser = db.getState().users.find((u) => u.id === targetId || u.username === targetId || (u.email && u.email === targetId));
+    if (targetUser) targetId = targetUser.id;
+  }
+
+  // Security guard: protect critical ledger identities
   delete updates.id;
+  delete updates.userId;
   delete updates.identityStatus;
   delete updates.identityVerifiedAt;
   delete updates.phoneVerified;
   delete updates.emailVerified;
   delete updates.businessVerificationStatus;
 
-  const updated = db.updateUser(userId, updates);
+  // Clean strings
+  if (updates.fullName && typeof updates.fullName === 'string') updates.fullName = updates.fullName.trim();
+  if (updates.headline && typeof updates.headline === 'string') updates.headline = updates.headline.trim();
+  if (updates.bio && typeof updates.bio === 'string') updates.bio = updates.bio.trim();
+  if (updates.category && typeof updates.category === 'string') updates.category = updates.category.trim();
+  if (updates.city && typeof updates.city === 'string') updates.city = updates.city.trim();
+  if (updates.country && typeof updates.country === 'string') updates.country = updates.country.trim();
+  if (updates.phone && typeof updates.phone === 'string') updates.phone = updates.phone.trim();
+  if (updates.businessName && typeof updates.businessName === 'string') updates.businessName = updates.businessName.trim();
+
+  const updated = db.updateUser(targetId, updates);
   if (!updated) {
-    return res.status(404).json({ error: 'User not found.' });
+    return res.status(404).json({ error: 'User profile not found.' });
   }
-  res.json({ user: updated, message: 'Profile updated successfully.' });
+
+  // Cross-sync to Supabase so changes are permanently saved across Vercel cold starts
+  syncUserToSupabase(updated).catch(() => {});
+  triggerGitSyncDebounced('user profile updated');
+
+  res.json({ success: true, user: updated, message: 'Profile updated successfully.' });
 });
 
 app.post('/api/users/:userId/location', (req: Request, res: Response) => {
@@ -544,6 +574,8 @@ app.post('/api/user/upload-avatar', (req: Request, res: Response) => {
     }
   }
   db.persist();
+  syncUserToSupabase(updated).catch(() => {});
+  triggerGitSyncDebounced('user avatar updated');
 
   res.json({ success: true, user: updated, message: 'Profile picture updated successfully.' });
 });

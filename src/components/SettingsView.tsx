@@ -40,6 +40,9 @@ interface SettingsViewProps {
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdated, onBack, onOpenAvatarUpload, onLogout }) => {
+  const [fullName, setFullName] = useState(user.fullName || '');
+  const [phone, setPhone] = useState(user.phone || '');
+  const [businessName, setBusinessName] = useState(user.businessName || '');
   const [headline, setHeadline] = useState(user.headline);
   const [bio, setBio] = useState(user.bio);
   const [category, setCategory] = useState(user.category);
@@ -372,11 +375,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
     setMessage(null);
     try {
       const res = await api.updateProfile({
-        headline,
-        bio,
-        category,
-        city,
-        country,
+        id: user.id,
+        fullName: fullName.trim(),
+        phone: phone.trim(),
+        businessName: businessName.trim(),
+        headline: headline.trim(),
+        bio: bio.trim(),
+        category: category.trim(),
+        city: city.trim(),
+        country: country.trim(),
         privacySettings: privacy,
       });
       onProfileUpdated(res.user);
@@ -463,6 +470,38 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div>
+              <label className="block font-semibold text-slate-700 mb-1">Full Name</label>
+              <input
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Your full name"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900 font-medium"
+              />
+            </div>
+            <div>
+              <label className="block font-semibold text-slate-700 mb-1">Phone Number</label>
+              <input
+                type="text"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="e.g. +234 ..."
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900"
+              />
+            </div>
+            {user.accountType === 'business' && (
+              <div className="md:col-span-2">
+                <label className="block font-semibold text-slate-700 mb-1">Business / Organization Name</label>
+                <input
+                  type="text"
+                  value={businessName}
+                  onChange={(e) => setBusinessName(e.target.value)}
+                  placeholder="Registered enterprise name"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900"
+                />
+              </div>
+            )}
             <div>
               <label className="block font-semibold text-slate-700 mb-1">Headline</label>
               <input

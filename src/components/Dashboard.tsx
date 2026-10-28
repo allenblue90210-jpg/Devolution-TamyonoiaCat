@@ -200,6 +200,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="flex flex-wrap items-center gap-2.5">
             <button
               type="button"
+              onClick={() => onNavigateTab('settings')}
+              className="px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
+              title="Edit your full profile details, name, phone, bio, and settings"
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              <span>Edit Profile</span>
+            </button>
+            <button
+              type="button"
               onClick={() => setShowLocationModal(true)}
               className="px-3.5 py-2 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200/80 rounded-lg transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer"
               title="Add or update location (City & Country)"
