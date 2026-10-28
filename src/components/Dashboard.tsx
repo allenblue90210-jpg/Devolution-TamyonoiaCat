@@ -151,6 +151,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-bold text-slate-900">{user.fullName}</h1>
+                <span className="inline-flex items-center gap-1 text-xs text-indigo-700 font-medium bg-indigo-50 px-2.5 py-0.5 rounded border border-indigo-200">
+                  <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Verified Profile</span>
+                </span>
               </div>
               <p className="text-xs text-slate-600">{user.headline}</p>
               <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 font-mono">

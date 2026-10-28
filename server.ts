@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import express, { Request, Response } from 'express';
+import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
@@ -26,8 +27,6 @@ import {
   syncReceiptToSupabase,
   pullPactsFromSupabase,
   pullReceiptsFromSupabase,
-  getSupabaseUserByToken,
-  autoConfirmSupabaseUser,
 } from './server/supabase.js';
 import {
   User,
@@ -48,240 +47,40 @@ import {
   RememberCorroboration,
 } from './src/types/trust.js';
 
-const app = express();
+export const app = express();
 const PORT = process.env.PORT || 3000;
-
-// Export for Vercel serverless function
-export { app };
 
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
-app.use((_req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, x-user-id');
-  if (_req.method === 'OPTIONS') {
-    return res.sendStatus(204);
-  }
-  next();
-});
-
 
 // Session helper: in this full-stack environment, we track active user by header 'x-user-id'.
-// Returns empty string (unauthenticated) when no valid user header is provided.
+// Defaults to primary account 'usr_allen_nuclear' (allennuclear001@gmail.com) unless explicitly guest.
 function getSessionUserId(req: Request): string {
-  const headerUserId = (req.headers['x-user-id'] as string || '').trim();
-  if (!headerUserId || headerUserId === 'guest' || headerUserId === 'none' || headerUserId === 'null' || headerUserId === 'undefined') {
+  const headerUserId = req.headers['x-user-id'] as string;
+  if (headerUserId === 'guest' || headerUserId === 'none' || headerUserId === 'null') {
     return '';
   }
-  return headerUserId;
+  if (headerUserId && db.getUserById(headerUserId)) {
+    return headerUserId;
+  }
+  if (db.getUserById('usr_allen_nuclear')) {
+    return 'usr_allen_nuclear';
+  }
+  const firstUser = db.getState().users[0];
+  return firstUser ? firstUser.id : '';
 }
-
-// Dynamically extract the public app origin (e.g. https://devolution-web.vercel.app)
-// Never redirects to localhost when invoked from a live web deployment
-function getAppOrigin(req: Request): string {
-  const origin = req.headers.origin as string;
-  if (origin && !origin.includes('localhost') && !origin.includes('127.0.0.1')) {
-    return origin.replace(/\/$/, '');
-  }
-  const referer = req.headers.referer as string;
-  if (referer) {
-    try {
-      const u = new URL(referer);
-      if (!u.origin.includes('localhost') && !u.origin.includes('127.0.0.1')) {
-        return u.origin.replace(/\/$/, '');
-      }
-    } catch {
-      // ignore
-    }
-  }
-  const host = req.headers.host as string;
-  if (host && !host.includes('localhost') && !host.includes('127.0.0.1')) {
-    const proto = (req.headers['x-forwarded-proto'] as string) || 'https';
-    return `${proto}://${host}`.replace(/\/$/, '');
-  }
-  if (process.env.APP_URL && !process.env.APP_URL.includes('localhost')) {
-    return process.env.APP_URL.replace(/\/$/, '');
-  }
-  return origin || process.env.APP_URL || 'http://localhost:3000';
-}
-
-/* ==========================================================================
-   SUPABASE STATE HYDRATION (Crucial for Vercel Serverless Cold Starts)
-   ========================================================================== */
-
-let hasHydrated = false;
-let hydratingPromise: Promise<void> | null = null;
-
-export async function ensureServerHydrated(): Promise<void> {
-  if (hasHydrated) return;
-  if (hydratingPromise) return hydratingPromise;
-
-  hydratingPromise = (async () => {
-    try {
-      // 1. Pull snapshot from devolution_state if available
-      try {
-        const pullRes = await pullFromSupabase();
-        if (pullRes?.success && pullRes.data) {
-          if (pullRes.data.users && Array.isArray(pullRes.data.users)) {
-            pullRes.data.users = pullRes.data.users.filter((u: any) =>
-              u.id !== 'usr_allen_001' &&
-              u.id !== 'usr_sarah_002' &&
-              u.id !== 'usr_fatima_003' &&
-              u.id !== 'usr_allen_006' &&
-              u.id !== 'usr_1792419706090_6uj2' &&
-              !u.email?.includes('example.com') &&
-              !u.email?.includes('cloudworks.ng') &&
-              !u.email?.includes('horizonlogistics.com')
-            );
-          }
-          db.mergeState(pullRes.data);
-        }
-      } catch (e: any) {
-        console.warn('[Hydration State Snapshot Notice]:', e.message);
-      }
-
-      // 2. Pull all registered users from devolution_users table
-      try {
-        const registeredUsers = await pullRegisteredUsersFromSupabase();
-        if (registeredUsers && Array.isArray(registeredUsers) && registeredUsers.length > 0) {
-          const mappedUsers: User[] = registeredUsers.map((data: any) => ({
-            id: data.id,
-            email: data.email || '',
-            username: (data.username || data.id).trim(),
-            fullName: data.full_name || data.username || 'User',
-            accountType: data.account_type || 'personal',
-            avatarUrl: data.privacy_settings?.avatarUrl || data.avatar_url || '',
-            headline: data.headline || 'Independent Professional',
-            bio: data.bio || '',
-            category: data.category || 'General Professional',
-            country: data.country || 'Nigeria',
-            city: data.city || 'Lagos',
-            phone: data.phone || '',
-            phoneVerified: !!data.phone,
-            emailVerified: true,
-            identityStatus: data.is_verified ? 'verified' : 'unverified',
-            identityMethod: data.identity_method || 'None submitted',
-            identityVerifiedAt: data.identity_verified_at || null,
-            businessVerificationStatus: 'unverified',
-            supabaseAuthId: data.supabase_auth_id || undefined,
-            privacySettings: data.privacy_settings || {
-              showRelationshipCounts: true,
-              showCategoryBreakdown: true,
-              showPublicEndorsers: true,
-              showTrustReceipts: true,
-              showCredentials: true,
-              showLocationCityOnly: true,
-              allowDirectVerificationRequests: true,
-            },
-            createdAt: data.created_at || new Date().toISOString(),
-          }));
-          db.mergeState({ users: mappedUsers });
-        }
-      } catch (uErr: any) {
-        console.warn('[Hydration Registered Users Notice]:', uErr.message);
-      }
-
-      // 3. Pull dedicated pacts and receipts
-      try {
-        const [remotePacts, remoteReceipts] = await Promise.all([
-          pullPactsFromSupabase().catch(() => []),
-          pullReceiptsFromSupabase().catch(() => []),
-        ]);
-        if (remotePacts && remotePacts.length > 0) {
-          db.reconcileExternalPacts(remotePacts);
-        }
-        if (remoteReceipts && remoteReceipts.length > 0) {
-          db.reconcileExternalReceipts(remoteReceipts);
-        }
-      } catch (pErr: any) {
-        console.warn('[Hydration Pacts/Receipts Notice]:', pErr.message);
-      }
-
-      hasHydrated = true;
-    } catch (err: any) {
-      console.warn('[Server Hydration Warning]:', err.message);
-    } finally {
-      hydratingPromise = null;
-    }
-  })();
-
-  return hydratingPromise;
-}
-
-// Middleware: ensure Supabase data is hydrated into in-memory db on API calls
-app.use(async (req, _res, next) => {
-  if (req.path.startsWith('/api')) {
-    await ensureServerHydrated();
-  }
-  next();
-});
 
 /* ==========================================================================
    AUTHENTICATION & PROFILE ENDPOINTS
    ========================================================================== */
 
-app.get('/api/auth/me', async (req: Request, res: Response) => {
+app.get('/api/auth/me', (req: Request, res: Response) => {
   const userId = getSessionUserId(req);
   if (!userId) {
     return res.json({ user: null });
   }
-
-  let user = db.getUserById(userId);
-
-  // If not found in in-memory state (e.g. serverless cold start), retrieve from Supabase
-  if (!user) {
-    try {
-      const { getSupabaseClient } = await import('./server/supabase.js');
-      const client = getSupabaseClient();
-      if (client) {
-        const { data, error } = await client
-          .from('devolution_users')
-          .select('*')
-          .or(`id.eq.${userId},email.ilike.${userId},username.ilike.${userId}`)
-          .maybeSingle();
-
-        if (data && !error) {
-          user = {
-            id: data.id,
-            email: data.email || '',
-            username: (data.username || data.id).trim(),
-            fullName: data.full_name || data.username || 'User',
-            accountType: data.account_type || 'personal',
-            avatarUrl: data.privacy_settings?.avatarUrl || data.avatar_url || '',
-            headline: data.headline || 'Independent Professional',
-            bio: data.bio || '',
-            category: data.category || 'General Professional',
-            country: data.country || 'Nigeria',
-            city: data.city || 'Lagos',
-            phone: data.phone || '',
-            phoneVerified: !!data.phone,
-            emailVerified: true,
-            identityStatus: data.is_verified ? 'verified' : 'unverified',
-            identityMethod: data.identity_method || 'None submitted',
-            identityVerifiedAt: data.identity_verified_at || null,
-            businessVerificationStatus: 'unverified',
-            supabaseAuthId: data.supabase_auth_id || undefined,
-            privacySettings: data.privacy_settings || {
-              showRelationshipCounts: true,
-              showCategoryBreakdown: true,
-              showPublicEndorsers: true,
-              showTrustReceipts: true,
-              showCredentials: true,
-              showLocationCityOnly: true,
-              allowDirectVerificationRequests: true,
-            },
-            createdAt: data.created_at || new Date().toISOString(),
-          };
-          db.createUser(user);
-        }
-      }
-    } catch (err: any) {
-      console.warn('[Supabase Me Restore Notice]:', err.message);
-    }
-  }
-
+  const user = db.getUserById(userId);
   if (!user) {
     return res.json({ user: null });
   }
@@ -350,75 +149,13 @@ app.post('/api/auth/send-magic-link', async (req: Request, res: Response) => {
   if (!user) {
     return res.status(401).json({ error: 'This email is not registered. Please sign up first.' });
   }
-  const appOrigin = getAppOrigin(req);
-  const otpRes = await supabaseAuthSendOtp(query, `${appOrigin}/#auth_confirmed=true`);
+  const otpRes = await supabaseAuthSendOtp(query);
   if (otpRes.success) {
     return res.json({ success: true, message: otpRes.message });
   }
   res.json({
     success: true,
     message: `Verification link dispatched to ${query}.`,
-  });
-});
-
-app.post('/api/auth/session-from-token', async (req: Request, res: Response) => {
-  const { accessToken } = req.body;
-  if (!accessToken || typeof accessToken !== 'string') {
-    return res.status(400).json({ error: 'Access token is required' });
-  }
-
-  const sbUser = await getSupabaseUserByToken(accessToken);
-  if (!sbUser || !sbUser.email) {
-    return res.status(401).json({ error: 'Invalid or expired confirmation token' });
-  }
-
-  const cleanEmail = sbUser.email.trim().toLowerCase();
-  let user = db.getState().users.find((u) => u.email && u.email.toLowerCase() === cleanEmail);
-
-  if (!user) {
-    const cleanName = sbUser.user_metadata?.full_name || cleanEmail.split('@')[0];
-    const cleanUsername = (sbUser.user_metadata?.username || cleanEmail.split('@')[0]).toLowerCase().replace(/[^a-z0-9_]/g, '');
-    user = {
-      id: `usr_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-      email: cleanEmail,
-      username: cleanUsername,
-      fullName: cleanName,
-      accountType: sbUser.user_metadata?.account_type || 'personal',
-      avatarUrl: '',
-      headline: 'Independent Professional',
-      bio: '',
-      category: 'General Professional',
-      country: 'Nigeria',
-      city: 'Lagos',
-      phone: sbUser.phone || '',
-      phoneVerified: !!sbUser.phone,
-      emailVerified: true,
-      identityStatus: 'unverified',
-      identityMethod: 'None submitted',
-      identityVerifiedAt: null,
-      businessVerificationStatus: 'unverified',
-      supabaseAuthId: sbUser.id,
-      privacySettings: {
-        showRelationshipCounts: true,
-        showCategoryBreakdown: true,
-        showPublicEndorsers: true,
-        showTrustReceipts: true,
-        showCredentials: true,
-        showLocationCityOnly: true,
-        allowDirectVerificationRequests: true,
-      },
-      createdAt: new Date().toISOString(),
-    };
-    db.createUser(user);
-    syncUserToSupabase(user).catch(() => {});
-  } else {
-    db.updateUser(user.id, { emailVerified: true, supabaseAuthId: sbUser.id });
-    user = db.getUserById(user.id) || user;
-  }
-
-  res.json({
-    user,
-    message: `Signed in as ${user.email} via confirmed Supabase credentials`,
   });
 });
 
@@ -438,61 +175,12 @@ app.post('/api/auth/signin', async (req: Request, res: Response) => {
   }
 
   const query = login.trim().toLowerCase();
-  let user = db.getState().users.find((u) =>
+  const user = db.getState().users.find((u) =>
     (u.email && u.email.toLowerCase() === query) ||
     (u.username && u.username.toLowerCase() === query)
   );
 
   if (!user) {
-    // If user does not exist in local state, try authenticating with Supabase Auth directly
-    if (query.includes('@')) {
-      const sbResult = await supabaseAuthSignIn(query, password);
-      if (sbResult.success && sbResult.user) {
-        const cleanName = sbResult.user.user_metadata?.full_name || query.split('@')[0];
-        const cleanUsername = (sbResult.user.user_metadata?.username || query.split('@')[0]).toLowerCase().replace(/[^a-z0-9_]/g, '');
-        const inputHash = crypto.createHash('sha256').update(password).digest('hex');
-        const restoredUser: User = {
-          id: `usr_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-          email: query,
-          username: cleanUsername,
-          fullName: cleanName,
-          accountType: sbResult.user.user_metadata?.account_type || 'personal',
-          avatarUrl: '',
-          headline: 'Independent Professional',
-          bio: '',
-          category: 'General Professional',
-          country: 'Nigeria',
-          city: 'Lagos',
-          phone: '',
-          phoneVerified: false,
-          emailVerified: true,
-          identityStatus: 'unverified',
-          identityMethod: 'None submitted',
-          identityVerifiedAt: null,
-          businessVerificationStatus: 'unverified',
-          passwordHash: inputHash,
-          supabaseAuthId: sbResult.user.id,
-          privacySettings: {
-            showRelationshipCounts: true,
-            showCategoryBreakdown: true,
-            showPublicEndorsers: true,
-            showTrustReceipts: true,
-            showCredentials: true,
-            showLocationCityOnly: true,
-            allowDirectVerificationRequests: true,
-          },
-          createdAt: new Date().toISOString(),
-        };
-        db.createUser(restoredUser);
-        syncUserToSupabase(restoredUser).catch(() => {});
-        return res.json({
-          user: restoredUser,
-          supabaseSession: sbResult.session,
-          authProvider: 'supabase',
-          message: `Authenticated via Supabase Auth as ${query}`,
-        });
-      }
-    }
     return res.status(401).json({ error: 'This account is not registered. Please sign up first to create an account.' });
   }
 
@@ -580,19 +268,13 @@ app.post('/api/auth/signup', async (req: Request, res: Response) => {
   const cleanEmail = email.trim().toLowerCase();
 
   try {
-    const appOrigin = getAppOrigin(req);
     // First try the client-side signUp (creates auth.users + session)
-    supabaseAuthResult = await supabaseAuthSignUp(
-      cleanEmail,
-      password,
-      {
-        full_name: fullName,
-        username: username.toLowerCase().replace(/[^a-z0-9_]/g, ''),
-        account_type: accountType || 'personal',
-        email_verified: true,
-      },
-      `${appOrigin}/#auth_confirmed=true`
-    );
+    supabaseAuthResult = await supabaseAuthSignUp(cleanEmail, password, {
+      full_name: fullName,
+      username: username.toLowerCase().replace(/[^a-z0-9_]/g, ''),
+      account_type: accountType || 'personal',
+      email_verified: true,
+    });
 
     // If client signUp fails (e.g. signups disabled), try admin API
     if (!supabaseAuthResult?.success) {
@@ -783,12 +465,9 @@ app.post('/api/users/quick-verify', (req: Request, res: Response) => {
   res.json({ success: true, user: updated, message: 'Identity verified and attested successfully (+25 Trust Points).' });
 });
 
-app.post('/api/auth/update-profile', async (req: Request, res: Response) => {
+app.post('/api/auth/update-profile', (req: Request, res: Response) => {
   const userId = getSessionUserId(req);
-  if (!userId) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  const updates = req.body || {};
+  const updates = req.body;
   // Security guard: never allow client to manipulate verification statuses directly
   delete updates.id;
   delete updates.identityStatus;
@@ -797,140 +476,14 @@ app.post('/api/auth/update-profile', async (req: Request, res: Response) => {
   delete updates.emailVerified;
   delete updates.businessVerificationStatus;
 
-  let user = db.getUserById(userId);
-  if (!user) {
-    await ensureServerHydrated();
-    user = db.getUserById(userId);
-  }
-  if (!user) {
-    return res.status(404).json({ error: 'User not found.' });
-  }
-
-  if (updates.avatarUrl !== undefined) {
-    updates.privacySettings = {
-      ...(user.privacySettings || {}),
-      ...(updates.privacySettings || {}),
-      avatarUrl: updates.avatarUrl,
-    };
-  }
-
   const updated = db.updateUser(userId, updates);
   if (!updated) {
     return res.status(404).json({ error: 'User not found.' });
   }
-
-  try {
-    await syncUserToSupabase(updated);
-    await syncToSupabase(db.getState());
-  } catch (sbErr: any) {
-    console.warn('[Update Profile Supabase Sync Notice]:', sbErr.message);
-  }
-
   res.json({ user: updated, message: 'Profile updated successfully.' });
 });
 
-/* ==========================================================================
-   GOOGLE PLAY POLICY COMPLIANCE: ACCOUNT DELETION & UGC REPORTING
-   ========================================================================== */
-
-// 1. Mandatory In-App & Web Account Deletion (Google Play Data Safety Policy)
-app.delete('/api/users/me', async (req: Request, res: Response) => {
-  const userId = getSessionUserId(req);
-  if (!userId || userId === 'guest') {
-    return res.status(401).json({ error: 'You must be authenticated to request account deletion.' });
-  }
-
-  const user = db.getUserById(userId);
-  if (!user) {
-    return res.status(404).json({ error: 'Account not found.' });
-  }
-
-  try {
-    // Delete local user data and all associated personal items
-    db.deleteUser(userId);
-
-    // If connected to Supabase, attempt to clean up the Supabase records
-    const supabaseClient = (await import('./server/supabase.js')).getSupabaseClient();
-    if (supabaseClient) {
-      try {
-        await supabaseClient.from('devolution_users').delete().eq('id', userId);
-        if (user.supabaseAuthId) {
-          await supabaseClient.auth.admin.deleteUser(user.supabaseAuthId);
-        }
-      } catch (sbDelErr: any) {
-        console.warn('[Supabase Account Deletion Warning]:', sbDelErr.message);
-      }
-    }
-
-    res.json({
-      success: true,
-      message: 'Your account and all associated personal records have been permanently deleted in accordance with data privacy regulations.',
-    });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message || 'Failed to complete account deletion request.' });
-  }
-});
-
-// 2. User-Generated Content (UGC) Abuse Reporting (Google Play UGC Policy)
-app.post('/api/reports', (req: Request, res: Response) => {
-  const reporterId = getSessionUserId(req);
-  const { targetType, targetId, reason, description } = req.body;
-
-  if (!targetType || !targetId || !reason) {
-    return res.status(400).json({ error: 'Target type, target ID, and reason are required to submit an abuse report.' });
-  }
-
-  const dispute: any = {
-    id: `rep_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-    title: `UGC Report: ${reason}`,
-    complainantId: reporterId || 'anonymous_witness',
-    respondentId: targetType === 'user' ? targetId : 'content_owner',
-    status: 'under_review',
-    category: reason,
-    description: description || `Report against ${targetType} [${targetId}] for ${reason}`,
-    createdAt: new Date().toISOString(),
-    evidenceIds: [],
-    resolution: null,
-  };
-
-  db.addDispute(dispute);
-
-  res.status(201).json({
-    success: true,
-    reportId: dispute.id,
-    message: 'Thank you for your report. Our moderation team reviews all flagged content within 24 hours to enforce our Community Guidelines and Terms of Service.',
-  });
-});
-
-// 3. User-Generated Content Blocking (Google Play UGC Policy)
-app.post('/api/users/block', (req: Request, res: Response) => {
-  const blockerId = getSessionUserId(req);
-  const { blockedUserId } = req.body;
-
-  if (!blockerId || blockerId === 'guest') {
-    return res.status(401).json({ error: 'You must be signed in to block a user.' });
-  }
-
-  if (!blockedUserId) {
-    return res.status(400).json({ error: 'User ID to block is required.' });
-  }
-
-  const blocker = db.getUserById(blockerId);
-  if (!blocker) return res.status(404).json({ error: 'User not found.' });
-
-  const currentBlocked = (blocker as any).blockedUserIds || [];
-  if (!currentBlocked.includes(blockedUserId)) {
-    currentBlocked.push(blockedUserId);
-    db.updateUser(blockerId, { blockedUserIds: currentBlocked } as any);
-  }
-
-  res.json({
-    success: true,
-    message: 'User blocked. You will no longer see content or receive interactions from this account.',
-  });
-});
-
-app.post('/api/user/upload-avatar', async (req: Request, res: Response) => {
+app.post('/api/user/upload-avatar', (req: Request, res: Response) => {
   const userId = getSessionUserId(req);
   if (!userId) {
     return res.status(401).json({ error: 'You must be signed in to upload a profile picture.' });
@@ -946,17 +499,7 @@ app.post('/api/user/upload-avatar', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Image must be a valid base64 image data URL or HTTPS image link.' });
   }
 
-  let user = db.getUserById(userId);
-  if (!user) {
-    await ensureServerHydrated();
-    user = db.getUserById(userId);
-  }
-  if (!user) {
-    return res.status(404).json({ error: 'User not found.' });
-  }
-
-  const updatedPrivacy = { ...(user.privacySettings || {}), avatarUrl };
-  const updated = db.updateUser(userId, { avatarUrl, privacySettings: updatedPrivacy as any });
+  const updated = db.updateUser(userId, { avatarUrl });
   if (!updated) {
     return res.status(404).json({ error: 'User not found.' });
   }
@@ -980,14 +523,6 @@ app.post('/api/user/upload-avatar', async (req: Request, res: Response) => {
     }
   }
   db.persist();
-
-  // Persist to Supabase immediately so page refresh on Vercel / serverless preserves the avatar
-  try {
-    await syncUserToSupabase(updated);
-    await syncToSupabase(db.getState());
-  } catch (sbErr: any) {
-    console.warn('[Upload Avatar Supabase Sync Notice]:', sbErr.message);
-  }
 
   res.json({ success: true, user: updated, message: 'Profile picture updated successfully.' });
 });
@@ -1101,7 +636,7 @@ app.get('/api/profiles', (req: Request, res: Response) => {
   res.json({ profiles: publicProfiles });
 });
 
-app.get('/api/profiles/:username', async (req: Request, res: Response) => {
+app.get('/api/profiles/:username', (req: Request, res: Response) => {
   const rawParam = req.params.username;
   const clean = decodeURIComponent(rawParam).replace(/^@/, '').trim();
   let user = db.getUserByUsername(clean) || db.getUserById(rawParam) || db.getUserById(clean);
@@ -1113,60 +648,6 @@ app.get('/api/profiles/:username', async (req: Request, res: Response) => {
         u.id.toLowerCase() === clean.toLowerCase()
     );
   }
-
-  // If not found in in-memory state (e.g. Vercel serverless cold start), try Supabase
-  if (!user) {
-    try {
-      const { getSupabaseClient } = await import('./server/supabase.js');
-      const client = getSupabaseClient();
-      if (client) {
-        const { data, error } = await client
-          .from('devolution_users')
-          .select('*')
-          .or(`username.ilike.${clean},email.ilike.${clean},id.eq.${clean},full_name.ilike.%${clean}%`)
-          .maybeSingle();
-
-        if (data && !error) {
-          user = {
-            id: data.id,
-            email: data.email || '',
-            username: (data.username || data.id).trim(),
-            fullName: data.full_name || data.username || 'User',
-            accountType: data.account_type || 'personal',
-            avatarUrl: data.privacy_settings?.avatarUrl || data.avatar_url || '',
-            headline: data.headline || 'Independent Professional',
-            bio: data.bio || '',
-            category: data.category || 'General Professional',
-            country: data.country || 'Nigeria',
-            city: data.city || 'Lagos',
-            phone: data.phone || '',
-            phoneVerified: !!data.phone,
-            emailVerified: true,
-            identityStatus: data.is_verified ? 'verified' : 'unverified',
-            identityMethod: data.identity_method || 'None submitted',
-            identityVerifiedAt: data.identity_verified_at || null,
-            businessVerificationStatus: 'unverified',
-            supabaseAuthId: data.supabase_auth_id || undefined,
-            privacySettings: data.privacy_settings || {
-              showRelationshipCounts: true,
-              showCategoryBreakdown: true,
-              showPublicEndorsers: true,
-              showTrustReceipts: true,
-              showCredentials: true,
-              showLocationCityOnly: true,
-              allowDirectVerificationRequests: true,
-            },
-            createdAt: data.created_at || new Date().toISOString(),
-          };
-          // Hydrate into in-memory db so subsequent requests don't hit Supabase again
-          db.createUser(user);
-        }
-      }
-    } catch (err: any) {
-      console.warn('[Supabase Profile Restore Notice]:', err.message);
-    }
-  }
-
   if (!user) {
     return res.status(404).json({ error: 'Profile not found' });
   }
@@ -3650,7 +3131,6 @@ async function startServer() {
   });
 
   if (process.env.NODE_ENV !== 'production') {
-    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: {
         middlewareMode: true,
@@ -3729,9 +3209,6 @@ async function startServer() {
           console.warn('[Supabase Startup Detail Pull Notice]:', pullDetailErr.message);
         }
 
-        // Ensure all registered users and state are hydrated
-        await ensureServerHydrated();
-
         await syncToSupabase(db.getState());
         console.log('[Supabase Startup] Synchronized current state to Supabase.');
       } catch (sbErr: any) {
@@ -3741,14 +3218,8 @@ async function startServer() {
   });
 }
 
-// Only start the persistent server when NOT running as a Vercel serverless function
 if (!process.env.VERCEL) {
   startServer().catch((err) => {
     console.error('Failed to start server:', err);
-  });
-} else {
-  // On Vercel: register the API 404 guard immediately (no Vite middleware needed)
-  app.all('/api/*', (req: Request, res: Response) => {
-    res.status(404).json({ error: `API route ${req.method} ${req.path} not found` });
   });
 }

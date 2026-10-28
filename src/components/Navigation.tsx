@@ -541,6 +541,10 @@ export const Navigation: React.FC<NavigationProps> = ({
                           <div className="min-w-0 flex-1">
                             <div className="text-xs font-bold text-slate-900 truncate">{currentUser.fullName}</div>
                             <div className="text-[11px] text-slate-500 font-mono truncate">@{currentUser.username}</div>
+                            <div className="mt-0.5 flex items-center gap-1.5 text-[10px] text-emerald-700 font-semibold">
+                              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                              <span>Verified Account</span>
+                            </div>
                           </div>
                         </div>
                       </div>
