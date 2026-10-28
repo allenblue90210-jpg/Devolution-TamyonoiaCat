@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api.js';
-import { Search, ShieldCheck, Building2, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Search, ShieldCheck, Building2, CheckCircle2, ArrowRight, ArrowLeft, MapPin } from 'lucide-react';
 import { UserAvatar } from './UserAvatar.js';
 
 interface DirectoryViewProps {
@@ -10,6 +10,7 @@ interface DirectoryViewProps {
 
 export const DirectoryView: React.FC<DirectoryViewProps> = ({ onSelectProfile, onBack }) => {
   const [query, setQuery] = useState('');
+  const [locationFilter, setLocationFilter] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [onlyVerified, setOnlyVerified] = useState(false);
   const [profiles, setProfiles] = useState<any[]>([]);

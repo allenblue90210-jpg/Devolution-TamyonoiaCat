@@ -286,6 +286,82 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
     } finally {
       setIsSavingToken(false);
     }
+  const handleDetectCurrentLocation = () => {
+    if (!('geolocation' in navigator)) {
+      setLocationNotice({ text: 'Geolocation is not supported by your browser.', type: 'error' });
+      return;
+    }
+    setIsDetectingLocation(true);
+    setLocationNotice({ text: 'Detecting your coordinates...', type: 'info' });
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
+            { headers: { 'Accept-Language': 'en' } }
+          );
+          if (res.ok) {
+            const data = await res.json();
+            const addr = data.address || {};
+            const detectedCity =
+              addr.city ||
+              addr.town ||
+              addr.village ||
+              addr.suburb ||
+              addr.state_district ||
+              addr.county ||
+              '';
+            const detectedCountry = addr.country || '';
+            if (detectedCity) setCity(detectedCity);
+            if (detectedCountry) setCountry(detectedCountry);
+            setLocationNotice({
+              text: `Location confirmed: ${[detectedCity, detectedCountry].filter(Boolean).join(', ')}`,
+              type: 'success',
+            });
+          } else {
+            throw new Error('Geocoding service unavailable');
+          }
+        } catch {
+          try {
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const parts = tz.split('/');
+            if (parts.length > 1) {
+              const tzCity = parts[1].replace(/_/g, ' ');
+              setCity(tzCity);
+              setLocationNotice({ text: `Set location from device timezone: ${tzCity}`, type: 'info' });
+            }
+          } catch {
+            setLocationNotice({ text: 'Coordinates retrieved, but city lookup timed out.', type: 'error' });
+          }
+        } finally {
+          setIsDetectingLocation(false);
+          setTimeout(() => setLocationNotice(null), 4500);
+        }
+      },
+      (error) => {
+        setIsDetectingLocation(false);
+        try {
+          const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+          const parts = tz.split('/');
+          if (parts.length > 1) {
+            const tzCity = parts[1].replace(/_/g, ' ');
+            setCity(tzCity);
+            setLocationNotice({
+              text: `GPS permission unavailable. Estimated city from timezone: ${tzCity}`,
+              type: 'info',
+            });
+            setTimeout(() => setLocationNotice(null), 4500);
+            return;
+          }
+        } catch {}
+        setLocationNotice({ text: `Could not retrieve location: ${error.message}`, type: 'error' });
+        setTimeout(() => setLocationNotice(null), 4500);
+      },
+      { timeout: 8000, enableHighAccuracy: true }
+    );
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -406,25 +482,60 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, onProfileUpdat
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">City Location</label>
-              <input
-                type="text"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900"
-              />
+              <div className="flex items-center justify-between mb-1">
+                <label className="block font-semibold text-slate-700">City Location</label>
+                <button
+                  type="button"
+                  onClick={handleDetectCurrentLocation}
+                  disabled={isDetectingLocation}
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100/70 border border-indigo-200/60 px-2 py-0.5 rounded cursor-pointer transition-colors disabled:opacity-50"
+                  title="Detect city and country from your browser GPS or time zone"
+                >
+                  <Navigation className={`w-3 h-3 ${isDetectingLocation ? 'animate-spin' : ''}`} />
+                  <span>{isDetectingLocation ? 'Locating...' : 'Auto-Detect'}</span>
+                </button>
+              </div>
+              <div className="relative">
+                <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="e.g. Lagos, London, New York"
+                  className="w-full pl-8 pr-3 py-2 border border-slate-200 rounded-lg text-slate-900"
+                />
+              </div>
             </div>
 
             <div>
               <label className="block font-semibold text-slate-700 mb-1">Country</label>
-              <input
-                type="text"
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900"
-              />
+              <div className="relative">
+                <Globe className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                  placeholder="e.g. Nigeria, United Kingdom, United States"
+                  className="w-full pl-8 pr-3 py-2 border border-slate-200 rounded-lg text-slate-900"
+                />
+              </div>
             </div>
           </div>
+
+          {locationNotice && (
+            <div
+              className={`p-2.5 rounded-lg text-xs flex items-center gap-2 border animate-in fade-in ${
+                locationNotice.type === 'success'
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                  : locationNotice.type === 'error'
+                  ? 'bg-amber-50 text-amber-800 border-amber-200'
+                  : 'bg-indigo-50 text-indigo-800 border-indigo-200'
+              }`}
+            >
+              <MapPin className="w-3.5 h-3.5 shrink-0" />
+              <span>{locationNotice.text}</span>
+            </div>
+          )}
 
           <div>
             <label className="block font-semibold text-slate-700 mb-1 text-xs">Biography</label>
