@@ -29,7 +29,9 @@ import {
   LogOut,
   Settings,
   MapPin,
+  Edit3,
 } from 'lucide-react';
+import { UpdateLocationModal } from './UpdateLocationModal.js';
 
 interface PublicProfileViewProps {
   username: string;
@@ -38,6 +40,7 @@ interface PublicProfileViewProps {
   onBack?: () => void;
   onOpenAvatarUpload?: () => void;
   onLogout?: () => void;
+  onProfileUpdated?: (updatedUser: User) => void;
 }
 
 export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
@@ -47,6 +50,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
   onBack,
   onOpenAvatarUpload,
   onLogout,
+  onProfileUpdated,
 }) => {
   const [data, setData] = useState<{
     user: User;
@@ -63,6 +67,7 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
 
   const [showQrModal, setShowQrModal] = useState(false);
   const [showDisputeModal, setShowDisputeModal] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
   // Dispute form
@@ -268,15 +273,44 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
               <p className="text-xs sm:text-sm text-slate-600 max-w-xl">{user.headline}</p>
               <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 font-mono pt-1">
                 <span>@{user.username}</span>
-                {(user.city || user.country) && (
+                {user.city || user.country ? (
                   <>
                     <span aria-hidden="true">·</span>
-                    <span className="inline-flex items-center gap-1 text-slate-700 font-sans font-medium">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (currentUser?.username === user.username) {
+                          setShowLocationModal(true);
+                        }
+                      }}
+                      className={`inline-flex items-center gap-1 text-slate-700 font-sans font-medium transition-colors ${
+                        currentUser?.username === user.username
+                          ? 'hover:text-indigo-600 hover:bg-indigo-50/70 px-1.5 py-0.5 rounded cursor-pointer group'
+                          : ''
+                      }`}
+                      title={currentUser?.username === user.username ? 'Click to update your location' : undefined}
+                    >
                       <MapPin className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
                       <span>{[user.city, user.country].filter(Boolean).join(', ')}</span>
-                    </span>
+                      {currentUser?.username === user.username && (
+                        <Edit3 className="w-3 h-3 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity ml-0.5" />
+                      )}
+                    </button>
                   </>
-                )}
+                ) : currentUser?.username === user.username ? (
+                  <>
+                    <span aria-hidden="true">·</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowLocationModal(true)}
+                      className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-700 font-sans font-medium hover:underline cursor-pointer"
+                      title="Add your location to your profile"
+                    >
+                      <MapPin className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                      <span>+ Add Location</span>
+                    </button>
+                  </>
+                ) : null}
                 <span aria-hidden="true">·</span>
                 <span className="text-slate-400">Member since {new Date(user.createdAt).getFullYear()}</span>
               </div>
@@ -287,6 +321,15 @@ export const PublicProfileView: React.FC<PublicProfileViewProps> = ({
           <div className="flex flex-wrap items-center gap-2 shrink-0">
             {currentUser?.username === user.username ? (
               <>
+                <button
+                  type="button"
+                  onClick={() => setShowLocationModal(true)}
+                  className="px-3 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200/80 rounded-lg flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                  title="Update your location (City & Country)"
+                >
+                  <MapPin className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Update Location</span>
+                </button>
                 {onOpenAvatarUpload && (
                   <button
                     onClick={onOpenAvatarUpload}
