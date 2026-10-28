@@ -48,8 +48,12 @@ const VAULT_LEDGER_FILE = path.join(VAULT_DIR, 'immutable_ledger.jsonl');
 const VAULT_BACKUP_FILE = path.join(VAULT_DIR, 'db_backup.json');
 
 function ensureVaultDir() {
-  if (!fs.existsSync(VAULT_DIR)) {
-    fs.mkdirSync(VAULT_DIR, { recursive: true });
+  try {
+    if (!fs.existsSync(VAULT_DIR)) {
+      fs.mkdirSync(VAULT_DIR, { recursive: true });
+    }
+  } catch {
+    // Gracefully ignore on read-only environments (e.g. Vercel serverless)
   }
 }
 
@@ -366,17 +370,18 @@ class Database {
         // ignore backup errors
       }
 
-      if (notify) {
-        for (const listener of this.saveListeners) {
-          try {
-            listener();
-          } catch (lErr) {
-            console.error('Error in db save listener:', lErr);
-          }
-        }
-      }
     } catch (err) {
       console.error('Failed to write database file:', err);
+    }
+
+    if (notify) {
+      for (const listener of this.saveListeners) {
+        try {
+          listener();
+        } catch (lErr) {
+          console.error('Error in db save listener:', lErr);
+        }
+      }
     }
   }
 
